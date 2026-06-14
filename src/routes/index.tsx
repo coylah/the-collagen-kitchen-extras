@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Search, Sparkles, Filter, Salad, ArrowRight } from "lucide-react";
+import { Search, Sparkles, Filter, Salad, ArrowRight, BookOpen } from "lucide-react";
 import { listRecipes } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
 import { RecipeCard } from "@/components/recipe-card";
@@ -13,7 +13,7 @@ const recipesQuery = queryOptions({
   queryFn: () => listRecipes(),
 });
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/")(({
   head: () => ({
     meta: [
       { title: "The Collagen Kitchen — Love Coylah" },
@@ -41,9 +41,11 @@ export const Route = createFileRoute("/")({
       <p className="mx-auto max-w-6xl p-8">No recipes yet.</p>
     </AppShell>
   ),
-});
+}));
 
 const MEAL_ORDER = ["breakfast", "lunch", "dinner", "snack", "dessert"];
+
+const MAX_TAGS = 20;
 
 function Cookbook() {
   const { data: recipes } = useSuspenseQuery(recipesQuery);
@@ -60,10 +62,20 @@ function Cookbook() {
       ),
     [recipes],
   );
-  const tags = useMemo(
-    () => Array.from(new Set(recipes.flatMap((r) => r.tags))).sort(),
-    [recipes],
-  );
+
+  const tags = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const r of recipes) {
+      for (const t of r.tags) {
+        counts.set(t, (counts.get(t) ?? 0) + 1);
+      }
+    }
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, MAX_TAGS)
+      .map(([t]) => t)
+      .sort();
+  }, [recipes]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -94,16 +106,38 @@ function Cookbook() {
       });
   }, [recipes, search, meal, tag, maxTime, boostOnly]);
 
-  // Group filtered recipes by meal type for section headers
   const grouped = useMemo(() => {
     const g: Record<string, typeof filtered> = {};
     for (const r of filtered) (g[r.meal_type] ??= []).push(r);
     return g;
   }, [filtered]);
 
+  if (recipes.length === 0) {
+    return (
+      <AppShell>
+        <section className="border-b border-border/50 bg-gradient-to-br from-background via-background to-primary/20">
+          <div className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
+            <p className="font-serif text-[11px] uppercase tracking-[0.28em] text-secondary">
+              Beauty starts in the kitchen
+            </p>
+            <h1 className="mt-4 font-serif text-5xl leading-[1.05] sm:text-6xl">
+              The Collagen Kitchen
+            </h1>
+          </div>
+        </section>
+        <div className="mx-auto max-w-6xl px-4 py-20 text-center">
+          <BookOpen className="mx-auto h-10 w-10 text-muted-foreground" />
+          <p className="mt-4 font-serif text-xl">Recipes coming soon</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            The cookbook is being filled with skin-food recipes. Check back soon.
+          </p>
+        </div>
+      </AppShell>
+    );
+  }
+
   return (
     <AppShell>
-      {/* Hero */}
       <section className="border-b border-border/50 bg-gradient-to-br from-background via-background to-primary/20">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
           <p className="font-serif text-[11px] uppercase tracking-[0.28em] text-secondary">
@@ -123,7 +157,6 @@ function Cookbook() {
         </div>
       </section>
 
-      {/* Build Your Own callout */}
       <section className="mx-auto max-w-6xl px-4 pt-8">
         <Link
           to="/build/glow-bowl"
@@ -144,7 +177,6 @@ function Cookbook() {
         </Link>
       </section>
 
-      {/* Filters */}
       <section className="sticky top-[63px] z-30 mt-6 border-y border-border/60 bg-background/90 backdrop-blur">
         <div className="mx-auto max-w-6xl space-y-3 px-4 py-4">
           <div className="relative">
@@ -179,18 +211,20 @@ function Cookbook() {
             >
               <Sparkles className="h-3.5 w-3.5" /> Super Boost
             </Button>
-            <select
-              value={tag}
-              onChange={(e) => setTag(e.target.value)}
-              className="h-8 rounded-md border border-input bg-background px-2 text-xs"
-            >
-              <option value="all">Any tag</option>
-              {tags.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
+            {tags.length > 0 && (
+              <select
+                value={tag}
+                onChange={(e) => setTag(e.target.value)}
+                className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+              >
+                <option value="all">Any tag</option>
+                {tags.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            )}
             <select
               value={maxTime}
               onChange={(e) => setMaxTime(Number(e.target.value))}
@@ -209,7 +243,6 @@ function Cookbook() {
         </div>
       </section>
 
-      {/* Grid grouped by meal type */}
       <section className="mx-auto max-w-6xl px-4 py-10">
         {filtered.length === 0 ? (
           <p className="py-16 text-center text-muted-foreground">
