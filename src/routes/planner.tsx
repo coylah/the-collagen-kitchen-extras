@@ -4,12 +4,12 @@ import { Minus, Plus, Trash2, X } from "lucide-react";
 import { listRecipes } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
+import type { Recipe } from "@/lib/recipe-types";
 import {
   DAYS,
   SLOTS,
   planKey,
   useMealPlan,
-  type Slot,
 } from "@/lib/user-state";
 
 const recipesQuery = queryOptions({
