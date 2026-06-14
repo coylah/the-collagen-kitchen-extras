@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   ArrowLeft,
   Clock,
@@ -9,7 +9,7 @@ import {
   Plus,
   Sparkles,
   CalendarPlus,
-  ChefHat,
+  Lightbulb,
 } from "lucide-react";
 import { getRecipeBySlug } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
@@ -77,13 +77,23 @@ function RecipePage() {
   const [checkedStep, setCheckedStep] = useState<Record<number, boolean>>({});
   const [showPlanPicker, setShowPlanPicker] = useState(false);
 
+  useEffect(() => {
+    setCheckedIng({});
+    setCheckedStep({});
+    setServings(recipe.servings);
+    setShowPlanPicker(false);
+  }, [recipe.slug, recipe.servings]);
+
   const scaledIngredients = useMemo(
     () => scaleRecipe(recipe, servings),
     [recipe, servings],
   );
 
   const total = recipe.prep_min + recipe.cook_min;
-  const isOats = recipe.slug === "overnight-beauty-oats";
+
+  const hasOatsBuilder =
+    recipe.tags.includes("beauty-oats-builder") ||
+    recipe.slug === "overnight-beauty-oats";
 
   return (
     <AppShell>
@@ -127,18 +137,19 @@ function RecipePage() {
 
             {recipe.tags.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-1.5">
-                {recipe.tags.map((t) => (
-                  <span
-                    key={t}
-                    className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
-                  >
-                    {t}
-                  </span>
-                ))}
+                {recipe.tags
+                  .filter((t) => t !== "beauty-oats-builder")
+                  .map((t) => (
+                    <span
+                      key={t}
+                      className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
+                    >
+                      {t}
+                    </span>
+                  ))}
               </div>
             )}
 
-            {/* Action bar */}
             <div className="no-print mt-6 flex flex-wrap items-center gap-2 border-t border-border/60 pt-6">
               <Button
                 variant={isFav(recipe.slug) ? "default" : "outline"}
@@ -159,7 +170,8 @@ function RecipePage() {
                 size="sm"
                 onClick={() => setShowPlanPicker((v) => !v)}
               >
-                <CalendarPlus className="h-4 w-4" /> Add to meal plan
+                <CalendarPlus className="h-4 w-4" />
+                {showPlanPicker ? "Cancel" : "Add to meal plan"}
               </Button>
               <Button variant="ghost" size="sm" onClick={() => window.print()}>
                 Print
@@ -175,7 +187,7 @@ function RecipePage() {
               />
             )}
 
-            {isOats && (
+            {hasOatsBuilder && (
               <p className="mt-6 rounded-xl border border-secondary/30 bg-primary/15 p-3 text-sm text-foreground/80">
                 This is the <strong>base recipe</strong>. Scroll down for the
                 Build Your Beauty Oats guide with toppings &amp; flavour combos.
@@ -183,7 +195,6 @@ function RecipePage() {
             )}
 
             <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_1.3fr]">
-              {/* Ingredients */}
               <section>
                 <div className="flex items-center justify-between">
                   <h2 className="font-serif text-xl">Ingredients</h2>
@@ -236,7 +247,6 @@ function RecipePage() {
                 </ul>
               </section>
 
-              {/* Method */}
               <section>
                 <h2 className="font-serif text-xl">Method</h2>
                 <ol className="mt-4 space-y-3">
@@ -283,7 +293,11 @@ function RecipePage() {
             {recipe.notes && (
               <aside className="mt-10 rounded-2xl border bg-muted/40 p-5">
                 <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <ChefHat className="h-3.5 w-3.5" /> Chef's note
+                  <Lightbulb className="h-3.5 w-3.5 text-secondary" />
+                  <span className="font-script text-base normal-case tracking-normal text-secondary/90">
+                    Coylah's
+                  </span>
+                  tips
                 </p>
                 <p className="mt-2 text-sm leading-relaxed">{recipe.notes}</p>
               </aside>
@@ -292,31 +306,17 @@ function RecipePage() {
             {recipe.collagen_tip && (
               <aside className="mt-4 rounded-2xl border border-secondary/30 bg-primary/20 p-5">
                 <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
-                  <Sparkles className="h-3.5 w-3.5" /> Why your skin will love this
+                  <Sparkles className="h-3.5 w-3.5" /> The glow factor
                 </p>
                 <p className="mt-2 text-sm leading-relaxed text-foreground/85">
                   {recipe.collagen_tip}
                 </p>
               </aside>
             )}
-
-            <aside className="mt-4 rounded-2xl border border-border/70 bg-card p-5">
-              <p className="flex items-baseline gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                <span className="font-script text-xl normal-case tracking-normal text-secondary/90">
-                  Coylah's
-                </span>
-                Tips
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-foreground/80">
-                Pair this with a glass of water, a vitamin C–rich fruit, or a small
-                handful of nuts to extend the collagen-supporting hit. Real food
-                first, supplements second.
-              </p>
-            </aside>
           </div>
         </div>
 
-        {isOats && <BuildYourBeautyOats />}
+        {hasOatsBuilder && <BuildYourBeautyOats />}
       </article>
     </AppShell>
   );
