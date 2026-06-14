@@ -11,7 +11,7 @@ function read<T>(key: string, fallback: T): T {
 }
 
 export function useLocalStorage<T>(key: string, initial: T) {
-  const [value, setValue] = useState<T>(initial);
+  const [value, setValue] = useState<T>(() => read<T>(key, initial));
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
