@@ -50,15 +50,47 @@ export type ShoppingItem = {
   item: string;
   unit: string;
   qty: number | null;
-  qtyText: string; // displayed
+  qtyText: string;
   category: string;
   fromRecipes: string[];
-  staple: boolean; // cupboard/seasoning/oil — no quantity shown
+  staple: boolean;
   key: string;
 };
 
 function normItem(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+}
+
+// Normalise unit aliases so "grams" and "g" aggregate into the same list entry
+const UNIT_ALIASES: Record<string, string> = {
+  grams: "g",
+  gram: "g",
+  kilograms: "kg",
+  kilogram: "kg",
+  millilitres: "ml",
+  milliliters: "ml",
+  millilitre: "ml",
+  milliliter: "ml",
+  litres: "l",
+  liters: "l",
+  litre: "l",
+  liter: "l",
+  tablespoons: "tbsp",
+  tablespoon: "tbsp",
+  teaspoons: "tsp",
+  teaspoon: "tsp",
+  ounces: "oz",
+  ounce: "oz",
+  pounds: "lb",
+  pound: "lb",
+  pinches: "pinch",
+  handfuls: "handful",
+  cups: "cup",
+};
+
+function normUnit(u: string): string {
+  const lower = u.toLowerCase().trim();
+  return UNIT_ALIASES[lower] ?? lower;
 }
 
 const STAPLE_CATEGORIES = new Set(["cupboard", "pantry", "herbs", "spices", "fats"]);
@@ -67,19 +99,18 @@ const STAPLE_UNITS = new Set([
   "pinch", "pinches", "dash", "splash", "drizzle",
   "handful", "handfuls",
 ]);
-// Produce items that come in discrete whole units when unit is empty
 const PRODUCE_CATEGORIES = new Set(["produce"]);
 
 function isStaple(ing: { category: string; unit: string }): boolean {
   if (STAPLE_CATEGORIES.has(ing.category.toLowerCase())) return true;
-  if (STAPLE_UNITS.has(ing.unit.toLowerCase())) return true;
+  if (STAPLE_UNITS.has(normUnit(ing.unit))) return true;
   return false;
 }
 
 export function shoppingItemKey(item: string, unit: string, staple: boolean) {
   return staple
     ? `staple|${normItem(item)}`
-    : `${normItem(item)}|${unit.toLowerCase()}`;
+    : `${normItem(item)}|${normUnit(unit)}`;
 }
 
 export function buildShoppingList(
@@ -103,7 +134,7 @@ export function buildShoppingList(
       } else {
         map.set(key, {
           item: ing.item,
-          unit: ing.unit,
+          unit: normUnit(ing.unit),
           qty: scaled,
           qtyText: "",
           category: ing.category || "other",
@@ -115,7 +146,6 @@ export function buildShoppingList(
     }
   }
 
-  // Compute display quantity per item with smart rounding
   for (const item of map.values()) {
     if (item.staple) {
       item.qtyText = "";
@@ -125,7 +155,6 @@ export function buildShoppingList(
       item.qtyText = "";
       continue;
     }
-    // Produce with empty unit → round up to whole (you don't buy half a cauliflower)
     if (PRODUCE_CATEGORIES.has(item.category.toLowerCase()) && !item.unit) {
       item.qty = Math.ceil(item.qty);
       item.qtyText = String(item.qty);
