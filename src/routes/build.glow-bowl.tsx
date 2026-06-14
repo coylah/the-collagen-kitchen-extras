@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Check, Salad, ShoppingBasket, Sparkles, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ type Step = {
   intro: string;
   max: number;
   category: string;
-  options: string[];
+  options: { label: string; ingredients?: string }[];
 };
 
 const STEPS: Step[] = [
@@ -46,21 +46,21 @@ const STEPS: Step[] = [
     max: 1,
     category: "grains",
     options: [
-      "Brown rice",
-      "Quinoa",
-      "Couscous",
-      "Giant couscous",
-      "Pearl barley",
-      "Sweet potato cubes",
-      "Baby potatoes",
-      "Sourdough croutons",
-      "Mixed leaves",
-      "Spinach",
-      "Kale",
-      "Rocket",
-      "Lentils",
-      "Chickpeas",
-      "Butter beans",
+      { label: "Brown rice" },
+      { label: "Quinoa" },
+      { label: "Couscous" },
+      { label: "Giant couscous" },
+      { label: "Pearl barley" },
+      { label: "Sweet potato cubes" },
+      { label: "Baby potatoes" },
+      { label: "Sourdough croutons" },
+      { label: "Mixed leaves" },
+      { label: "Spinach" },
+      { label: "Kale" },
+      { label: "Rocket" },
+      { label: "Lentils" },
+      { label: "Chickpeas" },
+      { label: "Butter beans" },
     ],
   },
   {
@@ -70,22 +70,22 @@ const STEPS: Step[] = [
     max: 1,
     category: "protein",
     options: [
-      "Grilled chicken",
-      "Roast chicken thighs",
-      "Turkey mince",
-      "Turkey meatballs",
-      "Tuna",
-      "Salmon",
-      "Mackerel",
-      "Sardines",
-      "Prawns",
-      "Boiled eggs",
-      "Beef strips",
-      "Leftover slow-cooked beef",
-      "Pork slices",
-      "Halloumi",
-      "Cottage cheese",
-      "Greek yogurt dressing on the side",
+      { label: "Grilled chicken" },
+      { label: "Roast chicken thighs" },
+      { label: "Turkey mince" },
+      { label: "Turkey meatballs" },
+      { label: "Tuna" },
+      { label: "Salmon" },
+      { label: "Mackerel" },
+      { label: "Sardines" },
+      { label: "Prawns" },
+      { label: "Boiled eggs" },
+      { label: "Beef strips" },
+      { label: "Leftover slow-cooked beef" },
+      { label: "Pork slices" },
+      { label: "Halloumi" },
+      { label: "Cottage cheese" },
+      { label: "Greek yogurt dressing on the side" },
     ],
   },
   {
@@ -95,26 +95,26 @@ const STEPS: Step[] = [
     max: 3,
     category: "produce",
     options: [
-      "Red pepper",
-      "Yellow pepper",
-      "Cherry tomatoes",
-      "Cucumber",
-      "Red onion",
-      "Carrot ribbons",
-      "Roasted butternut squash",
-      "Roasted sweet potato",
-      "Broccoli",
-      "Tenderstem broccoli",
-      "Spinach",
-      "Kale",
-      "Rocket",
-      "Beetroot",
-      "Mango",
-      "Strawberries",
-      "Kiwi",
-      "Orange segments",
-      "Pomegranate seeds",
-      "Fresh coriander, parsley, basil or mint",
+      { label: "Red pepper" },
+      { label: "Yellow pepper" },
+      { label: "Cherry tomatoes" },
+      { label: "Cucumber" },
+      { label: "Red onion" },
+      { label: "Carrot ribbons" },
+      { label: "Roasted butternut squash" },
+      { label: "Roasted sweet potato" },
+      { label: "Broccoli" },
+      { label: "Tenderstem broccoli" },
+      { label: "Spinach" },
+      { label: "Kale" },
+      { label: "Rocket" },
+      { label: "Beetroot" },
+      { label: "Mango" },
+      { label: "Strawberries" },
+      { label: "Kiwi" },
+      { label: "Orange segments" },
+      { label: "Pomegranate seeds" },
+      { label: "Fresh herbs (coriander, parsley, basil or mint)" },
     ],
   },
   {
@@ -124,16 +124,16 @@ const STEPS: Step[] = [
     max: 1,
     category: "fats",
     options: [
-      "Avocado",
-      "Olive oil",
-      "Olives",
-      "Feta",
-      "Nuts",
-      "Seeds",
-      "Peanut butter dressing",
-      "Tahini dressing",
-      "Greek yogurt dressing",
-      "Salmon or mackerel",
+      { label: "Avocado" },
+      { label: "Olive oil" },
+      { label: "Olives" },
+      { label: "Feta" },
+      { label: "Nuts" },
+      { label: "Seeds" },
+      { label: "Peanut butter dressing" },
+      { label: "Tahini dressing" },
+      { label: "Greek yogurt dressing" },
+      { label: "Salmon or mackerel" },
     ],
   },
   {
@@ -143,17 +143,17 @@ const STEPS: Step[] = [
     max: 1,
     category: "cupboard",
     options: [
-      "Pumpkin seeds",
-      "Sunflower seeds",
-      "Sesame seeds",
-      "Chia seeds",
-      "Flaxseed",
-      "Crushed almonds",
-      "Cashews",
-      "Walnuts",
-      "Toasted chickpeas",
-      "Sourdough croutons",
-      "Crispy chicken skin (if using roast chicken)",
+      { label: "Pumpkin seeds" },
+      { label: "Sunflower seeds" },
+      { label: "Sesame seeds" },
+      { label: "Chia seeds" },
+      { label: "Flaxseed" },
+      { label: "Crushed almonds" },
+      { label: "Cashews" },
+      { label: "Walnuts" },
+      { label: "Toasted chickpeas" },
+      { label: "Sourdough croutons" },
+      { label: "Crispy chicken skin" },
     ],
   },
   {
@@ -163,12 +163,30 @@ const STEPS: Step[] = [
     max: 1,
     category: "cupboard",
     options: [
-      "Lemon Yogurt — Greek yogurt, lemon juice, garlic, salt, pepper, parsley",
-      "Honey Mustard — olive oil, ACV, Dijon, honey, salt, pepper",
-      "Tahini Lemon — tahini, lemon, garlic, water, salt, pepper",
-      "Satay Style — peanut butter, lime, soy/tamari, ginger, water",
-      "Balsamic Glow — olive oil, balsamic, Dijon, salt, pepper",
-      "ACV Glow — olive oil, ACV, lemon, garlic, salt, pepper",
+      {
+        label: "Lemon Yogurt",
+        ingredients: "Greek yogurt, lemon juice, garlic, salt, pepper, parsley",
+      },
+      {
+        label: "Honey Mustard",
+        ingredients: "Olive oil, ACV, Dijon, honey, salt, pepper",
+      },
+      {
+        label: "Tahini Lemon",
+        ingredients: "Tahini, lemon, garlic, water, salt, pepper",
+      },
+      {
+        label: "Satay Style",
+        ingredients: "Peanut butter, lime, soy/tamari, ginger, water",
+      },
+      {
+        label: "Balsamic Glow",
+        ingredients: "Olive oil, balsamic, Dijon, salt, pepper",
+      },
+      {
+        label: "ACV Glow",
+        ingredients: "Olive oil, ACV, lemon, garlic, salt, pepper",
+      },
     ],
   },
 ];
@@ -184,7 +202,7 @@ const PRESETS: Preset[] = [
       colour: ["Spinach", "Red pepper"],
       fats: ["Avocado"],
       crunch: ["Pumpkin seeds"],
-      dressing: ["Lemon Yogurt — Greek yogurt, lemon juice, garlic, salt, pepper, parsley"],
+      dressing: ["Lemon Yogurt"],
     },
   },
   {
@@ -195,7 +213,7 @@ const PRESETS: Preset[] = [
       colour: ["Cucumber", "Cherry tomatoes", "Red onion"],
       fats: ["Olive oil"],
       crunch: ["Sunflower seeds"],
-      dressing: ["ACV Glow — olive oil, ACV, lemon, garlic, salt, pepper"],
+      dressing: ["ACV Glow"],
     },
   },
   {
@@ -206,7 +224,7 @@ const PRESETS: Preset[] = [
       colour: ["Broccoli", "Cucumber"],
       fats: ["Avocado"],
       crunch: ["Sesame seeds"],
-      dressing: ["Tahini Lemon — tahini, lemon, garlic, water, salt, pepper"],
+      dressing: ["Tahini Lemon"],
     },
   },
   {
@@ -217,7 +235,7 @@ const PRESETS: Preset[] = [
       colour: ["Red pepper", "Cherry tomatoes"],
       fats: ["Avocado"],
       crunch: ["Pumpkin seeds"],
-      dressing: ["Lemon Yogurt — Greek yogurt, lemon juice, garlic, salt, pepper, parsley"],
+      dressing: ["Lemon Yogurt"],
     },
   },
   {
@@ -228,7 +246,7 @@ const PRESETS: Preset[] = [
       colour: ["Mango", "Cucumber", "Red pepper"],
       fats: ["Avocado"],
       crunch: ["Sesame seeds"],
-      dressing: ["ACV Glow — olive oil, ACV, lemon, garlic, salt, pepper"],
+      dressing: ["ACV Glow"],
     },
   },
   {
@@ -239,7 +257,7 @@ const PRESETS: Preset[] = [
       colour: ["Cucumber"],
       fats: ["Olive oil"],
       crunch: ["Sourdough croutons"],
-      dressing: ["Lemon Yogurt — Greek yogurt, lemon juice, garlic, salt, pepper, parsley"],
+      dressing: ["Lemon Yogurt"],
     },
   },
   {
@@ -250,7 +268,7 @@ const PRESETS: Preset[] = [
       colour: ["Beetroot", "Rocket", "Cucumber"],
       fats: ["Olive oil"],
       crunch: ["Walnuts"],
-      dressing: ["Balsamic Glow — olive oil, balsamic, Dijon, salt, pepper"],
+      dressing: ["Balsamic Glow"],
     },
   },
   {
@@ -261,7 +279,7 @@ const PRESETS: Preset[] = [
       colour: ["Spinach", "Cherry tomatoes"],
       fats: ["Olive oil"],
       crunch: ["Pumpkin seeds"],
-      dressing: ["Tahini Lemon — tahini, lemon, garlic, water, salt, pepper"],
+      dressing: ["Tahini Lemon"],
     },
   },
   {
@@ -272,7 +290,7 @@ const PRESETS: Preset[] = [
       colour: ["Broccoli", "Red pepper"],
       fats: ["Olive oil"],
       crunch: ["Sesame seeds"],
-      dressing: ["Satay Style — peanut butter, lime, soy/tamari, ginger, water"],
+      dressing: ["Satay Style"],
     },
   },
   {
@@ -283,7 +301,7 @@ const PRESETS: Preset[] = [
       colour: ["Cherry tomatoes", "Cucumber"],
       fats: ["Avocado"],
       crunch: ["Pumpkin seeds"],
-      dressing: ["Honey Mustard — olive oil, ACV, Dijon, honey, salt, pepper"],
+      dressing: ["Honey Mustard"],
     },
   },
 ];
@@ -295,14 +313,18 @@ function GlowBowlBuilder() {
   const [added, setAdded] = useState(false);
   const { add } = useShoppingExtras();
 
-  function togglePick(stepKey: string, option: string, max: number) {
+  useEffect(() => {
+    setAdded(false);
+  }, []);
+
+  function togglePick(stepKey: string, optionLabel: string, max: number) {
     setAdded(false);
     setPicks((prev) => {
       const cur = prev[stepKey] ?? [];
-      if (cur.includes(option)) {
-        return { ...prev, [stepKey]: cur.filter((o) => o !== option) };
+      if (cur.includes(optionLabel)) {
+        return { ...prev, [stepKey]: cur.filter((o) => o !== optionLabel) };
       }
-      const next = max === 1 ? [option] : [...cur, option].slice(-max);
+      const next = max === 1 ? [optionLabel] : [...cur, optionLabel].slice(-max);
       return { ...prev, [stepKey]: next };
     });
   }
@@ -323,8 +345,13 @@ function GlowBowlBuilder() {
   const allPicked = useMemo(() => {
     const out: { item: string; category: string }[] = [];
     for (const step of STEPS) {
-      for (const it of picks[step.key] ?? []) {
-        out.push({ item: it, category: step.category });
+      for (const label of picks[step.key] ?? []) {
+        const opt = step.options.find((o) => o.label === label);
+        if (opt?.ingredients) {
+          out.push({ item: `${opt.label} dressing ingredients`, category: step.category });
+        } else {
+          out.push({ item: label, category: step.category });
+        }
       }
     }
     return out;
@@ -336,11 +363,15 @@ function GlowBowlBuilder() {
     setAdded(true);
   }
 
-  const totalPicked = allPicked.length;
+  const totalPicked = Object.values(picks).flat().length;
+
+  function getDressingIngredients(label: string): string | undefined {
+    const step = STEPS.find((s) => s.key === "dressing");
+    return step?.options.find((o) => o.label === label)?.ingredients;
+  }
 
   return (
     <AppShell>
-      {/* Hero */}
       <section className="border-b border-border/50 bg-gradient-to-br from-background via-background to-primary/20">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:py-16">
           <p className="font-serif text-[11px] uppercase tracking-[0.28em] text-secondary">
@@ -359,9 +390,7 @@ function GlowBowlBuilder() {
       </section>
 
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[1fr_320px]">
-        {/* Steps */}
         <div className="space-y-10">
-          {/* Presets */}
           <section>
             <h2 className="font-serif text-xl">Or start from a preset</h2>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -389,21 +418,27 @@ function GlowBowlBuilder() {
                 <p className="mt-1 text-sm text-muted-foreground">{step.intro}</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {step.options.map((opt) => {
-                    const active = sel.includes(opt);
+                    const active = sel.includes(opt.label);
                     return (
-                      <button
-                        key={opt}
-                        onClick={() => togglePick(step.key, opt, step.max)}
-                        className={cn(
-                          "rounded-full border px-3.5 py-1.5 text-sm transition-all",
-                          active
-                            ? "border-secondary bg-secondary text-secondary-foreground"
-                            : "border-border bg-card text-foreground/80 hover:border-secondary/50",
+                      <div key={opt.label} className="flex flex-col gap-0.5">
+                        <button
+                          onClick={() => togglePick(step.key, opt.label, step.max)}
+                          className={cn(
+                            "rounded-full border px-3.5 py-1.5 text-sm transition-all",
+                            active
+                              ? "border-secondary bg-secondary text-secondary-foreground"
+                              : "border-border bg-card text-foreground/80 hover:border-secondary/50",
+                          )}
+                        >
+                          {active && <Check className="mr-1 inline h-3 w-3" />}
+                          {opt.label}
+                        </button>
+                        {opt.ingredients && (
+                          <p className="px-3.5 text-[11px] text-muted-foreground">
+                            {opt.ingredients}
+                          </p>
                         )}
-                      >
-                        {active && <Check className="mr-1 inline h-3 w-3" />}
-                        {opt}
-                      </button>
+                      </div>
                     );
                   })}
                 </div>
@@ -412,7 +447,6 @@ function GlowBowlBuilder() {
           })}
         </div>
 
-        {/* Sticky summary */}
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm">
             <div className="flex items-center gap-2">
@@ -429,8 +463,7 @@ function GlowBowlBuilder() {
 
             {totalPicked === 0 ? (
               <p className="mt-4 text-sm text-muted-foreground">
-                Start picking ingredients from the steps. Your bowl will appear
-                here.
+                Start picking ingredients from the steps. Your bowl will appear here.
               </p>
             ) : (
               <ul className="mt-4 space-y-3">
@@ -443,19 +476,23 @@ function GlowBowlBuilder() {
                         {s.title.replace(/^\d+ · /, "")}
                       </p>
                       <ul className="mt-1 space-y-1">
-                        {items.map((it) => (
-                          <li
-                            key={it}
-                            className="flex items-start justify-between gap-2 text-sm"
-                          >
-                            <span>{it}</span>
-                            <button
-                              onClick={() => togglePick(s.key, it, s.max)}
-                              className="text-muted-foreground hover:text-foreground"
-                              aria-label="Remove"
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </button>
+                        {items.map((label) => (
+                          <li key={label} className="flex flex-col gap-0.5">
+                            <div className="flex items-start justify-between gap-2 text-sm">
+                              <span>{label}</span>
+                              <button
+                                onClick={() => togglePick(s.key, label, s.max)}
+                                className="text-muted-foreground hover:text-foreground"
+                                aria-label="Remove"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                            {s.key === "dressing" && getDressingIngredients(label) && (
+                              <p className="text-[11px] text-muted-foreground">
+                                {getDressingIngredients(label)}
+                              </p>
+                            )}
                           </li>
                         ))}
                       </ul>
