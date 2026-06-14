@@ -24,15 +24,14 @@ export function planKey(day: string, slot: Slot) {
 }
 
 export function useMealPlan() {
-  const [plan, setPlan] = useLocalStorage<MealPlan>("ck.plan", {});
+  const [plan, setPlan, planLoaded] = useLocalStorage<MealPlan>("ck.plan", {});
   const [people, setPeople] = useLocalStorage<number>("ck.people", 2);
   const set = (day: string, slot: Slot, entry: PlanEntry | null) =>
     setPlan((p) => ({ ...p, [planKey(day, slot)]: entry }));
   const clear = () => setPlan({});
-  return { plan, setPlan, set, clear, people, setPeople };
+  return { plan, setPlan, set, clear, people, setPeople, planLoaded };
 }
 
-// Shopping list state — "I have this" hide list, persisted
 export function useHaveList() {
   const [have, setHave] = useLocalStorage<string[]>("ck.have", []);
   const isHad = (key: string) => have.includes(key);
@@ -42,7 +41,6 @@ export function useHaveList() {
   return { have, isHad, toggle, reset };
 }
 
-// Extra shopping items added outside the meal plan (e.g. from Glow Bowl builder)
 export type ExtraItem = { item: string; category: string; addedAt: number };
 export function useShoppingExtras() {
   const [extras, setExtras] = useLocalStorage<ExtraItem[]>("ck.extras", []);
