@@ -10,7 +10,7 @@ export const listRecipes = createServerFn({ method: "GET" }).handler(
       .select("*")
       .order("name");
     if (error) throw new Error(error.message);
-    return (data ?? []) as Recipe[];
+    return (data ?? []) as unknown as Recipe[];
   },
 );
 
