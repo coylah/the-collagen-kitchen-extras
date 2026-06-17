@@ -1,24 +1,123 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions } from "@tanstack/react-query";
 import { useMemo, useState, useEffect } from "react";
 import {
   ArrowLeft,
-  Clock,
   Heart,
   Minus,
   Plus,
   Sparkles,
   CalendarPlus,
-  Lightbulb,
 } from "lucide-react";
 import { getRecipeBySlug } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
-import { RecipePlaceholder } from "@/components/recipe-card";
 import { Button } from "@/components/ui/button";
 import { useFavourites, useMealPlan, DAYS, SLOTS, type Slot } from "@/lib/user-state";
 import { scaleRecipe } from "@/lib/recipe-math";
 import { cn } from "@/lib/utils";
 import { BuildYourBeautyOats } from "@/components/build-your-beauty-oats";
+
+// ─── Illustration stamps (same as recipe card) ────────────────────────────────
+
+function SmoothieIllo() {
+  return (
+    <svg width="48" height="56" viewBox="0 0 64 76" fill="none" aria-hidden="true">
+      <path d="M16 14 L20 60 Q20 64 32 64 Q44 64 44 60 L48 14 Z" stroke="#1C1917" strokeWidth="0.7" fill="none" strokeLinejoin="round"/>
+      <path d="M16 14 L48 14" stroke="#1C1917" strokeWidth="0.7" strokeLinecap="round"/>
+      <path d="M18 26 L46 26" stroke="#EDE5DC" strokeWidth="0.6" strokeLinecap="round"/>
+      <path d="M19 38 L45 38" stroke="#EDE5DC" strokeWidth="0.6" strokeLinecap="round"/>
+      <path d="M32 14 L43 5" stroke="#1C1917" strokeWidth="0.65" strokeLinecap="round"/>
+      <circle cx="43.5" cy="4.5" r="1.8" fill="#C9485B"/>
+      <path d="M18 64 L18 70 Q18 72 32 72 Q46 72 46 70 L46 64" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function BreakfastIllo() {
+  return (
+    <svg width="48" height="56" viewBox="0 0 64 76" fill="none" aria-hidden="true">
+      <path d="M8 36 Q8 60 32 60 Q56 60 56 36" stroke="#1C1917" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
+      <path d="M8 36 L56 36" stroke="#1C1917" strokeWidth="0.7" strokeLinecap="round"/>
+      <path d="M20 36 Q20 50 32 50 Q44 50 44 36" stroke="#EDE5DC" strokeWidth="0.6" fill="none"/>
+      <path d="M24 36 Q22 28 26 24 Q30 21 32 26 Q34 21 38 24 Q42 28 40 36" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="32" cy="25" r="1.8" fill="#C9485B"/>
+      <path d="M48 26 Q54 24 56 30 L58 42" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
+      <path d="M16 60 L16 68 Q16 70 32 70 Q48 70 48 68 L48 60" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function LunchIllo() {
+  return (
+    <svg width="48" height="56" viewBox="0 0 64 76" fill="none" aria-hidden="true">
+      <path d="M8 40 Q8 64 32 64 Q56 64 56 40" stroke="#1C1917" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
+      <path d="M8 40 L56 40" stroke="#1C1917" strokeWidth="0.7" strokeLinecap="round"/>
+      <path d="M14 40 Q12 30 20 26 Q26 23 28 30" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
+      <path d="M28 30 Q30 24 36 26 Q42 28 40 36" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
+      <path d="M40 36 Q46 28 52 34 Q55 38 54 40" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
+      <circle cx="32" cy="29" r="1.8" fill="#C9485B"/>
+      <path d="M16 64 L16 72 Q16 74 32 74 Q48 74 48 72 L48 64" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function DinnerIllo() {
+  return (
+    <svg width="48" height="56" viewBox="0 0 72 76" fill="none" aria-hidden="true">
+      <ellipse cx="38" cy="54" rx="24" ry="8" stroke="#1C1917" strokeWidth="0.7" fill="none"/>
+      <ellipse cx="38" cy="52" rx="18" ry="5.5" stroke="#EDE5DC" strokeWidth="0.6" fill="none"/>
+      <path d="M14 54 L6 46" stroke="#1C1917" strokeWidth="0.7" strokeLinecap="round"/>
+      <path d="M14 50 Q14 38 38 36 Q62 38 62 50" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
+      <path d="M24 46 Q30 40 38 42 Q46 44 52 40" stroke="#1C1917" strokeWidth="0.6" fill="none" strokeLinecap="round"/>
+      <circle cx="38" cy="38" r="1.8" fill="#C9485B"/>
+      <path d="M30 30 Q30 24 32 22" stroke="#1C1917" strokeWidth="0.55" fill="none" strokeLinecap="round"/>
+      <path d="M38 28 Q38 22 38 18" stroke="#1C1917" strokeWidth="0.55" fill="none" strokeLinecap="round"/>
+      <path d="M46 30 Q46 24 44 22" stroke="#1C1917" strokeWidth="0.55" fill="none" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function SnackIllo() {
+  return (
+    <svg width="48" height="56" viewBox="0 0 64 76" fill="none" aria-hidden="true">
+      <ellipse cx="32" cy="60" rx="22" ry="5" stroke="#1C1917" strokeWidth="0.7" fill="none"/>
+      <ellipse cx="32" cy="58" rx="16" ry="3.5" stroke="#EDE5DC" strokeWidth="0.6" fill="none"/>
+      <circle cx="24" cy="50" r="6" stroke="#1C1917" strokeWidth="0.65" fill="none"/>
+      <circle cx="24" cy="50" r="2.5" stroke="#EDE5DC" strokeWidth="0.5" fill="none"/>
+      <circle cx="40" cy="52" r="5" stroke="#1C1917" strokeWidth="0.65" fill="none"/>
+      <circle cx="40" cy="52" r="2" stroke="#EDE5DC" strokeWidth="0.5" fill="none"/>
+      <circle cx="32" cy="46" r="4" stroke="#1C1917" strokeWidth="0.65" fill="none"/>
+      <circle cx="32" cy="46" r="1.5" fill="#C9485B" opacity="0.5"/>
+    </svg>
+  );
+}
+
+function GlowBowlIllo() {
+  return (
+    <svg width="48" height="56" viewBox="0 0 100 110" fill="none" aria-hidden="true">
+      <path d="M8 52 Q8 82 50 82 Q92 82 92 52" stroke="#1C1917" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
+      <path d="M8 52 L92 52" stroke="#1C1917" strokeWidth="0.7" strokeLinecap="round"/>
+      <path d="M20 52 Q20 70 50 70 Q80 70 80 52" stroke="#EDE5DC" strokeWidth="0.6" fill="none"/>
+      <path d="M16 52 Q14 40 22 34 Q30 28 36 36" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
+      <path d="M36 36 Q40 28 50 30 Q60 28 64 36" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
+      <path d="M64 36 Q70 28 78 34 Q86 40 84 52" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
+      <path d="M28 44 Q34 38 42 42 Q50 46 58 40 Q66 36 72 42" stroke="#1C1917" strokeWidth="0.6" fill="none" strokeLinecap="round"/>
+      <circle cx="50" cy="34" r="1.8" fill="#C9485B"/>
+    </svg>
+  );
+}
+
+function RecipeIllo({ mealType }: { mealType: string }) {
+  const t = mealType.toLowerCase();
+  if (t === "smoothie") return <SmoothieIllo />;
+  if (t === "breakfast") return <BreakfastIllo />;
+  if (t === "lunch") return <LunchIllo />;
+  if (t === "snack") return <SnackIllo />;
+  if (t.includes("glow")) return <GlowBowlIllo />;
+  return <DinnerIllo />;
+}
+
+// ─── Route ────────────────────────────────────────────────────────────────────
 
 const recipeQuery = (slug: string) =>
   queryOptions({
@@ -39,7 +138,7 @@ export const Route = createFileRoute("/recipes/$slug")({
           {
             name: "description",
             content:
-              loaderData.notes?.slice(0, 160) ??
+              loaderData.collagen_tip?.slice(0, 160) ??
               `${loaderData.name} — a collagen-supporting recipe.`,
           },
           { property: "og:title", content: loaderData.name },
@@ -53,12 +152,12 @@ export const Route = createFileRoute("/recipes/$slug")({
   component: RecipePage,
   errorComponent: ({ error }) => (
     <AppShell>
-      <p className="mx-auto max-w-3xl p-8 text-destructive">{error.message}</p>
+      <p className="mx-auto max-w-4xl p-8 text-destructive">{error.message}</p>
     </AppShell>
   ),
   notFoundComponent: () => (
     <AppShell>
-      <div className="mx-auto max-w-3xl p-8 text-center">
+      <div className="mx-auto max-w-4xl p-8 text-center">
         <p className="text-muted-foreground">Recipe not found.</p>
         <Link to="/" className="mt-4 inline-block text-secondary underline">
           Back to cookbook
@@ -67,6 +166,8 @@ export const Route = createFileRoute("/recipes/$slug")({
     </AppShell>
   ),
 });
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 function RecipePage() {
   const recipe = Route.useLoaderData() as import("@/lib/recipe-types").Recipe;
@@ -98,82 +199,95 @@ function RecipePage() {
   return (
     <AppShell>
       <article className="mx-auto max-w-4xl px-4 py-8">
+
+        {/* Back link */}
         <Link
           to="/"
-          className="no-print mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          className="no-print mb-6 inline-flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="h-3.5 w-3.5" /> Back to cookbook
+          <ArrowLeft className="h-3 w-3" /> Back to cookbook
         </Link>
 
-        <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm">
-          <div className="relative aspect-[16/9] w-full">
-            {recipe.image_url ? (
-              <img
-                src={recipe.image_url}
-                alt={recipe.name}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <RecipePlaceholder mealType={recipe.meal_type} className="h-full w-full" />
-            )}
-          </div>
-          <div className="p-6 sm:p-10">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-secondary">
-              {recipe.meal_type}
-            </p>
-            <h1 className="mt-2 font-serif text-3xl sm:text-4xl">{recipe.name}</h1>
+        <div className="overflow-hidden rounded-2xl border border-border/60 bg-white">
 
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+          {/* ── Header ── */}
+          <div className="relative border-b border-border/60 px-8 py-10 sm:px-12">
+
+            {/* Illustration stamp — top right */}
+            <div className="absolute right-8 top-8 opacity-50 no-print">
+              <RecipeIllo mealType={recipe.meal_type} />
+            </div>
+
+            <p className="text-[9px] uppercase tracking-[0.22em] text-secondary">
+              {recipe.meal_type}
+              {recipe.collagen_boost && " · Super Boost"}
+            </p>
+
+            <h1 className="mt-3 font-serif text-4xl font-light leading-[1.0] text-foreground sm:text-5xl">
+              {recipe.name}
+            </h1>
+
+            {/* Rose rule */}
+            <div className="mt-5 h-px w-7 bg-secondary" />
+
+            {/* Tease — collagen tip as the hook */}
+            {recipe.collagen_tip && (
+              <p className="mt-4 max-w-lg text-sm font-light leading-relaxed text-muted-foreground">
+                {recipe.collagen_tip}
+              </p>
+            )}
+
+            {/* Meta row */}
+            <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
-                <Clock className="h-4 w-4" /> {total} min ({recipe.prep_min} prep ·{" "}
-                {recipe.cook_min} cook)
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                {total} min
+                {recipe.prep_min > 0 && ` (${recipe.prep_min} prep`}
+                {recipe.cook_min > 0 && ` · ${recipe.cook_min} cook)`}
               </span>
+              <span>· Serves {servings}</span>
               {recipe.collagen_boost && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs text-secondary-foreground">
-                  <Sparkles className="h-3 w-3" /> Super Boost
+                <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-[10px] text-secondary-foreground">
+                  <Sparkles className="h-2.5 w-2.5" /> Super Boost
                 </span>
               )}
             </div>
 
-            {recipe.tags.length > 0 && (
+            {/* Tags */}
+            {recipe.tags.filter(t => t !== "beauty-oats-builder").length > 0 && (
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {recipe.tags
-                  .filter((t) => t !== "beauty-oats-builder")
-                  .map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground"
-                    >
+                  .filter(t => t !== "beauty-oats-builder")
+                  .map(t => (
+                    <span key={t} className="rounded-full border border-border/60 px-2.5 py-0.5 text-[10px] text-muted-foreground">
                       {t}
                     </span>
                   ))}
               </div>
             )}
 
-            <div className="no-print mt-6 flex flex-wrap items-center gap-2 border-t border-border/60 pt-6">
+            {/* Actions */}
+            <div className="no-print mt-6 flex flex-wrap gap-2">
               <Button
-                variant={isFav(recipe.slug) ? "default" : "outline"}
                 size="sm"
+                variant={isFav(recipe.slug) ? "default" : "outline"}
                 onClick={() => toggle(recipe.slug)}
-                className={isFav(recipe.slug) ? "bg-secondary text-secondary-foreground hover:bg-secondary/90" : ""}
+                className={isFav(recipe.slug) ? "bg-foreground text-background hover:bg-foreground/90" : ""}
               >
-                <Heart
-                  className={cn(
-                    "h-4 w-4",
-                    isFav(recipe.slug) && "fill-secondary-foreground",
-                  )}
-                />
-                {isFav(recipe.slug) ? "Saved" : "Save"}
+                <Heart className={cn("h-3.5 w-3.5", isFav(recipe.slug) && "fill-background")} />
+                {isFav(recipe.slug) ? "Saved" : "Save recipe"}
               </Button>
               <Button
-                variant="outline"
                 size="sm"
-                onClick={() => setShowPlanPicker((v) => !v)}
+                variant="outline"
+                onClick={() => setShowPlanPicker(v => !v)}
               >
-                <CalendarPlus className="h-4 w-4" />
+                <CalendarPlus className="h-3.5 w-3.5" />
                 {showPlanPicker ? "Cancel" : "Add to meal plan"}
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => window.print()}>
+              <Button size="sm" variant="ghost" onClick={() => window.print()}>
                 Print
               </Button>
             </div>
@@ -188,170 +302,168 @@ function RecipePage() {
             )}
 
             {hasOatsBuilder && (
-              <p className="mt-6 rounded-xl border border-secondary/30 bg-primary/15 p-3 text-sm text-foreground/80">
-                This is the <strong>base recipe</strong>. Scroll down for the
-                Build Your Beauty Oats guide with toppings &amp; flavour combos.
+              <p className="mt-5 text-xs text-muted-foreground">
+                This is the base recipe — scroll down for the Beauty Oats builder with toppings and flavour combos.
               </p>
             )}
-
-            <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_1.3fr]">
-              <section>
-                <div className="flex items-center justify-between">
-                  <h2 className="font-serif text-xl">Ingredients</h2>
-                  <div className="no-print flex items-center gap-1 rounded-full border bg-background px-1 py-1">
-                    <button
-                      onClick={() => setServings((s) => Math.max(1, s - 1))}
-                      className="grid h-7 w-7 place-items-center rounded-full hover:bg-accent"
-                      aria-label="Fewer servings"
-                    >
-                      <Minus className="h-3.5 w-3.5" />
-                    </button>
-                    <span className="min-w-[5rem] text-center text-sm">
-                      Serves {servings}
-                    </span>
-                    <button
-                      onClick={() => setServings((s) => s + 1)}
-                      className="grid h-7 w-7 place-items-center rounded-full hover:bg-accent"
-                      aria-label="More servings"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-                <ul className="mt-4 space-y-2">
-                  {scaledIngredients.map((ing, i) => (
-                    <li key={i}>
-                      <label className="flex cursor-pointer items-start gap-3 rounded-lg px-2 py-1.5 hover:bg-muted/60">
-                        <input
-                          type="checkbox"
-                          className="mt-1 h-4 w-4 accent-secondary"
-                          checked={!!checkedIng[i]}
-                          onChange={() =>
-                            setCheckedIng((c) => ({ ...c, [i]: !c[i] }))
-                          }
-                        />
-                        <span
-                          className={cn(
-                            "text-sm",
-                            checkedIng[i] &&
-                              "text-muted-foreground line-through decoration-muted-foreground/60",
-                          )}
-                        >
-                          {ing.qty && <strong>{ing.qty} </strong>}
-                          {ing.unit && <span>{ing.unit} </span>}
-                          {ing.item}
-                        </span>
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-
-              <section>
-                <h2 className="font-serif text-xl">Method</h2>
-                <ol className="mt-4 space-y-3">
-                  {recipe.method.map((step, i) => (
-                    <li key={i}>
-                      <label className="flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 hover:bg-muted/60">
-                        <span
-                          className={cn(
-                            "grid h-6 w-6 shrink-0 place-items-center rounded-full border text-xs font-semibold",
-                            checkedStep[i]
-                              ? "border-secondary bg-secondary text-secondary-foreground"
-                              : "border-input text-foreground/70",
-                          )}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setCheckedStep((c) => ({ ...c, [i]: !c[i] }));
-                          }}
-                        >
-                          {i + 1}
-                        </span>
-                        <input
-                          type="checkbox"
-                          className="sr-only"
-                          checked={!!checkedStep[i]}
-                          onChange={() =>
-                            setCheckedStep((c) => ({ ...c, [i]: !c[i] }))
-                          }
-                        />
-                        <span
-                          className={cn(
-                            "text-sm leading-relaxed",
-                            checkedStep[i] && "text-muted-foreground line-through",
-                          )}
-                        >
-                          {step}
-                        </span>
-                      </label>
-                    </li>
-                  ))}
-                </ol>
-              </section>
-            </div>
-
-            {recipe.notes && (
-              <aside className="mt-10 rounded-2xl border bg-muted/40 p-5">
-                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <Lightbulb className="h-3.5 w-3.5 text-secondary" />
-                  <span className="font-script text-base normal-case tracking-normal text-secondary/90">
-                    Coylah's
-                  </span>
-                  tips
-                </p>
-                <p className="mt-2 text-sm leading-relaxed">{recipe.notes}</p>
-              </aside>
-            )}
-
-            {recipe.collagen_tip && (
-              <aside className="mt-4 rounded-2xl border border-secondary/30 bg-primary/20 p-5">
-                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
-                  <Sparkles className="h-3.5 w-3.5" /> The glow factor
-                </p>
-                <p className="mt-2 text-sm leading-relaxed text-foreground/85">
-                  {recipe.collagen_tip}
-                </p>
-              </aside>
-            )}
           </div>
+
+          {/* ── Ingredients + Method ── */}
+          <div className="grid gap-0 lg:grid-cols-[1fr_1.4fr]">
+
+            {/* Ingredients */}
+            <section className="border-b border-border/60 px-8 py-8 lg:border-b-0 lg:border-r lg:px-10">
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="font-serif text-xl font-light">Ingredients</h2>
+                <div className="no-print flex items-center gap-1.5">
+                  <button
+                    onClick={() => setServings(s => Math.max(1, s - 1))}
+                    className="grid h-6 w-6 place-items-center rounded-full border border-border/60 text-muted-foreground hover:border-secondary hover:text-secondary"
+                    aria-label="Fewer servings"
+                  >
+                    <Minus className="h-3 w-3" />
+                  </button>
+                  <span className="min-w-[4.5rem] text-center text-xs text-muted-foreground">
+                    Serves {servings}
+                  </span>
+                  <button
+                    onClick={() => setServings(s => s + 1)}
+                    className="grid h-6 w-6 place-items-center rounded-full border border-border/60 text-muted-foreground hover:border-secondary hover:text-secondary"
+                    aria-label="More servings"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+              <ul className="space-y-1">
+                {scaledIngredients.map((ing, i) => (
+                  <li key={i}>
+                    <label className="flex cursor-pointer items-start gap-3 rounded-lg px-1 py-2 hover:bg-muted/40">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-3.5 w-3.5 accent-secondary"
+                        checked={!!checkedIng[i]}
+                        onChange={() => setCheckedIng(c => ({ ...c, [i]: !c[i] }))}
+                      />
+                      <span className={cn(
+                        "text-sm font-light leading-relaxed",
+                        checkedIng[i] && "text-muted-foreground line-through"
+                      )}>
+                        {ing.qty && <span className="text-muted-foreground">{ing.qty} </span>}
+                        {ing.unit && <span className="text-muted-foreground">{ing.unit} </span>}
+                        {ing.item}
+                      </span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            {/* Method */}
+            <section className="px-8 py-8 lg:px-10">
+              <h2 className="mb-5 font-serif text-xl font-light">Method</h2>
+              <ol className="space-y-4">
+                {recipe.method.map((step, i) => (
+                  <li key={i}>
+                    <label className="flex cursor-pointer items-start gap-3 rounded-lg px-1 py-1 hover:bg-muted/40">
+                      <span
+                        className={cn(
+                          "mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border text-[10px]",
+                          checkedStep[i]
+                            ? "border-secondary bg-secondary text-secondary-foreground"
+                            : "border-border/60 text-muted-foreground",
+                        )}
+                        onClick={e => {
+                          e.preventDefault();
+                          setCheckedStep(c => ({ ...c, [i]: !c[i] }));
+                        }}
+                      >
+                        {i + 1}
+                      </span>
+                      <input
+                        type="checkbox"
+                        className="sr-only"
+                        checked={!!checkedStep[i]}
+                        onChange={() => setCheckedStep(c => ({ ...c, [i]: !c[i] }))}
+                      />
+                      <span className={cn(
+                        "text-sm font-light leading-relaxed",
+                        checkedStep[i] && "text-muted-foreground line-through"
+                      )}>
+                        {step}
+                      </span>
+                    </label>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          </div>
+
+          {/* ── Callout boxes — stacked ── */}
+          {(recipe.notes || recipe.collagen_tip) && (
+            <div className="space-y-2 border-t border-border/60 px-8 py-8 lg:px-10">
+              {recipe.notes && (
+                <aside className="border-l-2 border-secondary py-3 pl-4 pr-4">
+                  <p className="mb-1.5 text-[9px] uppercase tracking-[0.18em] text-secondary">
+                    Coylah's tips
+                  </p>
+                  <p className="text-sm font-light leading-relaxed text-foreground/80">
+                    {recipe.notes}
+                  </p>
+                </aside>
+              )}
+              {recipe.collagen_tip && (
+                <aside className="border-l-2 border-secondary py-3 pl-4 pr-4">
+                  <p className="mb-1.5 text-[9px] uppercase tracking-[0.18em] text-secondary">
+                    ✦ The glow factor
+                  </p>
+                  <p className="text-sm font-light leading-relaxed text-foreground/80">
+                    {recipe.collagen_tip}
+                  </p>
+                </aside>
+              )}
+            </div>
+          )}
+
         </div>
 
         {hasOatsBuilder && <BuildYourBeautyOats />}
+
       </article>
     </AppShell>
   );
 }
 
+// ─── Plan picker ──────────────────────────────────────────────────────────────
+
 function PlanPicker({ onPick }: { onPick: (day: string, slot: Slot) => void }) {
   return (
-    <div className="mt-3 rounded-xl border bg-muted/40 p-3">
-      <p className="mb-2 text-xs text-muted-foreground">
+    <div className="mt-4 rounded-xl border border-border/60 p-4">
+      <p className="mb-3 text-xs text-muted-foreground">
         Tap a slot to add this recipe to your week:
       </p>
       <div className="grid grid-cols-[auto_repeat(4,1fr)] gap-1 text-xs">
         <div />
-        {SLOTS.map((s) => (
-          <div key={s} className="px-1 text-center capitalize text-muted-foreground">
-            {s}
-          </div>
+        {SLOTS.map(s => (
+          <div key={s} className="px-1 text-center capitalize text-muted-foreground">{s}</div>
         ))}
-        {DAYS.map((d) => (
-          <Row key={d} day={d} onPick={onPick} />
+        {DAYS.map(d => (
+          <PlanRow key={d} day={d} onPick={onPick} />
         ))}
       </div>
     </div>
   );
 }
 
-function Row({ day, onPick }: { day: string; onPick: (d: string, s: Slot) => void }) {
+function PlanRow({ day, onPick }: { day: string; onPick: (d: string, s: Slot) => void }) {
   return (
     <>
       <div className="px-1 py-1 text-muted-foreground">{day}</div>
-      {SLOTS.map((s) => (
+      {SLOTS.map(s => (
         <button
           key={s}
           onClick={() => onPick(day, s)}
-          className="rounded-md border bg-background py-1 transition-colors hover:border-secondary hover:bg-secondary/10"
+          className="rounded-md border border-border/60 bg-background py-1 text-muted-foreground transition-colors hover:border-secondary hover:text-secondary"
         >
           +
         </button>
