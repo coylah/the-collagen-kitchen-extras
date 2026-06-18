@@ -14,7 +14,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 function Header() {
   return (
-    <header className="no-print sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur">
+    <header className="no-print sticky top-0 z-40 border-b border-border/60 bg-background/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <Link to="/" className="group flex flex-col leading-none">
           <span className="font-script text-base text-secondary/80 -mb-1">Love Coylah</span>
@@ -45,8 +45,11 @@ function Footer() {
       <p className="mt-1 font-serif text-sm tracking-[0.2em] uppercase text-muted-foreground">
         Age Slow · Reclaim Your Glow
       </p>
-      <p className="mt-3 text-xs text-muted-foreground/80">
+      <p className="mt-3 text-xs text-muted-foreground/60">
         The Collagen Kitchen · Skin-food recipes from the inside out.
+      </p>
+      <p className="mt-2 text-xs text-muted-foreground/40">
+        Coylah is not a doctor, dermatologist or registered nutritionist. Always speak to your GP before making changes to your diet or skincare.
       </p>
     </footer>
   );
