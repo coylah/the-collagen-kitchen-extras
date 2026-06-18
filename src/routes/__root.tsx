@@ -91,6 +91,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "The Collagen Kitchen" },
+      { name: "description", content: "Collagen Cookbook Creator transforms your recipes into an interactive digital cookbook." },
+      { property: "og:description", content: "Collagen Cookbook Creator transforms your recipes into an interactive digital cookbook." },
+      { name: "twitter:description", content: "Collagen Cookbook Creator transforms your recipes into an interactive digital cookbook." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8e45be7d-a284-40ea-9ffe-a80ab19a33d7/id-preview-91a37a0f--cefe356e-c50f-42fb-ac86-6cff166c4912.lovable.app-1781786401498.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8e45be7d-a284-40ea-9ffe-a80ab19a33d7/id-preview-91a37a0f--cefe356e-c50f-42fb-ac86-6cff166c4912.lovable.app-1781786401498.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
