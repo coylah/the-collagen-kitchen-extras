@@ -20,12 +20,7 @@ export const Route = createFileRoute("/")(({
       {
         name: "description",
         content:
-          "Skin-food recipes to help you age slow and reclaim your glow. Browse, save, plan and shop collagen-supporting meals.",
-      },
-      { property: "og:title", content: "The Collagen Kitchen — Love Coylah" },
-      {
-        property: "og:description",
-        content: "Skin-food recipes to help you age slow and reclaim your glow.",
+          "Skin-food recipes to help you age slow and reclaim your glow.",
       },
     ],
   }),
@@ -57,7 +52,8 @@ function Cookbook() {
   const mealTypes = useMemo(
     () =>
       Array.from(new Set(recipes.map((r) => r.meal_type))).sort(
-        (a, b) => (MEAL_ORDER.indexOf(a) + 99) - (MEAL_ORDER.indexOf(b) + 99),
+        (a, b) =>
+          (MEAL_ORDER.indexOf(a) + 99) - (MEAL_ORDER.indexOf(b) + 99),
       ),
     [recipes],
   );
@@ -114,7 +110,7 @@ function Cookbook() {
   if (recipes.length === 0) {
     return (
       <AppShell>
-        <section className="border-b border-border/50 bg-gradient-to-br from-background via-background to-primary/20">
+        <section className="border-b border-border/50">
           <div className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
             <p className="font-serif text-[11px] uppercase tracking-[0.28em] text-secondary">
               Beauty starts in the kitchen
@@ -137,8 +133,7 @@ function Cookbook() {
 
   return (
     <AppShell>
-      {/* Hero */}
-      <section className="border-b border-border/50 bg-gradient-to-br from-background via-background to-primary/20">
+      <section className="border-b border-border/50">
         <div className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
           <p className="font-serif text-[11px] uppercase tracking-[0.28em] text-secondary">
             Beauty starts in the kitchen
@@ -147,18 +142,12 @@ function Cookbook() {
             The Collagen Kitchen
           </h1>
           <p className="mt-5 max-w-2xl text-base text-foreground/75 sm:text-lg">
-            Skin-food recipes to help you age slow &amp; reclaim your glow — and build
-            collagen from the inside out.
-          </p>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Browse, save, plan your week and build a shopping list from simple
-            collagen-supporting meals.
+            Skin-food recipes to help you age slow &amp; reclaim your glow.
           </p>
         </div>
       </section>
 
-      {/* Filters + Glow Bowl link tucked in */}
-      <section className="sticky top-[63px] z-30 mt-0 border-b border-border/60 bg-background/90 backdrop-blur">
+      <section className="sticky top-[63px] z-30 border-b border-border/60 bg-background/90 backdrop-blur">
         <div className="mx-auto max-w-6xl space-y-3 px-4 py-4">
           <div className="flex items-center gap-3">
             <div className="relative flex-1">
@@ -198,7 +187,11 @@ function Cookbook() {
               variant={boostOnly ? "default" : "outline"}
               size="sm"
               onClick={() => setBoostOnly((v) => !v)}
-              className={boostOnly ? "bg-secondary text-secondary-foreground hover:bg-secondary/90" : ""}
+              className={
+                boostOnly
+                  ? "bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                  : ""
+              }
             >
               <Sparkles className="h-3.5 w-3.5" /> Super Boost
             </Button>
@@ -234,7 +227,6 @@ function Cookbook() {
         </div>
       </section>
 
-      {/* Recipe grid */}
       <section className="mx-auto max-w-6xl px-4 py-10">
         {filtered.length === 0 ? (
           <p className="py-16 text-center text-muted-foreground">
