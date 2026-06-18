@@ -6,7 +6,7 @@ import { listRecipes } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { useMealPlan, useHaveList, useShoppingExtras, type ExtraItem } from "@/lib/user-state";
-import { buildShoppingList, shoppingItemKey, type ShoppingItem } from "@/lib/recipe-math";
+import { buildShoppingList, type ShoppingItem } from "@/lib/recipe-math";
 import { cn } from "@/lib/utils";
 
 const recipesQuery = queryOptions({
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/shopping")({
       { title: "Shopping list — The Collagen Kitchen" },
       {
         name: "description",
-        content: "An auto-generated shopping list from your weekly meal plan.",
+        content: "Your ingredients, grouped and ready to shop.",
       },
     ],
   }),
@@ -38,29 +38,32 @@ export const Route = createFileRoute("/shopping")({
   ),
 });
 
+// Merge duplicate category labels into one clean set
 const CATEGORY_LABEL: Record<string, string> = {
   produce: "Fruit & veg",
   protein: "Protein",
-  dairy: "Dairy",
+  dairy: "Dairy & chilled",
   grains: "Grains",
   cupboard: "Cupboard staples",
   pantry: "Cupboard staples",
   spices: "Cupboard staples",
-  herbs: "Herbs & seasoning",
+  herbs: "Cupboard staples",
   fats: "Cupboard staples",
-  nuts_seeds: "Nuts & seeds",
+  nuts_seeds: "Cupboard staples",
   other: "Other",
 };
+
+// Deduplicated display order — cupboard staples merged under one heading
 const CATEGORY_ORDER = [
   "produce",
   "protein",
   "dairy",
   "grains",
-  "herbs",
   "cupboard",
+  "pantry",
   "fats",
   "spices",
-  "pantry",
+  "herbs",
   "nuts_seeds",
   "other",
 ];
@@ -88,13 +91,33 @@ function ShoppingPage() {
   const active = fullList.filter((i) => !isHad(i.key));
   const had = fullList.filter((i) => isHad(i.key));
 
+  // Merge duplicate categories into single groups
   const grouped = useMemo(() => {
     const g: Record<string, ShoppingItem[]> = {};
     for (const item of active) {
-      const c = item.category || "other";
-      (g[c] ??= []).push(item);
+      const rawCat = item.category || "other";
+      // Map all cupboard-type categories to one key
+      const mergedCat =
+        ["pantry", "spices", "herbs", "fats", "nuts_seeds"].includes(rawCat)
+          ? "cupboard"
+          : rawCat;
+      (g[mergedCat] ??= []).push(item);
     }
-    return CATEGORY_ORDER.filter((c) => g[c]).map((c) => [c, g[c]] as const);
+    // Return in order, deduped
+    const seen = new Set<string>();
+    return CATEGORY_ORDER.filter((c) => {
+      const mergedCat = ["pantry", "spices", "herbs", "fats", "nuts_seeds"].includes(c)
+        ? "cupboard"
+        : c;
+      if (seen.has(mergedCat)) return false;
+      seen.add(mergedCat);
+      return !!g[mergedCat];
+    }).map((c) => {
+      const mergedCat = ["pantry", "spices", "herbs", "fats", "nuts_seeds"].includes(c)
+        ? "cupboard"
+        : c;
+      return [mergedCat, g[mergedCat]] as const;
+    });
   }, [active]);
 
   const extrasByCategory = useMemo(() => {
@@ -111,16 +134,24 @@ function ShoppingPage() {
     setBought({});
   }
 
+  // Warm, clear subtitle
+  const subtitle = hasContent
+    ? entries.length > 0 && extras.length > 0
+      ? "Your shopping list from your meal plan and Glow Bowl extras."
+      : entries.length > 0
+      ? "Your ingredients, grouped and ready to shop."
+      : "Your Glow Bowl extras, ready to shop."
+    : "";
+
   return (
     <AppShell>
       <section className="mx-auto max-w-4xl px-4 py-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="font-serif text-3xl">Shopping list</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              From {entries.length} meal{entries.length === 1 ? "" : "s"} on your plan
-              {extras.length > 0 ? ` + ${extras.length} extras` : ""}.
-            </p>
+            {subtitle && (
+              <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+            )}
           </div>
           {hasContent && (
             <div className="flex items-center gap-2">
@@ -147,15 +178,25 @@ function ShoppingPage() {
         {!hasContent ? (
           <div className="mt-12 rounded-2xl border bg-card p-12 text-center">
             <ShoppingBasket className="mx-auto h-8 w-8 text-muted-foreground" />
-            <p className="mt-3 text-sm text-muted-foreground">
-              Your meal plan is empty.
+            <p className="mt-3 font-serif text-lg">Your list is empty</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Add recipes to your planner or build a Glow Bowl to get started.
             </p>
-            <Link
-              to="/planner"
-              className="mt-4 inline-block text-sm font-medium text-secondary underline"
-            >
-              Plan your week
-            </Link>
+            <div className="mt-4 flex justify-center gap-3">
+              <Link
+                to="/planner"
+                className="text-sm font-medium text-secondary underline underline-offset-2"
+              >
+                Plan your week
+              </Link>
+              <span className="text-muted-foreground">·</span>
+              <Link
+                to="/build/glow-bowl"
+                className="text-sm font-medium text-secondary underline underline-offset-2"
+              >
+                Build a Glow Bowl
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="mt-8 space-y-6">
@@ -183,7 +224,7 @@ function ShoppingPage() {
             {extras.length > 0 && (
               <div className="rounded-2xl border border-secondary/30 bg-card p-5">
                 <div className="flex items-center justify-between">
-                  <h2 className="font-serif text-lg">From your Glow Bowls</h2>
+                  <h2 className="font-serif text-lg">Glow Bowl extras</h2>
                   <button
                     onClick={clearExtras}
                     className="text-xs text-muted-foreground hover:text-foreground"
@@ -198,7 +239,10 @@ function ShoppingPage() {
                     </p>
                     <ul className="mt-1 divide-y divide-border/60">
                       {items.map((e) => (
-                        <li key={e.item} className="flex items-center justify-between py-2 text-sm">
+                        <li
+                          key={e.item}
+                          className="flex items-center justify-between py-2 text-sm"
+                        >
                           <span>{e.item}</span>
                           <button
                             onClick={() => removeExtra(e.item)}
@@ -222,10 +266,19 @@ function ShoppingPage() {
                 </summary>
                 <ul className="mt-3 divide-y divide-border/40">
                   {had.map((item) => (
-                    <li key={item.key} className="flex items-center justify-between py-2 text-sm text-muted-foreground">
+                    <li
+                      key={item.key}
+                      className="flex items-center justify-between py-2 text-sm text-muted-foreground"
+                    >
                       <span>
-                        {item.qtyText && <strong className="text-foreground/70">{item.qtyText} </strong>}
-                        {item.unit && !item.staple && <span>{item.unit} </span>}
+                        {item.qtyText && (
+                          <strong className="text-foreground/70">
+                            {item.qtyText}{" "}
+                          </strong>
+                        )}
+                        {item.unit && !item.staple && (
+                          <span>{item.unit} </span>
+                        )}
                         {item.item}
                       </span>
                       <button
@@ -272,7 +325,7 @@ function ShoppingRow({
           {item.item}
         </p>
         <p className="text-[11px] text-muted-foreground">
-          for: {item.fromRecipes.join(", ")}
+          {item.fromRecipes.join(", ")}
         </p>
       </div>
       <button
