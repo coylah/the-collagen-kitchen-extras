@@ -3,9 +3,12 @@ import { useLocalStorage } from "@/hooks/use-local-storage";
 export function useFavourites() {
   const [favs, setFavs] = useLocalStorage<string[]>("ck.favs", []);
   const toggle = (slug: string) =>
-    setFavs((prev) => (prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]));
+    setFavs((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
+    );
   const isFav = (slug: string) => favs.includes(slug);
-  return { favs, toggle, isFav };
+  const clearFavs = () => setFavs([]);
+  return { favs, toggle, isFav, clearFavs };
 }
 
 export type Slot = "breakfast" | "lunch" | "dinner" | "snack";
@@ -24,24 +27,28 @@ export function planKey(day: string, slot: Slot) {
 }
 
 export function useMealPlan() {
-  const [plan, setPlan, planLoaded] = useLocalStorage<MealPlan>("ck.plan", {});
-  const [people, setPeople] = useLocalStorage<number>("ck.people", 2);
+  const [plan, setPlan] = useLocalStorage<MealPlan>("ck.plan", {});
+  // Note: people/Cooking For removed — servings controlled per recipe only
   const set = (day: string, slot: Slot, entry: PlanEntry | null) =>
     setPlan((p) => ({ ...p, [planKey(day, slot)]: entry }));
+  // Clear plan only — never touches favourites
   const clear = () => setPlan({});
-  return { plan, setPlan, set, clear, people, setPeople, planLoaded };
+  return { plan, setPlan, set, clear };
 }
 
 export function useHaveList() {
   const [have, setHave] = useLocalStorage<string[]>("ck.have", []);
   const isHad = (key: string) => have.includes(key);
   const toggle = (key: string) =>
-    setHave((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+    setHave((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    );
   const reset = () => setHave([]);
   return { have, isHad, toggle, reset };
 }
 
 export type ExtraItem = { item: string; category: string; addedAt: number };
+
 export function useShoppingExtras() {
   const [extras, setExtras] = useLocalStorage<ExtraItem[]>("ck.extras", []);
   const add = (items: { item: string; category: string }[]) =>
@@ -53,7 +60,33 @@ export function useShoppingExtras() {
       return [...prev, ...additions];
     });
   const remove = (item: string) =>
-    setExtras((prev) => prev.filter((e) => e.item.toLowerCase() !== item.toLowerCase()));
+    setExtras((prev) =>
+      prev.filter((e) => e.item.toLowerCase() !== item.toLowerCase()),
+    );
   const clear = () => setExtras([]);
   return { extras, add, remove, clear };
+}
+
+// Manual shopping list items — typed in by the user
+export type ManualItem = { text: string; checked: boolean; addedAt: number };
+
+export function useManualItems() {
+  const [items, setItems] = useLocalStorage<ManualItem[]>("ck.manual", []);
+  const addItem = (text: string) => {
+    if (!text.trim()) return;
+    setItems((prev) => [
+      ...prev,
+      { text: text.trim(), checked: false, addedAt: Date.now() },
+    ]);
+  };
+  const toggleItem = (addedAt: number) =>
+    setItems((prev) =>
+      prev.map((i) =>
+        i.addedAt === addedAt ? { ...i, checked: !i.checked } : i,
+      ),
+    );
+  const removeItem = (addedAt: number) =>
+    setItems((prev) => prev.filter((i) => i.addedAt !== addedAt));
+  const clearAll = () => setItems([]);
+  return { items, addItem, toggleItem, removeItem, clearAll };
 }
