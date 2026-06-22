@@ -5,8 +5,13 @@ export function parseQty(qty: string): number | null {
   const s = qty.trim();
   if (!s) return null;
   if (s.includes("/")) {
-    const [a, b] = s.split("/").map((x) => parseFloat(x));
-    if (!isNaN(a) && !isNaN(b) && b !== 0) return a / b;
+    const parts = s.split("/");
+    if (parts.length === 2) {
+      const a = parseFloat(parts[0]);
+      const b = parseFloat(parts[1]);
+      if (!isNaN(a) && !isNaN(b) && b !== 0) return a / b;
+    }
+    return null;
   }
   if (s.includes("-")) {
     const [a] = s.split("-").map((x) => parseFloat(x));
@@ -56,19 +61,31 @@ export type ShoppingItem = {
   key: string;
 };
 
-// Normalise item names so similar ingredients merge
-// e.g. "chicken breast" and "chicken thighs" both become "chicken"
-// e.g. "greek yoghurt" and "greek yogurt" merge
+// Prep/descriptive words to strip before matching so
+// "tomatoes, chopped" and "2 tomatoes" merge into one item
+const PREP_WORDS = [
+  "chopped", "diced", "sliced", "minced", "crushed", "grated",
+  "peeled", "shredded", "cubed", "halved", "quartered", "julienned",
+  "finely chopped", "roughly chopped", "thinly sliced",
+  "to taste", "for serving", "for garnish", "optional",
+  "fresh", "dried", "frozen", "tinned", "canned", "raw", "cooked",
+  "small", "medium", "large", "whole", "ripe",
+];
+
+// Aliases — different names for the same buyable item merge together
 const ITEM_ALIASES: Record<string, string> = {
-  "chicken breast": "chicken",
-  "chicken breasts": "chicken",
-  "chicken thighs": "chicken",
-  "chicken thigh": "chicken",
-  "chicken fillets": "chicken",
-  "chicken fillet": "chicken",
-  "roast chicken thighs": "chicken",
-  "grilled chicken": "chicken",
+  "chicken breast": "chicken breast",
+  "chicken breasts": "chicken breast",
+  "chicken thighs": "chicken thigh",
+  "chicken thigh": "chicken thigh",
+  "chicken fillets": "chicken breast",
+  "chicken fillet": "chicken breast",
+  "roast chicken thighs": "chicken thigh",
+  "grilled chicken": "chicken breast",
+  "shredded chicken": "chicken breast",
+  "shredded chicken breast": "chicken breast",
   "greek yogurt": "greek yoghurt",
+  "greek yoghurt": "greek yoghurt",
   "full fat greek yogurt": "greek yoghurt",
   "full-fat greek yoghurt": "greek yoghurt",
   "natural yoghurt": "greek yoghurt",
@@ -77,14 +94,38 @@ const ITEM_ALIASES: Record<string, string> = {
   "beef mince": "beef mince",
   "lean beef mince": "beef mince",
   "spring onions": "spring onion",
-  "cherry tomatoes": "cherry tomatoes",
+  "spring onion": "spring onion",
+  "cherry tomatoes": "tomatoes",
+  "tomatoes": "tomatoes",
+  "tomato": "tomatoes",
   "olive oil": "olive oil",
   "extra virgin olive oil": "olive oil",
+  "garlic granules": "garlic granules",
+  "garlic powder": "garlic granules",
+  "avocado": "avocado",
+  "avocados": "avocado",
+  "egg": "eggs",
+  "eggs": "eggs",
 };
 
+function stripPrepWords(s: string): string {
+  let result = s.toLowerCase();
+  for (const word of PREP_WORDS) {
+    result = result.replace(new RegExp(`\\b${word}\\b`, "g"), "");
+  }
+  // Clean up leftover commas, double spaces, "a", "an"
+  result = result
+    .replace(/,/g, " ")
+    .replace(/\ba\b/g, " ")
+    .replace(/\ban\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return result;
+}
+
 function normItem(s: string): string {
-  const lower = s.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
-  return ITEM_ALIASES[lower] ?? lower;
+  const stripped = stripPrepWords(s).replace(/[^a-z0-9 ]/g, "").trim();
+  return ITEM_ALIASES[stripped] ?? stripped;
 }
 
 const UNIT_ALIASES: Record<string, string> = {
@@ -109,9 +150,23 @@ const UNIT_ALIASES: Record<string, string> = {
   pounds: "lb",
   pound: "lb",
   pinches: "pinch",
-  pinches: "pinch",
+  pinch: "pinch",
   handfuls: "handful",
+  handful: "handful",
   cups: "cup",
+  cup: "cup",
+};
+
+// Convert cup measurements to grams for common items so they merge with gram-based entries
+// Rough kitchen conversions — good enough for shopping purposes
+const CUP_TO_GRAMS: Record<string, number> = {
+  "greek yoghurt": 245,
+  "flour": 120,
+  "oats": 90,
+  "rice": 185,
+  "spinach": 30,
+  "berries": 150,
+  "mixed berries": 150,
 };
 
 function normUnit(u: string): string {
@@ -119,14 +174,13 @@ function normUnit(u: string): string {
   return UNIT_ALIASES[lower] ?? lower;
 }
 
-// Staple categories — show on list but no qty needed
+// Staple categories — show on list but no qty needed, just a tick
 const STAPLE_CATEGORIES = new Set(["cupboard", "pantry", "herbs", "spices", "fats"]);
 
-// Very small units — show as staple (just "have in cupboard")
+// Very small units — treat as staple, no precise qty needed
 const STAPLE_UNITS = new Set([
   "tsp", "tbsp", "teaspoon", "tablespoon",
   "pinch", "pinches", "dash", "splash", "drizzle",
-  "handful", "handfuls",
 ]);
 
 const PRODUCE_CATEGORIES = new Set(["produce"]);
@@ -138,19 +192,23 @@ function isStaple(ing: { category: string; unit: string }): boolean {
 }
 
 export function shoppingItemKey(item: string, unit: string, staple: boolean) {
-  // Staples group by name only — don't split by unit
   return staple
     ? `staple|${normItem(item)}`
-    : `${normItem(item)}|${normUnit(unit)}`;
+    : `${normItem(item)}|${normItem(item) === "" ? normUnit(unit) : "unified"}`;
 }
 
-// Get a clean display name for the shopping list
-// Removes "half a", "small", "large" etc — shopping list friendly
 function shoppingDisplayName(item: string): string {
   const normed = normItem(item);
-  // Capitalise first letter
+  if (!normed) return item;
   return normed.charAt(0).toUpperCase() + normed.slice(1);
 }
+
+// Items that should always show as whole numbers (you can't buy half an avocado at most shops)
+const WHOLE_ITEM_NAMES = new Set([
+  "avocado", "banana", "onion", "lemon", "lime", "orange",
+  "apple", "cucumber", "pepper", "carrot", "egg", "eggs",
+  "tomatoes", "potato", "sweet potato", "courgette",
+]);
 
 export function buildShoppingList(
   entries: { recipe: Recipe; servings: number }[],
@@ -161,22 +219,34 @@ export function buildShoppingList(
     const factor = servings / recipe.servings;
     for (const ing of recipe.ingredients) {
       const staple = isStaple(ing);
-      const key = shoppingItemKey(ing.item, ing.unit, staple);
-      const n = parseQty(ing.qty);
+      const itemName = normItem(ing.item);
+      const key = staple ? `staple|${itemName}` : `${itemName}`;
+
+      let n = parseQty(ing.qty);
+      let unit = normUnit(ing.unit);
+
+      // Convert cup measurements to grams where we have a conversion
+      if (unit === "cup" && CUP_TO_GRAMS[itemName] && n != null) {
+        n = n * CUP_TO_GRAMS[itemName];
+        unit = "g";
+      }
+
       const scaled = n != null ? n * factor : null;
       const existing = map.get(key);
 
       if (existing) {
-        // Merge quantities
-        if (!staple && existing.qty != null && scaled != null) {
+        if (!staple && existing.qty != null && scaled != null && existing.unit === unit) {
           existing.qty += scaled;
+        } else if (!staple && existing.qty == null && scaled != null) {
+          existing.qty = scaled;
+          existing.unit = unit;
         }
         if (!existing.fromRecipes.includes(recipe.name))
           existing.fromRecipes.push(recipe.name);
       } else {
         map.set(key, {
           item: shoppingDisplayName(ing.item),
-          unit: normUnit(ing.unit),
+          unit,
           qty: scaled,
           qtyText: "",
           category: ing.category || "other",
@@ -188,9 +258,8 @@ export function buildShoppingList(
     }
   }
 
-  // Format display quantities
+  // Format final display quantities — round to realistic shopping units
   for (const item of map.values()) {
-    // Staples — no qty shown, just the item name
     if (item.staple) {
       item.qtyText = "";
       continue;
@@ -199,16 +268,25 @@ export function buildShoppingList(
       item.qtyText = "";
       continue;
     }
-    // Produce with no unit — round up to whole items
-    if (PRODUCE_CATEGORIES.has(item.category.toLowerCase()) && !item.unit) {
+
+    const lowerName = item.item.toLowerCase();
+    const isWholeItem = WHOLE_ITEM_NAMES.has(lowerName) ||
+      (PRODUCE_CATEGORIES.has(item.category.toLowerCase()) && !item.unit);
+
+    if (isWholeItem) {
+      // Round UP to a whole number — you can't buy half an avocado
       item.qty = Math.ceil(item.qty);
       item.qtyText = String(item.qty);
+      item.unit = "";
       continue;
     }
+
     item.qtyText = formatQty(item.qty);
   }
 
-  return Array.from(map.values()).sort((a, b) =>
-    a.category.localeCompare(b.category) || a.item.localeCompare(b.item),
-  );
+  return Array.from(map.values())
+    .filter((item) => item.qtyText !== "0" || item.staple)
+    .sort((a, b) =>
+      a.category.localeCompare(b.category) || a.item.localeCompare(b.item),
+    );
 }
