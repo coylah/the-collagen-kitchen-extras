@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, BookOpen, CalendarDays, ShoppingBasket, Salad } from "lucide-react";
+import { Heart, BookOpen, CalendarDays, ShoppingBasket, Salad, HelpCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { WelcomeModal } from "@/components/welcome-modal";
+import { useState } from "react";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -15,21 +16,36 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 function Header() {
+  const [showHelp, setShowHelp] = useState(false);
+
+  function openWelcome() {
+    localStorage.removeItem("ck.welcomed");
+    window.location.reload();
+  }
+
   return (
-    <header className="no-print sticky top-0 z-40 border-b border-border/60 bg-background/95 backdrop-blur">
+    <header className="no-print sticky top-0 z-40 border-b border-border bg-background/98 backdrop-blur shadow-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <Link to="/" className="group flex flex-col leading-none">
-          <span className="font-script text-base text-secondary/80 -mb-1">Love Coylah</span>
-          <span className="font-serif text-xl tracking-tight text-foreground">
+          <span className="font-script text-lg text-secondary -mb-1">Love Coylah</span>
+          <span className="font-serif text-2xl font-light tracking-tight text-foreground">
             The Collagen Kitchen
           </span>
         </Link>
-        <nav className="flex items-center gap-1 text-sm">
+        <nav className="flex items-center gap-0.5 text-sm">
           <NavLink to="/" icon={<BookOpen className="h-4 w-4" />} label="Cookbook" />
           <NavLink to="/build/glow-bowl" icon={<Salad className="h-4 w-4" />} label="Build" />
           <NavLink to="/favourites" icon={<Heart className="h-4 w-4" />} label="Saved" />
           <NavLink to="/planner" icon={<CalendarDays className="h-4 w-4" />} label="Planner" />
           <NavLink to="/shopping" icon={<ShoppingBasket className="h-4 w-4" />} label="Shopping" />
+          <button
+            onClick={openWelcome}
+            className="inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+            title="How to use this app"
+            aria-label="How to use this app"
+          >
+            <HelpCircle className="h-4 w-4" />
+          </button>
         </nav>
       </div>
     </header>
@@ -38,15 +54,15 @@ function Header() {
 
 function Footer() {
   return (
-    <footer className="no-print mt-16 border-t border-border/60 py-10 text-center">
-      <p className="font-script text-2xl text-secondary/80">Love Coylah</p>
+    <footer className="no-print mt-20 border-t border-border py-12 text-center bg-muted/30">
+      <p className="font-script text-3xl text-secondary">Love Coylah</p>
       <p className="mt-1 font-serif text-sm tracking-[0.2em] uppercase text-muted-foreground">
         Age Slow · Reclaim Your Glow
       </p>
-      <p className="mt-3 text-xs text-muted-foreground/60">
+      <p className="mt-3 text-xs text-muted-foreground/60 max-w-md mx-auto">
         The Collagen Kitchen · Skin-food recipes from the inside out.
       </p>
-      <p className="mt-2 text-xs text-muted-foreground/40">
+      <p className="mt-2 text-xs text-muted-foreground/40 max-w-md mx-auto px-4">
         Coylah is not a doctor, dermatologist or registered nutritionist. Always speak to your GP before making changes to your diet or skincare.
       </p>
     </footer>
@@ -58,14 +74,14 @@ function NavLink({ to, icon, label }: { to: string; icon: ReactNode; label: stri
     <Link
       to={to}
       activeOptions={{ exact: to === "/" }}
-      className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-foreground/70 transition-colors hover:bg-accent hover:text-accent-foreground"
+      className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-foreground/60 transition-colors hover:bg-accent hover:text-foreground"
       activeProps={{
         className:
-          "inline-flex items-center gap-1.5 rounded-md px-3 py-2 bg-accent text-accent-foreground font-medium",
+          "inline-flex items-center gap-1.5 rounded-md px-3 py-2 bg-secondary/10 text-secondary font-medium border border-secondary/20",
       }}
     >
       {icon}
-      <span className="hidden sm:inline">{label}</span>
+      <span className="hidden sm:inline text-xs uppercase tracking-wide">{label}</span>
     </Link>
   );
 }
