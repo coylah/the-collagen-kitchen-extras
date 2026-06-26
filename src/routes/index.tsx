@@ -37,7 +37,21 @@ export const Route = createFileRoute("/")(({
 }));
 
 const MEAL_ORDER = ["breakfast", "lunch", "dinner", "snack", "smoothie", "dessert"];
-const MAX_TAGS = 20;
+
+// Only show tags that are genuinely useful for filtering — not generic collagen tags
+const ALLOWED_TAGS = new Set([
+  "quick",
+  "high-protein",
+  "meal-prep",
+  "one-pan",
+  "no-cook",
+  "omega-3",
+  "vitamin-c",
+  "antioxidants",
+  "dairy-free",
+  "gluten-free",
+  "healthy-fats",
+]);
 
 function Cookbook() {
   const { data: recipes } = useSuspenseQuery(recipesQuery);
@@ -55,20 +69,20 @@ function Cookbook() {
     [recipes],
   );
 
+  // Only show tags that are in the allowed set AND have at least 3 recipes
   const tags = useMemo(() => {
     const counts = new Map<string, number>();
     for (const r of recipes) {
       for (const t of r.tags) {
-        if (["collagen-rich", "collagen-supporting", "collagen"].includes(t.toLowerCase()))
-          continue;
-        counts.set(t, (counts.get(t) ?? 0) + 1);
+        const lower = t.toLowerCase();
+        if (!ALLOWED_TAGS.has(lower)) continue;
+        counts.set(lower, (counts.get(lower) ?? 0) + 1);
       }
     }
     return Array.from(counts.entries())
+      .filter(([, count]) => count >= 3)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, MAX_TAGS)
-      .map(([t]) => t)
-      .sort();
+      .map(([t]) => t);
   }, [recipes]);
 
   const filtered = useMemo(() => {
@@ -76,7 +90,7 @@ function Cookbook() {
     return recipes
       .filter((r) => {
         if (meal !== "all" && r.meal_type !== meal) return false;
-        if (tag !== "all" && !r.tags.includes(tag)) return false;
+        if (tag !== "all" && !r.tags.map(t => t.toLowerCase()).includes(tag)) return false;
         if (maxTime > 0 && r.prep_min + r.cook_min > maxTime) return false;
         if (q) {
           const hay =
@@ -118,15 +132,21 @@ function Cookbook() {
 
   return (
     <AppShell>
-      {/* Hero — dark, confident, editorial */}
-      <section className="bg-foreground text-background">
-        <div className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
-          <p className="font-script text-2xl text-secondary mb-1">Love Coylah</p>
-          <h1 className="font-serif text-6xl sm:text-7xl font-light leading-[1.0] mb-6">
+      {/* Hero — warm tinted, editorial, not dark */}
+      <section className="bg-[#FAFAF8] border-b border-border/60">
+        <div className="mx-auto max-w-6xl px-6 py-12 sm:py-16">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-px w-6 bg-secondary" />
+            <p className="text-[9px] uppercase tracking-[0.32em] text-secondary">Your skin-food cookbook</p>
+            <div className="h-px w-6 bg-secondary" />
+          </div>
+          <p className="font-script text-2xl text-secondary -mb-1">Love Coylah</p>
+          <h1 className="font-serif text-5xl sm:text-6xl font-light leading-[1.0] text-foreground mb-4">
             The Collagen<br/>Kitchen
           </h1>
-          <p className="max-w-xl text-base text-background/70 leading-relaxed mb-8">
-            Skin-food recipes to help you age slow &amp; reclaim your glow — built around food that actually does something for your skin.
+          <div className="w-8 h-px bg-secondary mb-5" />
+          <p className="max-w-lg text-sm text-muted-foreground leading-relaxed mb-7 font-light">
+            Every recipe in here feeds your collagen, your skin barrier and your glow. Real food, real results — built from the inside out.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -134,11 +154,11 @@ function Cookbook() {
               className="inline-flex items-center gap-2 rounded-full bg-secondary px-5 py-2.5 text-sm font-medium text-secondary-foreground hover:bg-secondary/90 transition-colors"
             >
               <Salad className="h-4 w-4" />
-              Build a Glow Bowl
+              ✦ Build a Glow Bowl
             </Link>
             <button
               onClick={() => setShowGuide(v => !v)}
-              className="inline-flex items-center gap-2 rounded-full border border-background/20 px-5 py-2.5 text-sm text-background/70 hover:bg-background/10 transition-colors"
+              className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm text-muted-foreground hover:border-secondary hover:text-secondary transition-colors"
             >
               <Info className="h-4 w-4" />
               {showGuide ? "Hide guide" : "How to use this cookbook"}
@@ -146,14 +166,14 @@ function Cookbook() {
           </div>
 
           {showGuide && (
-            <div className="mt-6 max-w-2xl rounded-2xl border border-background/10 bg-background/5 p-6">
-              <p className="font-serif text-lg text-background mb-4">Getting the best from this cookbook</p>
-              <ul className="space-y-3 text-sm text-background/70">
-                <li className="flex gap-3"><span className="text-secondary mt-0.5">✦</span><span><strong className="text-background">Cookbook</strong> — every recipe is built around food that actively supports your skin. Browse, filter and explore.</span></li>
-                <li className="flex gap-3"><span className="text-secondary mt-0.5">✦</span><span><strong className="text-background">Save</strong> — tap the heart on any recipe to save it to your Saved tab.</span></li>
-                <li className="flex gap-3"><span className="text-secondary mt-0.5">✦</span><span><strong className="text-background">Planner</strong> — add recipes to plan your week. Your shopping list builds automatically.</span></li>
-                <li className="flex gap-3"><span className="text-secondary mt-0.5">✦</span><span><strong className="text-background">Shopping list</strong> — everything from your plan in one clean list, grouped and ready to shop.</span></li>
-                <li className="flex gap-3"><span className="text-secondary mt-0.5">✦</span><span><strong className="text-background">Glow Bowl</strong> — build a collagen-supporting lunch from whatever's in your fridge.</span></li>
+            <div className="mt-6 max-w-xl rounded-2xl border border-border bg-white p-6">
+              <p className="font-serif text-lg mb-4">Getting the best from this cookbook</p>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Cookbook</strong> — every recipe actively supports your skin. Browse, filter and explore.</span></li>
+                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Save</strong> — tap the heart on any recipe to save it to your Saved tab.</span></li>
+                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Planner</strong> — add recipes to plan your week. Your shopping list builds automatically.</span></li>
+                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Shopping list</strong> — everything from your plan in one clean grouped list. Add anything else you need too.</span></li>
+                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Glow Bowl</strong> — build a collagen-supporting lunch from whatever's in your fridge.</span></li>
               </ul>
             </div>
           )}
@@ -161,50 +181,52 @@ function Cookbook() {
       </section>
 
       {/* Filter bar */}
-      <section className="sticky top-[63px] z-30 border-b border-border bg-background/98 backdrop-blur shadow-sm">
-        <div className="mx-auto max-w-6xl px-4 py-3 space-y-3">
-          <div className="flex items-center gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search recipes or ingredients…"
-                className="pl-9 bg-muted/40 border-border"
-              />
-            </div>
+      <section className="sticky top-[63px] z-30 border-b border-border bg-white/98 backdrop-blur shadow-sm">
+        <div className="mx-auto max-w-6xl px-4 py-3 space-y-2.5">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search recipes or ingredients…"
+              className="pl-9"
+            />
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Filter:</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground shrink-0">
+              Meal type:
+            </span>
             <FilterChip label="All" active={meal === "all"} onClick={() => setMeal("all")} />
             {mealTypes.map((m) => (
               <FilterChip key={m} label={m} active={meal === m} onClick={() => setMeal(m)} />
             ))}
-            <span className="mx-1 h-4 w-px bg-border" />
             {tags.length > 0 && (
-              <select
-                value={tag}
-                onChange={(e) => setTag(e.target.value)}
-                className="h-8 rounded-full border border-border bg-background px-3 text-xs text-foreground"
-              >
-                <option value="all">Tag: all</option>
-                {tags.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
+              <>
+                <span className="mx-1 h-4 w-px bg-border shrink-0" />
+                <select
+                  value={tag}
+                  onChange={(e) => setTag(e.target.value)}
+                  className="h-8 rounded-full border border-border bg-background px-3 text-xs text-foreground"
+                >
+                  <option value="all">Ingredient focus: all</option>
+                  {tags.map((t) => (
+                    <option key={t} value={t}>{t.replace(/-/g, " ")}</option>
+                  ))}
+                </select>
+              </>
             )}
             <select
               value={maxTime}
               onChange={(e) => setMaxTime(Number(e.target.value))}
               className="h-8 rounded-full border border-border bg-background px-3 text-xs text-foreground"
             >
-              <option value={0}>Time: any</option>
+              <option value={0}>Cooking time: any</option>
               <option value={15}>Under 15 min</option>
               <option value={30}>Under 30 min</option>
               <option value={45}>Under 45 min</option>
               <option value={60}>Under 60 min</option>
             </select>
-            <span className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground">
+            <span className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground shrink-0">
               <Filter className="h-3 w-3" /> {filtered.length} of {recipes.length}
             </span>
           </div>
@@ -214,13 +236,15 @@ function Cookbook() {
       {/* Recipe grid */}
       <section className="mx-auto max-w-6xl px-4 py-10">
         {filtered.length === 0 ? (
-          <p className="py-16 text-center text-muted-foreground">No recipes match those filters yet.</p>
+          <p className="py-16 text-center text-muted-foreground">
+            No recipes match those filters yet.
+          </p>
         ) : (
           <div className="space-y-14">
             {Object.entries(grouped).map(([mealType, items]) => (
               <div key={mealType}>
                 <div className="mb-6 flex items-center gap-4">
-                  <h2 className="font-serif text-3xl capitalize">{mealType}</h2>
+                  <h2 className="font-serif text-3xl font-light capitalize">{mealType}</h2>
                   <span className="h-px flex-1 bg-border" />
                   <span className="text-xs uppercase tracking-wider text-muted-foreground">
                     {items.length} {items.length === 1 ? "recipe" : "recipes"}
@@ -246,9 +270,9 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
       type="button"
       onClick={onClick}
       className={
-        "rounded-full border px-3.5 py-1 text-xs capitalize transition-colors font-medium " +
+        "rounded-full border px-3.5 py-1 text-xs capitalize transition-colors " +
         (active
-          ? "border-secondary bg-secondary text-secondary-foreground"
+          ? "border-secondary bg-secondary text-secondary-foreground font-medium"
           : "border-border bg-background text-foreground/60 hover:border-secondary/40 hover:text-foreground")
       }
     >
