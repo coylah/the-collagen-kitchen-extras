@@ -31,7 +31,8 @@ function Header() {
         </Link>
         <nav className="flex items-center gap-0.5">
           <NavLink to="/" icon={<BookOpen className="h-4 w-4" />} label="Recipes" />
-          <NavLink to="/build/glow-bowl" icon={<Salad className="h-4 w-4" />} label="Build" />
+          <NavLink to="/build/glow-bowl" icon={<Salad className="h-4 w-4" />} label="Glow Bowl" />
+          <NavLink to="/build/yoghurt-bowl" icon={<span className="text-base leading-none">🥣</span>} label="Yoghurt Bowl" />
           <NavLink to="/favourites" icon={<Heart className="h-4 w-4" />} label="Saved" />
           <NavLink to="/planner" icon={<CalendarDays className="h-4 w-4" />} label="Planner" />
           <NavLink to="/shopping" icon={<ShoppingBasket className="h-4 w-4" />} label="Shopping" />
