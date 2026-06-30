@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { BookOpen, Heart, CalendarDays, ShoppingBasket, Salad, X, Smartphone } from "lucide-react";
 
 const STORAGE_KEY = "ck.welcomed";
+const FAQ_DIRECT_KEY = "ck.openFaqDirect";
 
 export function WelcomeModal() {
   const [open, setOpen] = useState(false);
@@ -10,7 +11,14 @@ export function WelcomeModal() {
 
   useEffect(() => {
     const seen = localStorage.getItem(STORAGE_KEY);
-    if (!seen) setOpen(true);
+    const wantsFaq = localStorage.getItem(FAQ_DIRECT_KEY);
+    if (wantsFaq) {
+      localStorage.removeItem(FAQ_DIRECT_KEY);
+      setShowFaq(true);
+      setOpen(true);
+    } else if (!seen) {
+      setOpen(true);
+    }
   }, []);
 
   function close() {
@@ -46,7 +54,7 @@ export function WelcomeModal() {
     {
       icon: <Salad className="h-8 w-8 text-secondary" />,
       title: "Build a Glow Bowl",
-      body: "This one's a proper treat. Tap your way through six steps — Support, Build, Activate, Protect, Fortify, Finish — and you've built yourself a collagen-supporting lunch from whatever's in your fridge.\n\nThere's also a Yoghurt Bowl Builder for breakfast. Ten ready-made combinations to start from, or go completely your own way.",
+      body: "This one's a proper treat. Tap your way through six steps — Support, Build, Activate, Protect, Fortify, Finish — and you've built yourself a collagen-supporting lunch from whatever's in your fridge.\n\nStart from a preset or build entirely from scratch — and you can always tweak a preset afterwards too. Add it straight to your shopping list, or your meal plan, in one tap.",
     },
     {
       icon: <Smartphone className="h-8 w-8 text-secondary" />,
@@ -62,7 +70,7 @@ export function WelcomeModal() {
     { q: "How do I clear my shopping list?", a: "Tap \"Clear extras & manual\" to remove bowl extras and anything you've typed in manually. To clear the planner ingredients, go to the Planner and clear your week from there." },
     { q: "Can I add my own extras like coffee or milk?", a: "Yes — scroll to the bottom of the shopping list and type anything into the \"Add anything else\" box. It becomes a tappable checkbox item on your list." },
     { q: "Can I save recipes?", a: "Yes — tap the heart on any recipe card or recipe page to save it. Find everything you've saved under the Saved tab." },
-    { q: "Can I personalise my Glow Bowl or Yoghurt Bowl?", a: "Absolutely. Pick from the presets to get started then tap any ingredient to swap it out. Your bowl summary updates as you go." },
+    { q: "Can I personalise my Glow Bowl?", a: "Absolutely. Pick from the presets to get started then tap any ingredient to swap it out. Your bowl summary updates as you go. You can also add your finished bowl straight to your meal plan or shopping list." },
     { q: "How do I use this like an app on my phone?", a: "On iPhone, tap the Share button in your browser and select \"Add to Home Screen.\" On Android, tap the three dots menu and select \"Add to Home Screen.\" It'll sit on your phone just like a regular app." },
     { q: "I need help with something else.", a: "Email us at hello@lovecoylah.com — we're always happy to help." },
   ];
@@ -85,7 +93,6 @@ export function WelcomeModal() {
 
         {!showFaq ? (
           <>
-            {/* Welcome header — first step only */}
             {isFirst && (
               <div className="border-b border-border px-8 pt-8 pb-5 text-center">
                 <p className="font-script text-2xl text-secondary">Love Coylah</p>
@@ -99,7 +106,6 @@ export function WelcomeModal() {
               </div>
             )}
 
-            {/* Progress dots */}
             <div className="flex gap-1.5 justify-center pt-5 px-6">
               {steps.map((_, i) => (
                 <div
@@ -111,7 +117,6 @@ export function WelcomeModal() {
               ))}
             </div>
 
-            {/* Step content */}
             <div className="px-8 py-6 text-center">
               <div className="flex justify-center mb-4">
                 <div className="grid h-14 w-14 place-items-center rounded-full bg-secondary/10">
@@ -126,7 +131,6 @@ export function WelcomeModal() {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex gap-3 px-8 pb-4">
               {!isFirst && (
                 <button
@@ -166,12 +170,11 @@ export function WelcomeModal() {
           </>
         ) : (
           <>
-            {/* FAQ section */}
             <div className="px-8 pt-8 pb-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="font-serif text-2xl font-light">How to use this</h2>
-                <button onClick={() => setShowFaq(false)} className="text-xs text-secondary hover:underline">
-                  ← Back
+                <h2 className="font-serif text-2xl font-light">FAQs</h2>
+                <button onClick={() => { setShowFaq(false); setStep(0); }} className="text-xs text-secondary hover:underline">
+                  See full intro →
                 </button>
               </div>
               <div className="space-y-4">
