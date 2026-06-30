@@ -27,12 +27,13 @@ function Header() {
         <Link to="/" className="flex flex-col leading-none shrink-0">
           <span className="font-script text-base text-secondary -mb-1">Love Coylah</span>
           <span className="font-serif text-lg font-light tracking-tight text-foreground">
-            The Collagen Kitchen
+            The Collagen Kitchen — Extras
           </span>
         </Link>
         <nav className="flex items-center overflow-x-auto no-scrollbar">
           <NavLink to="/" icon={<BookOpen className="h-4 w-4" />} label="Recipes" />
           <NavLink to="/build/glow-bowl" icon={<Salad className="h-4 w-4" />} label="Glow Bowl" />
+          <NavLink to="/build/yoghurt-bowl" icon={<span className="text-sm leading-none">🥣</span>} label="Yoghurt Bowl" />
           <NavLink to="/favourites" icon={<Heart className="h-4 w-4" />} label="Saved" />
           <NavLink to="/planner" icon={<CalendarDays className="h-4 w-4" />} label="Planner" />
           <NavLink to="/shopping" icon={<ShoppingBasket className="h-4 w-4" />} label="Shopping" />
@@ -58,7 +59,7 @@ function Footer() {
         Age Slow · Reclaim Your Glow
       </p>
       <p className="mt-3 text-xs text-muted-foreground/60 max-w-md mx-auto">
-        The Collagen Kitchen · Skin-food recipes from the inside out.
+        The Collagen Kitchen Extras · Yoghurt bowls, desserts and snacks to go with your cookbook.
       </p>
       <p className="mt-2 text-xs text-muted-foreground/40 max-w-md mx-auto px-4">
         Coylah is not a doctor, dermatologist or registered nutritionist. Always speak to your GP before making changes to your diet or skincare.
