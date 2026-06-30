@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
-import { Check, ShoppingBasket, X } from "lucide-react";
+import { Check, ShoppingBasket, CalendarPlus, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { useShoppingExtras } from "@/lib/user-state";
+import { useShoppingExtras, useMealPlan, DAYS, SLOTS, type Slot } from "@/lib/user-state";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/build/yoghurt-bowl")({
@@ -123,12 +123,16 @@ type Picks = Record<string, string[]>;
 function YoghurtBowlBuilder() {
   const [picks, setPicks] = useState<Picks>({});
   const [added, setAdded] = useState(false);
+  const [showPlanPicker, setShowPlanPicker] = useState(false);
+  const [plannedTo, setPlannedTo] = useState<string | null>(null);
   const { add } = useShoppingExtras();
+  const { plan, set: setPlan } = useMealPlan();
 
   useEffect(() => { setAdded(false); }, []);
 
   function togglePick(stepKey: string, optionLabel: string) {
     setAdded(false);
+    setPlannedTo(null);
     setPicks((prev) => {
       const cur = prev[stepKey] ?? [];
       if (cur.includes(optionLabel)) return { ...prev, [stepKey]: cur.filter((o) => o !== optionLabel) };
@@ -138,11 +142,12 @@ function YoghurtBowlBuilder() {
 
   function applyPreset(p: Preset) {
     setAdded(false);
+    setPlannedTo(null);
     setPicks(p.pick as Picks);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function reset() { setPicks({}); setAdded(false); }
+  function reset() { setPicks({}); setAdded(false); setPlannedTo(null); }
 
   const allPicked = useMemo(() => {
     const out: { item: string; category: string }[] = [];
@@ -152,10 +157,30 @@ function YoghurtBowlBuilder() {
     return out;
   }, [picks]);
 
+  const bowlName = useMemo(() => {
+    const base = picks.base?.[0];
+    const fruit = picks.fruit?.[0];
+    if (base && fruit) return `Yoghurt Bowl: ${base} & ${fruit}`;
+    if (base) return `Yoghurt Bowl: ${base}`;
+    return "Custom Yoghurt Bowl";
+  }, [picks]);
+
   function addToShopping() {
     if (allPicked.length === 0) return;
     add(allPicked);
     setAdded(true);
+  }
+
+  function addToPlan(day: string, slot: Slot) {
+    setPlan(day, slot, {
+      slug: "",
+      servings: 1,
+      isCustomBowl: true,
+      bowlName,
+      bowlIngredients: allPicked,
+    });
+    setShowPlanPicker(false);
+    setPlannedTo(`${day} ${slot}`);
   }
 
   const totalPicked = Object.values(picks).flat().length;
@@ -293,8 +318,51 @@ function YoghurtBowlBuilder() {
                 <ShoppingBasket className="h-4 w-4" />
                 {added ? "Added to your list!" : "Add to shopping list"}
               </Button>
-              {added && <Link to="/shopping" className="text-center text-xs text-secondary underline underline-offset-2">View shopping list →</Link>}
-              {totalPicked > 0 && <button onClick={reset} className="text-center text-xs text-muted-foreground hover:text-foreground">Start over</button>}
+              {added && <Link to="/shopping" className="text-center text-xs text-secondary underline underline-offset-2 -mt-1">View shopping list →</Link>}
+
+              <Button
+                variant="outline"
+                onClick={() => setShowPlanPicker(v => !v)}
+                disabled={totalPicked === 0}
+                className="w-full border-secondary/40 hover:border-secondary hover:text-secondary h-11"
+              >
+                <CalendarPlus className="h-4 w-4" />
+                {showPlanPicker ? "Cancel" : "Add to meal plan"}
+              </Button>
+              {plannedTo && (
+                <p className="text-center text-xs text-secondary -mt-1">Added to {plannedTo} ✓</p>
+              )}
+
+              {showPlanPicker && (
+                <div className="mt-1 rounded-xl border border-border p-4">
+                  <p className="mb-3 text-xs text-muted-foreground">Tap a slot to add this bowl:</p>
+                  <div className="overflow-x-auto">
+                    <div className="grid grid-cols-[36px_repeat(4,1fr)] gap-1.5 text-[11px] min-w-[280px]">
+                      <div />
+                      {SLOTS.map(s => <div key={s} className="text-center capitalize text-muted-foreground py-1">{s.slice(0,4)}</div>)}
+                      {DAYS.map(d => (
+                        <div key={d} className="contents">
+                          <div className="py-1.5 text-muted-foreground">{d}</div>
+                          {SLOTS.map(s => {
+                            const filled = !!plan[`${d}-${s}`];
+                            return (
+                              <button
+                                key={s}
+                                onClick={() => addToPlan(d, s)}
+                                className={`rounded-md border py-1.5 text-[11px] transition-colors ${filled ? "border-secondary bg-secondary/10 text-secondary" : "border-border text-muted-foreground hover:border-secondary hover:text-secondary"}`}
+                              >
+                                {filled ? "✓" : "+"}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {totalPicked > 0 && <button onClick={reset} className="text-center text-xs text-muted-foreground hover:text-foreground pt-1">Start over</button>}
             </div>
           </div>
         </aside>
