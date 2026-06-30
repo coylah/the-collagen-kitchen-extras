@@ -1,19 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
-import { Check, Salad, ShoppingBasket, X } from "lucide-react";
+import { Check, Salad, ShoppingBasket, CalendarPlus, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { useShoppingExtras } from "@/lib/user-state";
+import { useShoppingExtras, useMealPlan, DAYS, SLOTS, type Slot } from "@/lib/user-state";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/build/glow-bowl")({
   head: () => ({
     meta: [
       { title: "Build Your Glow Bowl — The Collagen Kitchen" },
-      {
-        name: "description",
-        content: "Six steps to a collagen-supporting lunch bowl.",
-      },
+      { name: "description", content: "Six steps to a collagen-supporting lunch bowl." },
     ],
   }),
   component: GlowBowlBuilder,
@@ -40,18 +37,9 @@ const STEPS: Step[] = [
     intro: "Pick one or two.",
     category: "grains",
     options: [
-      { label: "Brown rice" },
-      { label: "Quinoa" },
-      { label: "Couscous" },
-      { label: "Giant couscous" },
-      { label: "Lentils" },
-      { label: "Chickpeas" },
-      { label: "Butter beans" },
-      { label: "Sweet potato cubes" },
-      { label: "Mixed leaves" },
-      { label: "Spinach" },
-      { label: "Kale" },
-      { label: "Rocket" },
+      { label: "Brown rice" }, { label: "Quinoa" }, { label: "Couscous" }, { label: "Giant couscous" },
+      { label: "Lentils" }, { label: "Chickpeas" }, { label: "Butter beans" }, { label: "Sweet potato cubes" },
+      { label: "Mixed leaves" }, { label: "Spinach" }, { label: "Kale" }, { label: "Rocket" },
     ],
   },
   {
@@ -62,19 +50,9 @@ const STEPS: Step[] = [
     intro: "Pick one.",
     category: "protein",
     options: [
-      { label: "Grilled chicken (skin on)" },
-      { label: "Roast chicken thighs (skin on)" },
-      { label: "Turkey mince" },
-      { label: "Turkey meatballs" },
-      { label: "Tuna" },
-      { label: "Salmon" },
-      { label: "Mackerel" },
-      { label: "Sardines" },
-      { label: "Prawns" },
-      { label: "Boiled eggs" },
-      { label: "Beef strips" },
-      { label: "Halloumi" },
-      { label: "Cottage cheese" },
+      { label: "Grilled chicken (skin on)" }, { label: "Roast chicken thighs (skin on)" }, { label: "Turkey mince" },
+      { label: "Turkey meatballs" }, { label: "Tuna" }, { label: "Salmon" }, { label: "Mackerel" }, { label: "Sardines" },
+      { label: "Prawns" }, { label: "Boiled eggs" }, { label: "Beef strips" }, { label: "Halloumi" }, { label: "Cottage cheese" },
       { label: "Oysters", note: "The single richest food source of zinc and copper that exists. Nobody's suggesting a weekly habit — but if you ever fancy them, your skin will thank you." },
     ],
   },
@@ -86,24 +64,11 @@ const STEPS: Step[] = [
     intro: "Pick two or three — the more colour the better.",
     category: "produce",
     options: [
-      { label: "Red pepper" },
-      { label: "Yellow pepper" },
-      { label: "Cherry tomatoes" },
-      { label: "Cucumber" },
-      { label: "Red onion" },
-      { label: "Carrot ribbons" },
-      { label: "Roasted butternut squash" },
-      { label: "Roasted sweet potato" },
-      { label: "Broccoli" },
-      { label: "Tenderstem broccoli" },
-      { label: "Beetroot" },
-      { label: "Mango" },
-      { label: "Strawberries" },
-      { label: "Kiwi" },
-      { label: "Orange segments" },
-      { label: "Red/purple grapes" },
-      { label: "Pomegranate seeds" },
-      { label: "Fresh herbs" },
+      { label: "Red pepper" }, { label: "Yellow pepper" }, { label: "Cherry tomatoes" }, { label: "Cucumber" },
+      { label: "Red onion" }, { label: "Carrot ribbons" }, { label: "Roasted butternut squash" }, { label: "Roasted sweet potato" },
+      { label: "Broccoli" }, { label: "Tenderstem broccoli" }, { label: "Beetroot" }, { label: "Mango" },
+      { label: "Strawberries" }, { label: "Kiwi" }, { label: "Orange segments" }, { label: "Red/purple grapes" },
+      { label: "Pomegranate seeds" }, { label: "Fresh herbs" },
     ],
   },
   {
@@ -114,11 +79,7 @@ const STEPS: Step[] = [
     intro: "Pick one or two.",
     category: "fats",
     options: [
-      { label: "Avocado" },
-      { label: "Olives" },
-      { label: "Feta" },
-      { label: "Mozzarella pearls" },
-      { label: "Tahini drizzle" },
+      { label: "Avocado" }, { label: "Olives" }, { label: "Feta" }, { label: "Mozzarella pearls" }, { label: "Tahini drizzle" },
       { label: "Sun dried tomatoes", note: "Rich in lycopene — protects skin from UV-related collagen breakdown" },
       { label: "Kimchi", note: "Fermented and anti-inflammatory — gut health is directly linked to skin health" },
     ],
@@ -131,18 +92,9 @@ const STEPS: Step[] = [
     intro: "Pick one — this is your crunch layer too.",
     category: "cupboard",
     options: [
-      { label: "Pumpkin seeds" },
-      { label: "Sunflower seeds" },
-      { label: "Sesame seeds" },
-      { label: "Chia seeds" },
-      { label: "Flaxseed" },
-      { label: "Crushed almonds" },
-      { label: "Cashews" },
-      { label: "Walnuts" },
-      { label: "Pecans" },
-      { label: "Pine nuts" },
-      { label: "Chickpeas" },
-      { label: "Sourdough croutons" },
+      { label: "Pumpkin seeds" }, { label: "Sunflower seeds" }, { label: "Sesame seeds" }, { label: "Chia seeds" },
+      { label: "Flaxseed" }, { label: "Crushed almonds" }, { label: "Cashews" }, { label: "Walnuts" }, { label: "Pecans" },
+      { label: "Pine nuts" }, { label: "Chickpeas" }, { label: "Sourdough croutons" },
     ],
   },
   {
@@ -184,42 +136,64 @@ type Picks = Record<string, string[]>;
 function GlowBowlBuilder() {
   const [picks, setPicks] = useState<Picks>({});
   const [added, setAdded] = useState(false);
+  const [showPlanPicker, setShowPlanPicker] = useState(false);
+  const [plannedTo, setPlannedTo] = useState<string | null>(null);
   const { add } = useShoppingExtras();
+  const { plan, set: setPlan } = useMealPlan();
 
   useEffect(() => { setAdded(false); }, []);
 
   function togglePick(stepKey: string, optionLabel: string) {
     setAdded(false);
+    setPlannedTo(null);
     setPicks((prev) => {
       const cur = prev[stepKey] ?? [];
-      if (cur.includes(optionLabel))
-        return { ...prev, [stepKey]: cur.filter((o) => o !== optionLabel) };
+      if (cur.includes(optionLabel)) return { ...prev, [stepKey]: cur.filter((o) => o !== optionLabel) };
       return { ...prev, [stepKey]: [...cur, optionLabel] };
     });
   }
 
   function applyPreset(p: Preset) {
     setAdded(false);
+    setPlannedTo(null);
     setPicks(p.pick as Picks);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function reset() { setPicks({}); setAdded(false); }
+  function reset() { setPicks({}); setAdded(false); setPlannedTo(null); }
 
   const allPicked = useMemo(() => {
     const out: { item: string; category: string }[] = [];
     for (const step of STEPS) {
-      for (const label of picks[step.key] ?? []) {
-        out.push({ item: label, category: step.category });
-      }
+      for (const label of picks[step.key] ?? []) out.push({ item: label, category: step.category });
     }
     return out;
+  }, [picks]);
+
+  const bowlName = useMemo(() => {
+    const build = picks.build?.[0];
+    const activate = picks.activate?.[0];
+    if (build && activate) return `Glow Bowl: ${build} & ${activate}`;
+    if (build) return `Glow Bowl: ${build}`;
+    return "Custom Glow Bowl";
   }, [picks]);
 
   function addToShopping() {
     if (allPicked.length === 0) return;
     add(allPicked);
     setAdded(true);
+  }
+
+  function addToPlan(day: string, slot: Slot) {
+    setPlan(day, slot, {
+      slug: "",
+      servings: 1,
+      isCustomBowl: true,
+      bowlName,
+      bowlIngredients: allPicked,
+    });
+    setShowPlanPicker(false);
+    setPlannedTo(`${day} ${slot}`);
   }
 
   const totalPicked = Object.values(picks).flat().length;
@@ -232,7 +206,6 @@ function GlowBowlBuilder() {
 
   return (
     <AppShell>
-      {/* Hero */}
       <section className="border-b border-border">
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <div className="flex items-center gap-3 mb-3">
@@ -241,9 +214,7 @@ function GlowBowlBuilder() {
             <div className="h-px w-6 bg-secondary" />
           </div>
           <p className="font-script text-2xl text-secondary -mb-1">Love Coylah</p>
-          <h1 className="font-serif text-4xl sm:text-5xl font-light leading-tight text-foreground mb-3">
-            Glow Bowl Builder
-          </h1>
+          <h1 className="font-serif text-4xl sm:text-5xl font-light leading-tight text-foreground mb-3">Glow Bowl Builder</h1>
           <div className="w-8 h-px bg-secondary mb-4" />
           <p className="max-w-xl text-sm text-muted-foreground leading-relaxed font-light">
             Six steps. Support, Build, Activate, Protect, Fortify, Finish. Every step feeds a different part of your collagen story.
@@ -263,24 +234,18 @@ function GlowBowlBuilder() {
 
       <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[1fr_280px]">
         <div className="space-y-4 min-w-0">
-          {/* Presets */}
           <section className="rounded-2xl border border-border bg-card p-5">
             <h2 className="font-serif text-xl mb-1">Start from a preset</h2>
             <p className="text-sm text-muted-foreground mb-3">Tap one to pre-fill your bowl.</p>
             <div className="flex flex-wrap gap-2">
               {PRESETS.map((p) => (
-                <button
-                  key={p.name}
-                  onClick={() => applyPreset(p)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-sm transition-all hover:border-secondary hover:bg-secondary/5 hover:text-secondary"
-                >
+                <button key={p.name} onClick={() => applyPreset(p)} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-sm transition-all hover:border-secondary hover:bg-secondary/5 hover:text-secondary">
                   ✦ {p.name}
                 </button>
               ))}
             </div>
           </section>
 
-          {/* Steps */}
           {STEPS.map((step) => {
             const sel = picks[step.key] ?? [];
             const isDone = sel.length > 0;
@@ -306,20 +271,14 @@ function GlowBowlBuilder() {
                       <div key={opt.label} className="flex flex-col gap-0.5">
                         <button
                           onClick={() => togglePick(step.key, opt.label)}
-                          className={cn(
-                            "rounded-full border px-3 py-1.5 text-sm transition-all text-left",
-                            active ? "border-secondary bg-secondary text-secondary-foreground font-medium" : "border-border bg-background text-foreground/70 hover:border-secondary/50 hover:bg-secondary/5"
-                          )}
+                          className={cn("rounded-full border px-3 py-1.5 text-sm transition-all text-left",
+                            active ? "border-secondary bg-secondary text-secondary-foreground font-medium" : "border-border bg-background text-foreground/70 hover:border-secondary/50 hover:bg-secondary/5")}
                         >
                           {active && <Check className="mr-1 inline h-3 w-3" />}
                           {opt.label}
                         </button>
-                        {opt.note && active && (
-                          <p className="px-3 text-[11px] text-muted-foreground italic max-w-xs">{opt.note}</p>
-                        )}
-                        {opt.ingredients && active && (
-                          <p className="px-3 text-[11px] text-muted-foreground italic">{opt.ingredients}</p>
-                        )}
+                        {opt.note && active && <p className="px-3 text-[11px] text-muted-foreground italic max-w-xs">{opt.note}</p>}
+                        {opt.ingredients && active && <p className="px-3 text-[11px] text-muted-foreground italic">{opt.ingredients}</p>}
                       </div>
                     );
                   })}
@@ -329,7 +288,6 @@ function GlowBowlBuilder() {
           })}
         </div>
 
-        {/* Sticky summary */}
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-2xl border border-border bg-card p-5">
             <div className="flex items-center gap-2 mb-4">
@@ -381,6 +339,47 @@ function GlowBowlBuilder() {
                 {added ? "Added to your list!" : "Add bowl to shopping list"}
               </Button>
               {added && <Link to="/shopping" className="text-center text-xs text-secondary underline underline-offset-2">View shopping list →</Link>}
+
+              <Button
+                variant="outline"
+                onClick={() => setShowPlanPicker(v => !v)}
+                disabled={totalPicked === 0}
+                className="w-full border-secondary/40 hover:border-secondary hover:text-secondary"
+              >
+                <CalendarPlus className="h-4 w-4" />
+                {showPlanPicker ? "Cancel" : "Add to meal plan"}
+              </Button>
+              {plannedTo && (
+                <p className="text-center text-xs text-secondary">Added to {plannedTo} ✓</p>
+              )}
+
+              {showPlanPicker && (
+                <div className="mt-2 rounded-xl border border-border p-3">
+                  <p className="mb-2 text-[11px] text-muted-foreground">Tap a slot:</p>
+                  <div className="grid grid-cols-[auto_repeat(4,1fr)] gap-1 text-[10px] overflow-x-auto">
+                    <div />
+                    {SLOTS.map(s => <div key={s} className="text-center capitalize text-muted-foreground">{s}</div>)}
+                    {DAYS.map(d => (
+                      <div key={d} className="contents">
+                        <div className="py-1 text-muted-foreground">{d}</div>
+                        {SLOTS.map(s => {
+                          const filled = !!plan[`${d}-${s}`];
+                          return (
+                            <button
+                              key={s}
+                              onClick={() => addToPlan(d, s)}
+                              className={`rounded-md border py-1 text-[10px] transition-colors ${filled ? "border-secondary bg-secondary/10 text-secondary" : "border-border text-muted-foreground hover:border-secondary hover:text-secondary"}`}
+                            >
+                              {filled ? "✓" : "+"}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {totalPicked > 0 && <button onClick={reset} className="text-center text-xs text-muted-foreground hover:text-foreground">Start over</button>}
             </div>
           </div>
