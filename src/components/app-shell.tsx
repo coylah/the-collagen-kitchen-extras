@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { Heart, BookOpen, CalendarDays, ShoppingBasket, Salad, HelpCircle } from "lucide-react";
 import type { ReactNode } from "react";
 import { WelcomeModal } from "@/components/welcome-modal";
-import { useState } from "react";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -33,7 +32,6 @@ function Header() {
         <nav className="flex items-center overflow-x-auto no-scrollbar">
           <NavLink to="/" icon={<BookOpen className="h-4 w-4" />} label="Recipes" />
           <NavLink to="/build/glow-bowl" icon={<Salad className="h-4 w-4" />} label="Glow Bowl" />
-          <NavLink to="/build/yoghurt-bowl" icon={<span className="text-sm leading-none">🥣</span>} label="Yoghurt" />
           <NavLink to="/favourites" icon={<Heart className="h-4 w-4" />} label="Saved" />
           <NavLink to="/planner" icon={<CalendarDays className="h-4 w-4" />} label="Planner" />
           <NavLink to="/shopping" icon={<ShoppingBasket className="h-4 w-4" />} label="Shopping" />
