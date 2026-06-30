@@ -15,9 +15,13 @@ export type Slot = "breakfast" | "lunch" | "dinner" | "snack";
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 export const SLOTS: Slot[] = ["breakfast", "lunch", "dinner", "snack"];
 
+// PlanEntry is now either a recipe (slug) or a custom bowl (name + ingredient list)
 export type PlanEntry = {
   slug: string;
   servings: number;
+  isCustomBowl?: boolean;
+  bowlName?: string;
+  bowlIngredients?: { item: string; category: string }[];
 };
 
 export type MealPlan = Record<string, PlanEntry | null>;
@@ -28,10 +32,8 @@ export function planKey(day: string, slot: Slot) {
 
 export function useMealPlan() {
   const [plan, setPlan] = useLocalStorage<MealPlan>("ck.plan", {});
-  // Note: people/Cooking For removed — servings controlled per recipe only
   const set = (day: string, slot: Slot, entry: PlanEntry | null) =>
     setPlan((p) => ({ ...p, [planKey(day, slot)]: entry }));
-  // Clear plan only — never touches favourites
   const clear = () => setPlan({});
   return { plan, setPlan, set, clear };
 }
@@ -67,7 +69,6 @@ export function useShoppingExtras() {
   return { extras, add, remove, clear };
 }
 
-// Manual shopping list items — typed in by the user
 export type ManualItem = { text: string; checked: boolean; addedAt: number };
 
 export function useManualItems() {
