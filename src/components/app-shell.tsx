@@ -15,8 +15,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 function Header() {
-  function openWelcome() {
-    localStorage.removeItem("ck.welcomed");
+  function openFaq() {
+    localStorage.setItem("ck.welcomed", "1");
+    localStorage.setItem("ck.openFaqDirect", "1");
     window.location.reload();
   }
 
@@ -36,12 +37,12 @@ function Header() {
           <NavLink to="/planner" icon={<CalendarDays className="h-4 w-4" />} label="Planner" />
           <NavLink to="/shopping" icon={<ShoppingBasket className="h-4 w-4" />} label="Shopping" />
           <button
-            onClick={openWelcome}
+            onClick={openFaq}
             className="inline-flex flex-col items-center gap-0.5 rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground shrink-0"
-            title="How to use this app"
+            title="FAQs"
           >
             <HelpCircle className="h-4 w-4" />
-            <span className="text-[9px] uppercase tracking-wide">Help</span>
+            <span className="text-[9px] uppercase tracking-wide">FAQs</span>
           </button>
         </nav>
       </div>
