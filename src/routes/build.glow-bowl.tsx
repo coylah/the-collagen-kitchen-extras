@@ -120,7 +120,6 @@ const STEPS: Step[] = [
       { label: "Mozzarella pearls" },
       { label: "Tahini drizzle" },
       { label: "Sun dried tomatoes", note: "Rich in lycopene — protects skin from UV-related collagen breakdown" },
-      { label: "Pesto", note: "Olive oil, pine nuts and basil — healthy fats and antioxidants in one spoonful" },
       { label: "Kimchi", note: "Fermented and anti-inflammatory — gut health is directly linked to skin health" },
     ],
   },
@@ -170,14 +169,14 @@ const PRESETS: Preset[] = [
   { name: "Chicken & Sweet Potato Glow", pick: { support: ["Sweet potato cubes"], build: ["Grilled chicken (skin on)"], activate: ["Spinach", "Red pepper"], protect: ["Avocado"], fortify: ["Pumpkin seeds"], finish: ["Lemon Yogurt"] } },
   { name: "Tuna Crunch Bowl", pick: { support: ["Mixed leaves"], build: ["Tuna"], activate: ["Cucumber", "Cherry tomatoes", "Red onion"], protect: ["Olives"], fortify: ["Sunflower seeds"], finish: ["Apple Cider Vinegar Glow"] } },
   { name: "Salmon Skin Glow", pick: { support: ["Brown rice"], build: ["Salmon"], activate: ["Broccoli", "Cucumber"], protect: ["Avocado"], fortify: ["Sesame seeds"], finish: ["Tahini Lemon"] } },
-  { name: "Turkey Taco Bowl", pick: { support: ["Brown rice"], build: ["Turkey mince"], activate: ["Red pepper", "Cherry tomatoes"], protect: ["Avocado"], fortify: ["Pumpkin seeds"], finish: ["Lemon Yogurt"] } },
+  { name: "Turkey & Sweetcorn Bowl", pick: { support: ["Brown rice"], build: ["Turkey mince"], activate: ["Red pepper", "Cherry tomatoes"], protect: ["Avocado"], fortify: ["Pumpkin seeds"], finish: ["Lemon Yogurt"] } },
   { name: "Prawn Mango Glow", pick: { support: ["Quinoa"], build: ["Prawns"], activate: ["Mango", "Cucumber", "Red pepper"], protect: ["Avocado"], fortify: ["Sesame seeds"], finish: ["Apple Cider Vinegar Glow"] } },
   { name: "Halloumi Chickpea Bowl", pick: { support: ["Chickpeas"], build: ["Halloumi"], activate: ["Cherry tomatoes"], protect: ["Tahini drizzle"], fortify: ["Pumpkin seeds"], finish: ["Tahini Lemon"] } },
   { name: "Mackerel Beetroot Bowl", pick: { support: ["Lentils"], build: ["Mackerel"], activate: ["Beetroot", "Rocket", "Cucumber"], protect: ["Olives"], fortify: ["Walnuts"], finish: ["Balsamic Glow"] } },
   { name: "Egg & Avocado Bowl", pick: { support: ["Mixed leaves"], build: ["Boiled eggs"], activate: ["Cherry tomatoes", "Cucumber"], protect: ["Avocado"], fortify: ["Pumpkin seeds"], finish: ["Honey Mustard"] } },
   { name: "Beef & Broccoli Bowl", pick: { support: ["Brown rice"], build: ["Beef strips"], activate: ["Broccoli", "Red pepper"], protect: ["Avocado"], fortify: ["Sesame seeds"], finish: ["Satay Style"] } },
   { name: "Sardine & Lemon Bowl", pick: { support: ["Rocket"], build: ["Sardines"], activate: ["Cherry tomatoes", "Red onion", "Cucumber"], protect: ["Olives"], fortify: ["Pine nuts"], finish: ["Lemon Yogurt"] } },
-  { name: "Mediterranean Pesto Bowl", pick: { support: ["Giant couscous"], build: ["Grilled chicken (skin on)"], activate: ["Cherry tomatoes", "Red pepper"], protect: ["Pesto", "Sun dried tomatoes"], fortify: ["Pine nuts"], finish: ["Balsamic Glow"] } },
+  { name: "Mediterranean Glow Bowl", pick: { support: ["Giant couscous"], build: ["Grilled chicken (skin on)"], activate: ["Cherry tomatoes", "Red pepper"], protect: ["Sun dried tomatoes", "Feta"], fortify: ["Pine nuts"], finish: ["Lemon Yogurt"] } },
 ];
 
 type Picks = Record<string, string[]>;
@@ -225,11 +224,6 @@ function GlowBowlBuilder() {
 
   const totalPicked = Object.values(picks).flat().length;
   const stepsComplete = STEPS.filter(s => (picks[s.key]?.length ?? 0) > 0).length;
-
-  function getOptionNote(stepKey: string, label: string): string | undefined {
-    const step = STEPS.find((s) => s.key === stepKey);
-    return step?.options.find((o) => o.label === label)?.note;
-  }
 
   function getDressingIngredients(label: string): string | undefined {
     const step = STEPS.find((s) => s.key === "finish");
