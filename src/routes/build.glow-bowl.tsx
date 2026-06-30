@@ -133,7 +133,6 @@ const PRESETS: Preset[] = [
 
 type Picks = Record<string, string[]>;
 
-// Splits dressing ingredient strings into individual shopping items
 function expandIngredients(ingredientString: string): string[] {
   return ingredientString.split(",").map((s) => s.trim()).filter(Boolean);
 }
@@ -167,13 +166,11 @@ function GlowBowlBuilder() {
 
   function reset() { setPicks({}); setAdded(false); setPlannedTo(null); }
 
-  // Builds the real shopping list — expands dressings into actual ingredients
   const allPicked = useMemo(() => {
     const out: { item: string; category: string }[] = [];
     for (const step of STEPS) {
       for (const label of picks[step.key] ?? []) {
         if (step.key === "finish") {
-          // Dressing — expand into individual ingredients, not just the dressing name
           const opt = step.options.find((o) => o.label === label);
           if (opt?.ingredients) {
             for (const ing of expandIngredients(opt.ingredients)) {
@@ -237,7 +234,7 @@ function GlowBowlBuilder() {
           <h1 className="font-serif text-4xl sm:text-5xl font-light leading-tight text-foreground mb-3">Glow Bowl Builder</h1>
           <div className="w-8 h-px bg-secondary mb-4" />
           <p className="max-w-xl text-sm text-muted-foreground leading-relaxed font-light">
-            Six steps. Support, Build, Activate, Protect, Fortify, Finish. Every step feeds a different part of your collagen story.
+            Six steps. Support, Build, Activate, Protect, Fortify, Finish. Every step feeds a different part of your collagen story. Start from a preset and leave it as is, or tap any ingredient to swap it out and make it completely your own — totally up to you.
           </p>
           {stepsComplete > 0 && (
             <div className="flex items-center gap-3 mt-4">
@@ -256,7 +253,7 @@ function GlowBowlBuilder() {
         <div className="space-y-4 min-w-0">
           <section className="rounded-2xl border border-border bg-card p-5">
             <h2 className="font-serif text-xl mb-1">Start from a preset</h2>
-            <p className="text-sm text-muted-foreground mb-3">Tap one to pre-fill your bowl.</p>
+            <p className="text-sm text-muted-foreground mb-3">Tap one to pre-fill your bowl, then tweak it however you like.</p>
             <div className="flex flex-wrap gap-2">
               {PRESETS.map((p) => (
                 <button key={p.name} onClick={() => applyPreset(p)} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-sm transition-all hover:border-secondary hover:bg-secondary/5 hover:text-secondary">
@@ -353,7 +350,6 @@ function GlowBowlBuilder() {
               </ul>
             )}
 
-            {/* Action buttons — more breathing room, less squashed */}
             <div className="flex flex-col gap-2.5 pt-1">
               <Button onClick={addToShopping} disabled={totalPicked === 0} className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 h-11">
                 <ShoppingBasket className="h-4 w-4" />
