@@ -10,7 +10,10 @@ export const Route = createFileRoute("/build/yoghurt-bowl")({
   head: () => ({
     meta: [
       { title: "Build Your Yoghurt Bowl — The Collagen Kitchen" },
-      { name: "description", content: "Five steps to a collagen-supporting breakfast bowl." },
+      {
+        name: "description",
+        content: "Five steps to a collagen-supporting breakfast bowl.",
+      },
     ],
   }),
   component: YoghurtBowlBuilder,
@@ -49,11 +52,26 @@ const STEPS: Step[] = [
     intro: "Pick two or three. The more colour the better.",
     category: "produce",
     options: [
-      { label: "Blueberries" }, { label: "Raspberries" }, { label: "Strawberries" }, { label: "Blackberries" },
-      { label: "Mixed berries" }, { label: "Mango chunks" }, { label: "Kiwi" }, { label: "Banana" },
-      { label: "Peach" }, { label: "Cherries" }, { label: "Pomegranate seeds" }, { label: "Passion fruit" },
-      { label: "Papaya" }, { label: "Pineapple chunks" }, { label: "Apple slices" }, { label: "Pear slices" },
-      { label: "Watermelon" }, { label: "Goji berries" }, { label: "Dried apricots" }, { label: "Dried cranberries" },
+      { label: "Blueberries" },
+      { label: "Raspberries" },
+      { label: "Strawberries" },
+      { label: "Blackberries" },
+      { label: "Mixed berries" },
+      { label: "Mango chunks" },
+      { label: "Kiwi" },
+      { label: "Banana" },
+      { label: "Peach" },
+      { label: "Cherries" },
+      { label: "Pomegranate seeds" },
+      { label: "Passion fruit" },
+      { label: "Papaya" },
+      { label: "Pineapple chunks" },
+      { label: "Apple slices" },
+      { label: "Pear slices" },
+      { label: "Watermelon" },
+      { label: "Goji berries" },
+      { label: "Dried apricots" },
+      { label: "Dried cranberries" },
       { label: "Fig slices" },
     ],
   },
@@ -65,10 +83,22 @@ const STEPS: Step[] = [
     intro: "Pick two or three.",
     category: "cupboard",
     options: [
-      { label: "Homemade granola" }, { label: "Oats" }, { label: "Crushed almonds" }, { label: "Walnuts" },
-      { label: "Pecans" }, { label: "Cashews" }, { label: "Hazelnuts" }, { label: "Macadamia nuts" },
-      { label: "Pumpkin seeds" }, { label: "Sunflower seeds" }, { label: "Chia seeds" }, { label: "Flaxseed" },
-      { label: "Hemp seeds" }, { label: "Sesame seeds" }, { label: "Coconut flakes" }, { label: "Cacao nibs" },
+      { label: "Homemade granola" },
+      { label: "Oats" },
+      { label: "Crushed almonds" },
+      { label: "Walnuts" },
+      { label: "Pecans" },
+      { label: "Cashews" },
+      { label: "Hazelnuts" },
+      { label: "Macadamia nuts" },
+      { label: "Pumpkin seeds" },
+      { label: "Sunflower seeds" },
+      { label: "Chia seeds" },
+      { label: "Flaxseed" },
+      { label: "Hemp seeds" },
+      { label: "Sesame seeds" },
+      { label: "Coconut flakes" },
+      { label: "Cacao nibs" },
       { label: "Dark chocolate chips (70%+)" },
     ],
   },
@@ -80,8 +110,13 @@ const STEPS: Step[] = [
     intro: "Pick one.",
     category: "cupboard",
     options: [
-      { label: "Honey" }, { label: "Peanut butter" }, { label: "Almond butter" }, { label: "Cashew butter" },
-      { label: "Tahini" }, { label: "Maple syrup" }, { label: "Melted dark chocolate" },
+      { label: "Honey" },
+      { label: "Peanut butter" },
+      { label: "Almond butter" },
+      { label: "Cashew butter" },
+      { label: "Tahini" },
+      { label: "Maple syrup" },
+      { label: "Melted dark chocolate" },
     ],
   },
   {
@@ -135,7 +170,8 @@ function YoghurtBowlBuilder() {
     setPlannedTo(null);
     setPicks((prev) => {
       const cur = prev[stepKey] ?? [];
-      if (cur.includes(optionLabel)) return { ...prev, [stepKey]: cur.filter((o) => o !== optionLabel) };
+      if (cur.includes(optionLabel))
+        return { ...prev, [stepKey]: cur.filter((o) => o !== optionLabel) };
       return { ...prev, [stepKey]: [...cur, optionLabel] };
     });
   }
@@ -152,7 +188,9 @@ function YoghurtBowlBuilder() {
   const allPicked = useMemo(() => {
     const out: { item: string; category: string }[] = [];
     for (const step of STEPS) {
-      for (const label of picks[step.key] ?? []) out.push({ item: label, category: step.category });
+      for (const label of picks[step.key] ?? []) {
+        out.push({ item: label, category: step.category });
+      }
     }
     return out;
   }, [picks]);
@@ -188,6 +226,7 @@ function YoghurtBowlBuilder() {
 
   return (
     <AppShell>
+      {/* Hero — pure white */}
       <section className="border-b border-border">
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <div className="flex items-center gap-3 mb-3">
@@ -201,7 +240,7 @@ function YoghurtBowlBuilder() {
           </h1>
           <div className="w-8 h-px bg-secondary mb-4" />
           <p className="max-w-xl text-sm text-muted-foreground leading-relaxed font-light">
-            Five steps to a collagen-supporting breakfast bowl. Base, Activate, Fortify, Protect, Boost — each layer doing something specific for your skin. Start from a preset or build entirely your own.
+            Five steps to a collagen-supporting breakfast bowl. Base, Activate, Fortify, Protect, Boost — each layer doing something specific for your skin.
           </p>
           {stepsComplete > 0 && (
             <div className="flex items-center gap-3 mt-4">
@@ -218,18 +257,25 @@ function YoghurtBowlBuilder() {
 
       <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[1fr_320px]">
         <div className="space-y-4 min-w-0">
+
+          {/* Presets */}
           <section className="rounded-2xl border border-border bg-card p-5">
             <h2 className="font-serif text-xl mb-1">Start from a preset</h2>
             <p className="text-sm text-muted-foreground mb-3">Tap one to pre-fill your bowl, then tweak to taste.</p>
             <div className="flex flex-wrap gap-2">
               {PRESETS.map((p) => (
-                <button key={p.name} onClick={() => applyPreset(p)} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-sm transition-all hover:border-secondary hover:bg-secondary/5 hover:text-secondary">
+                <button
+                  key={p.name}
+                  onClick={() => applyPreset(p)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-sm transition-all hover:border-secondary hover:bg-secondary/5 hover:text-secondary"
+                >
                   ✦ {p.name}
                 </button>
               ))}
             </div>
           </section>
 
+          {/* Steps */}
           {STEPS.map((step) => {
             const sel = picks[step.key] ?? [];
             const isDone = sel.length > 0;
@@ -275,6 +321,7 @@ function YoghurtBowlBuilder() {
           })}
         </div>
 
+        {/* Sticky summary */}
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-2xl border border-border bg-card p-5">
             <div className="flex items-center gap-2 mb-4">
@@ -316,7 +363,7 @@ function YoghurtBowlBuilder() {
             <div className="flex flex-col gap-2.5 pt-1">
               <Button onClick={addToShopping} disabled={totalPicked === 0} className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 h-11">
                 <ShoppingBasket className="h-4 w-4" />
-                {added ? "Added to your list!" : "Add to shopping list"}
+                {added ? "Added to your list!" : "Add bowl to shopping list"}
               </Button>
               {added && <Link to="/shopping" className="text-center text-xs text-secondary underline underline-offset-2 -mt-1">View shopping list →</Link>}
 
