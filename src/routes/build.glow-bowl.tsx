@@ -19,7 +19,7 @@ export const Route = createFileRoute("/build/glow-bowl")({
   component: GlowBowlBuilder,
 });
 
-type Option = { label: string; ingredients?: string };
+type Option = { label: string; ingredients?: string; note?: string };
 
 type Step = {
   key: string;
@@ -75,6 +75,7 @@ const STEPS: Step[] = [
       { label: "Beef strips" },
       { label: "Halloumi" },
       { label: "Cottage cheese" },
+      { label: "Oysters", note: "The single richest food source of zinc and copper that exists. Nobody's suggesting a weekly habit — but if you ever fancy them, your skin will thank you." },
     ],
   },
   {
@@ -108,17 +109,19 @@ const STEPS: Step[] = [
   {
     key: "protect",
     pillar: "4 · Protect",
-    title: "Your healthy fats",
-    subtitle: "Omega-3s for your skin barrier, antioxidants to stop collagen breaking down",
-    intro: "Pick one.",
+    title: "Your healthy fats & antioxidants",
+    subtitle: "Protects the collagen you've already built, helps you absorb fat-soluble vitamins",
+    intro: "Pick one or two.",
     category: "fats",
     options: [
       { label: "Avocado" },
-      { label: "Olive oil" },
       { label: "Olives" },
       { label: "Feta" },
       { label: "Mozzarella pearls" },
       { label: "Tahini drizzle" },
+      { label: "Sun dried tomatoes", note: "Rich in lycopene — protects skin from UV-related collagen breakdown" },
+      { label: "Pesto", note: "Olive oil, pine nuts and basil — healthy fats and antioxidants in one spoonful" },
+      { label: "Kimchi", note: "Fermented and anti-inflammatory — gut health is directly linked to skin health" },
     ],
   },
   {
@@ -152,11 +155,11 @@ const STEPS: Step[] = [
     category: "cupboard",
     options: [
       { label: "Lemon Yogurt", ingredients: "Greek yogurt, lemon juice, garlic, salt, pepper, parsley" },
-      { label: "Honey Mustard", ingredients: "Olive oil, apple cider vinegar, Dijon mustard, honey, salt, pepper" },
+      { label: "Honey Mustard", ingredients: "Extra virgin olive oil, apple cider vinegar, Dijon mustard, honey, salt, pepper" },
       { label: "Tahini Lemon", ingredients: "Tahini, lemon juice, garlic, water, salt, pepper" },
       { label: "Satay Style", ingredients: "Peanut butter, lime juice, soy sauce or tamari, ginger, water" },
-      { label: "Balsamic Glow", ingredients: "Olive oil, balsamic vinegar, Dijon mustard, salt, pepper" },
-      { label: "Apple Cider Vinegar Glow", ingredients: "Olive oil, apple cider vinegar, lemon juice, garlic, salt, pepper" },
+      { label: "Balsamic Glow", ingredients: "Extra virgin olive oil, balsamic vinegar, Dijon mustard, salt, pepper" },
+      { label: "Apple Cider Vinegar Glow", ingredients: "Extra virgin olive oil, apple cider vinegar, lemon juice, garlic, salt, pepper" },
     ],
   },
 ];
@@ -165,15 +168,16 @@ type Preset = { name: string; pick: Partial<Record<string, string[]>> };
 
 const PRESETS: Preset[] = [
   { name: "Chicken & Sweet Potato Glow", pick: { support: ["Sweet potato cubes"], build: ["Grilled chicken (skin on)"], activate: ["Spinach", "Red pepper"], protect: ["Avocado"], fortify: ["Pumpkin seeds"], finish: ["Lemon Yogurt"] } },
-  { name: "Tuna Crunch Bowl", pick: { support: ["Mixed leaves"], build: ["Tuna"], activate: ["Cucumber", "Cherry tomatoes", "Red onion"], protect: ["Olive oil"], fortify: ["Sunflower seeds"], finish: ["Apple Cider Vinegar Glow"] } },
+  { name: "Tuna Crunch Bowl", pick: { support: ["Mixed leaves"], build: ["Tuna"], activate: ["Cucumber", "Cherry tomatoes", "Red onion"], protect: ["Olives"], fortify: ["Sunflower seeds"], finish: ["Apple Cider Vinegar Glow"] } },
   { name: "Salmon Skin Glow", pick: { support: ["Brown rice"], build: ["Salmon"], activate: ["Broccoli", "Cucumber"], protect: ["Avocado"], fortify: ["Sesame seeds"], finish: ["Tahini Lemon"] } },
   { name: "Turkey Taco Bowl", pick: { support: ["Brown rice"], build: ["Turkey mince"], activate: ["Red pepper", "Cherry tomatoes"], protect: ["Avocado"], fortify: ["Pumpkin seeds"], finish: ["Lemon Yogurt"] } },
   { name: "Prawn Mango Glow", pick: { support: ["Quinoa"], build: ["Prawns"], activate: ["Mango", "Cucumber", "Red pepper"], protect: ["Avocado"], fortify: ["Sesame seeds"], finish: ["Apple Cider Vinegar Glow"] } },
   { name: "Halloumi Chickpea Bowl", pick: { support: ["Chickpeas"], build: ["Halloumi"], activate: ["Cherry tomatoes"], protect: ["Tahini drizzle"], fortify: ["Pumpkin seeds"], finish: ["Tahini Lemon"] } },
-  { name: "Mackerel Beetroot Bowl", pick: { support: ["Lentils"], build: ["Mackerel"], activate: ["Beetroot", "Rocket", "Cucumber"], protect: ["Olive oil"], fortify: ["Walnuts"], finish: ["Balsamic Glow"] } },
+  { name: "Mackerel Beetroot Bowl", pick: { support: ["Lentils"], build: ["Mackerel"], activate: ["Beetroot", "Rocket", "Cucumber"], protect: ["Olives"], fortify: ["Walnuts"], finish: ["Balsamic Glow"] } },
   { name: "Egg & Avocado Bowl", pick: { support: ["Mixed leaves"], build: ["Boiled eggs"], activate: ["Cherry tomatoes", "Cucumber"], protect: ["Avocado"], fortify: ["Pumpkin seeds"], finish: ["Honey Mustard"] } },
-  { name: "Beef & Broccoli Bowl", pick: { support: ["Brown rice"], build: ["Beef strips"], activate: ["Broccoli", "Red pepper"], protect: ["Olive oil"], fortify: ["Sesame seeds"], finish: ["Satay Style"] } },
-  { name: "Sardine & Lemon Bowl", pick: { support: ["Rocket"], build: ["Sardines"], activate: ["Cherry tomatoes", "Red onion", "Cucumber"], protect: ["Olive oil"], fortify: ["Pine nuts"], finish: ["Lemon Yogurt"] } },
+  { name: "Beef & Broccoli Bowl", pick: { support: ["Brown rice"], build: ["Beef strips"], activate: ["Broccoli", "Red pepper"], protect: ["Avocado"], fortify: ["Sesame seeds"], finish: ["Satay Style"] } },
+  { name: "Sardine & Lemon Bowl", pick: { support: ["Rocket"], build: ["Sardines"], activate: ["Cherry tomatoes", "Red onion", "Cucumber"], protect: ["Olives"], fortify: ["Pine nuts"], finish: ["Lemon Yogurt"] } },
+  { name: "Mediterranean Pesto Bowl", pick: { support: ["Giant couscous"], build: ["Grilled chicken (skin on)"], activate: ["Cherry tomatoes", "Red pepper"], protect: ["Pesto", "Sun dried tomatoes"], fortify: ["Pine nuts"], finish: ["Balsamic Glow"] } },
 ];
 
 type Picks = Record<string, string[]>;
@@ -222,6 +226,11 @@ function GlowBowlBuilder() {
   const totalPicked = Object.values(picks).flat().length;
   const stepsComplete = STEPS.filter(s => (picks[s.key]?.length ?? 0) > 0).length;
 
+  function getOptionNote(stepKey: string, label: string): string | undefined {
+    const step = STEPS.find((s) => s.key === stepKey);
+    return step?.options.find((o) => o.label === label)?.note;
+  }
+
   function getDressingIngredients(label: string): string | undefined {
     const step = STEPS.find((s) => s.key === "finish");
     return step?.options.find((o) => o.label === label)?.ingredients;
@@ -229,7 +238,7 @@ function GlowBowlBuilder() {
 
   return (
     <AppShell>
-      {/* Hero — pure white */}
+      {/* Hero */}
       <section className="border-b border-border">
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <div className="flex items-center gap-3 mb-3">
@@ -304,13 +313,16 @@ function GlowBowlBuilder() {
                         <button
                           onClick={() => togglePick(step.key, opt.label)}
                           className={cn(
-                            "rounded-full border px-3 py-1.5 text-sm transition-all",
+                            "rounded-full border px-3 py-1.5 text-sm transition-all text-left",
                             active ? "border-secondary bg-secondary text-secondary-foreground font-medium" : "border-border bg-background text-foreground/70 hover:border-secondary/50 hover:bg-secondary/5"
                           )}
                         >
                           {active && <Check className="mr-1 inline h-3 w-3" />}
                           {opt.label}
                         </button>
+                        {opt.note && active && (
+                          <p className="px-3 text-[11px] text-muted-foreground italic max-w-xs">{opt.note}</p>
+                        )}
                         {opt.ingredients && active && (
                           <p className="px-3 text-[11px] text-muted-foreground italic">{opt.ingredients}</p>
                         )}
