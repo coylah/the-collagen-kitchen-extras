@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, BookOpen, CalendarDays, ShoppingBasket, Salad, IceCreamBowl, HelpCircle } from "lucide-react";
+import { Heart, BookOpen, CalendarDays, ShoppingBasket, Salad, HelpCircle, Soup } from "lucide-react";
 import type { ReactNode } from "react";
 import { WelcomeModal } from "@/components/welcome-modal";
 
@@ -33,14 +33,13 @@ function Header() {
         <nav className="flex items-center overflow-x-auto no-scrollbar">
           <NavLink to="/" icon={<BookOpen className="h-4 w-4" />} label="Recipes" />
           <NavLink to="/build/glow-bowl" icon={<Salad className="h-4 w-4" />} label="Glow Bowl" />
-          <NavLink to="/build/yoghurt-bowl" icon={<IceCreamBowl className="h-4 w-4" />} label="Yoghurt Bowl" />
+          <NavLink to="/bone-broth" icon={<Soup className="h-4 w-4" />} label="Bone Broth" />
           <NavLink to="/favourites" icon={<Heart className="h-4 w-4" />} label="Saved" />
           <NavLink to="/planner" icon={<CalendarDays className="h-4 w-4" />} label="Planner" />
           <NavLink to="/shopping" icon={<ShoppingBasket className="h-4 w-4" />} label="Shopping" />
           <button
             onClick={openFaq}
             className="inline-flex flex-col items-center gap-0.5 rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground shrink-0"
-            title="FAQs"
           >
             <HelpCircle className="h-4 w-4" />
             <span className="text-[9px] uppercase tracking-wide">FAQs</span>
@@ -84,5 +83,3 @@ function NavLink({ to, icon, label }: { to: string; icon: ReactNode; label: stri
     </Link>
   );
 }
-
-
