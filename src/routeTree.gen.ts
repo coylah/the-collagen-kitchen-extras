@@ -13,10 +13,12 @@ import { Route as ShoppingRouteImport } from './routes/shopping'
 import { Route as PlannerRouteImport } from './routes/planner'
 import { Route as FavouritesRouteImport } from './routes/favourites'
 import { Route as BoneBrothRouteImport } from './routes/bone-broth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RecipesSlugRouteImport } from './routes/recipes.$slug'
 import { Route as BuildYoghurtBowlRouteImport } from './routes/build.yoghurt-bowl'
 import { Route as BuildGlowBowlRouteImport } from './routes/build.glow-bowl'
+import { Route as AuthenticatedAdminImportRouteImport } from './routes/_authenticated/admin.import'
 
 const ShoppingRoute = ShoppingRouteImport.update({
   id: '/shopping',
@@ -36,6 +38,10 @@ const FavouritesRoute = FavouritesRouteImport.update({
 const BoneBrothRoute = BoneBrothRouteImport.update({
   id: '/bone-broth',
   path: '/bone-broth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -58,6 +64,12 @@ const BuildGlowBowlRoute = BuildGlowBowlRouteImport.update({
   path: '/build/glow-bowl',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminImportRoute =
+  AuthenticatedAdminImportRouteImport.update({
+    id: '/admin/import',
+    path: '/admin/import',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/build/glow-bowl': typeof BuildGlowBowlRoute
   '/build/yoghurt-bowl': typeof BuildYoghurtBowlRoute
   '/recipes/$slug': typeof RecipesSlugRoute
+  '/admin/import': typeof AuthenticatedAdminImportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,10 +91,12 @@ export interface FileRoutesByTo {
   '/build/glow-bowl': typeof BuildGlowBowlRoute
   '/build/yoghurt-bowl': typeof BuildYoghurtBowlRoute
   '/recipes/$slug': typeof RecipesSlugRoute
+  '/admin/import': typeof AuthenticatedAdminImportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/bone-broth': typeof BoneBrothRoute
   '/favourites': typeof FavouritesRoute
   '/planner': typeof PlannerRoute
@@ -89,6 +104,7 @@ export interface FileRoutesById {
   '/build/glow-bowl': typeof BuildGlowBowlRoute
   '/build/yoghurt-bowl': typeof BuildYoghurtBowlRoute
   '/recipes/$slug': typeof RecipesSlugRoute
+  '/_authenticated/admin/import': typeof AuthenticatedAdminImportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +117,7 @@ export interface FileRouteTypes {
     | '/build/glow-bowl'
     | '/build/yoghurt-bowl'
     | '/recipes/$slug'
+    | '/admin/import'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,9 +128,11 @@ export interface FileRouteTypes {
     | '/build/glow-bowl'
     | '/build/yoghurt-bowl'
     | '/recipes/$slug'
+    | '/admin/import'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/bone-broth'
     | '/favourites'
     | '/planner'
@@ -121,10 +140,12 @@ export interface FileRouteTypes {
     | '/build/glow-bowl'
     | '/build/yoghurt-bowl'
     | '/recipes/$slug'
+    | '/_authenticated/admin/import'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   BoneBrothRoute: typeof BoneBrothRoute
   FavouritesRoute: typeof FavouritesRoute
   PlannerRoute: typeof PlannerRoute
@@ -164,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BoneBrothRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -192,11 +220,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BuildGlowBowlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/import': {
+      id: '/_authenticated/admin/import'
+      path: '/admin/import'
+      fullPath: '/admin/import'
+      preLoaderRoute: typeof AuthenticatedAdminImportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminImportRoute: typeof AuthenticatedAdminImportRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminImportRoute: AuthenticatedAdminImportRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   BoneBrothRoute: BoneBrothRoute,
   FavouritesRoute: FavouritesRoute,
   PlannerRoute: PlannerRoute,
