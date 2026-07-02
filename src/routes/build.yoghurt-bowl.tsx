@@ -12,7 +12,7 @@ export const Route = createFileRoute("/build/yoghurt-bowl")({
       { title: "Build Your Yoghurt Bowl — The Collagen Kitchen" },
       {
         name: "description",
-        content: "Five steps to a collagen-supporting breakfast bowl.",
+        content: "Five steps to a collagen-supporting yoghurt bowl — perfect for breakfast or lunch.",
       },
     ],
   }),
@@ -226,12 +226,11 @@ function YoghurtBowlBuilder() {
 
   return (
     <AppShell>
-      {/* Hero — pure white */}
       <section className="border-b border-border">
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
           <div className="flex items-center gap-3 mb-3">
             <div className="h-px w-6 bg-secondary" />
-            <p className="text-[9px] uppercase tracking-[0.32em] text-secondary">Build your breakfast</p>
+            <p className="text-[9px] uppercase tracking-[0.32em] text-secondary">Build your bowl</p>
             <div className="h-px w-6 bg-secondary" />
           </div>
           <p className="font-script text-2xl text-secondary -mb-1">Love Coylah</p>
@@ -240,7 +239,7 @@ function YoghurtBowlBuilder() {
           </h1>
           <div className="w-8 h-px bg-secondary mb-4" />
           <p className="max-w-xl text-sm text-muted-foreground leading-relaxed font-light">
-            Five steps to a collagen-supporting breakfast bowl. Base, Activate, Fortify, Protect, Boost — each layer doing something specific for your skin.
+            Five steps to a collagen-supporting bowl — brilliant for breakfast or light enough for lunch. Base, Activate, Fortify, Protect, Boost — each layer doing something specific for your skin.
           </p>
           {stepsComplete > 0 && (
             <div className="flex items-center gap-3 mt-4">
@@ -257,8 +256,6 @@ function YoghurtBowlBuilder() {
 
       <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[1fr_320px]">
         <div className="space-y-4 min-w-0">
-
-          {/* Presets */}
           <section className="rounded-2xl border border-border bg-card p-5">
             <h2 className="font-serif text-xl mb-1">Start from a preset</h2>
             <p className="text-sm text-muted-foreground mb-3">Tap one to pre-fill your bowl, then tweak to taste.</p>
@@ -275,7 +272,6 @@ function YoghurtBowlBuilder() {
             </div>
           </section>
 
-          {/* Steps */}
           {STEPS.map((step) => {
             const sel = picks[step.key] ?? [];
             const isDone = sel.length > 0;
@@ -321,7 +317,6 @@ function YoghurtBowlBuilder() {
           })}
         </div>
 
-        {/* Sticky summary */}
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-2xl border border-border bg-card p-5">
             <div className="flex items-center gap-2 mb-4">
