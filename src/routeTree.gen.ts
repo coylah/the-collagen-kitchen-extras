@@ -17,7 +17,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as RecipesSlugRouteImport } from './routes/recipes.$slug'
 import { Route as BuildYoghurtBowlRouteImport } from './routes/build.yoghurt-bowl'
 import { Route as BuildGlowBowlRouteImport } from './routes/build.glow-bowl'
-import { Route as AdminImportRouteImport } from './routes/admin.import'
 
 const ShoppingRoute = ShoppingRouteImport.update({
   id: '/shopping',
@@ -59,11 +58,6 @@ const BuildGlowBowlRoute = BuildGlowBowlRouteImport.update({
   path: '/build/glow-bowl',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminImportRoute = AdminImportRouteImport.update({
-  id: '/admin/import',
-  path: '/admin/import',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -71,7 +65,6 @@ export interface FileRoutesByFullPath {
   '/favourites': typeof FavouritesRoute
   '/planner': typeof PlannerRoute
   '/shopping': typeof ShoppingRoute
-  '/admin/import': typeof AdminImportRoute
   '/build/glow-bowl': typeof BuildGlowBowlRoute
   '/build/yoghurt-bowl': typeof BuildYoghurtBowlRoute
   '/recipes/$slug': typeof RecipesSlugRoute
@@ -82,7 +75,6 @@ export interface FileRoutesByTo {
   '/favourites': typeof FavouritesRoute
   '/planner': typeof PlannerRoute
   '/shopping': typeof ShoppingRoute
-  '/admin/import': typeof AdminImportRoute
   '/build/glow-bowl': typeof BuildGlowBowlRoute
   '/build/yoghurt-bowl': typeof BuildYoghurtBowlRoute
   '/recipes/$slug': typeof RecipesSlugRoute
@@ -94,7 +86,6 @@ export interface FileRoutesById {
   '/favourites': typeof FavouritesRoute
   '/planner': typeof PlannerRoute
   '/shopping': typeof ShoppingRoute
-  '/admin/import': typeof AdminImportRoute
   '/build/glow-bowl': typeof BuildGlowBowlRoute
   '/build/yoghurt-bowl': typeof BuildYoghurtBowlRoute
   '/recipes/$slug': typeof RecipesSlugRoute
@@ -107,7 +98,6 @@ export interface FileRouteTypes {
     | '/favourites'
     | '/planner'
     | '/shopping'
-    | '/admin/import'
     | '/build/glow-bowl'
     | '/build/yoghurt-bowl'
     | '/recipes/$slug'
@@ -118,7 +108,6 @@ export interface FileRouteTypes {
     | '/favourites'
     | '/planner'
     | '/shopping'
-    | '/admin/import'
     | '/build/glow-bowl'
     | '/build/yoghurt-bowl'
     | '/recipes/$slug'
@@ -129,7 +118,6 @@ export interface FileRouteTypes {
     | '/favourites'
     | '/planner'
     | '/shopping'
-    | '/admin/import'
     | '/build/glow-bowl'
     | '/build/yoghurt-bowl'
     | '/recipes/$slug'
@@ -141,7 +129,6 @@ export interface RootRouteChildren {
   FavouritesRoute: typeof FavouritesRoute
   PlannerRoute: typeof PlannerRoute
   ShoppingRoute: typeof ShoppingRoute
-  AdminImportRoute: typeof AdminImportRoute
   BuildGlowBowlRoute: typeof BuildGlowBowlRoute
   BuildYoghurtBowlRoute: typeof BuildYoghurtBowlRoute
   RecipesSlugRoute: typeof RecipesSlugRoute
@@ -205,13 +192,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BuildGlowBowlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/import': {
-      id: '/admin/import'
-      path: '/admin/import'
-      fullPath: '/admin/import'
-      preLoaderRoute: typeof AdminImportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -221,7 +201,6 @@ const rootRouteChildren: RootRouteChildren = {
   FavouritesRoute: FavouritesRoute,
   PlannerRoute: PlannerRoute,
   ShoppingRoute: ShoppingRoute,
-  AdminImportRoute: AdminImportRoute,
   BuildGlowBowlRoute: BuildGlowBowlRoute,
   BuildYoghurtBowlRoute: BuildYoghurtBowlRoute,
   RecipesSlugRoute: RecipesSlugRoute,
