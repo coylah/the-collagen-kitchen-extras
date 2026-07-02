@@ -159,7 +159,6 @@ function YoghurtBowlBuilder() {
   const [picks, setPicks] = useState<Picks>({});
   const [added, setAdded] = useState(false);
   const [showPlanPicker, setShowPlanPicker] = useState(false);
-  add(allPicked);
   const [plannedTo, setPlannedTo] = useState<string | null>(null);
   const { add } = useShoppingExtras();
   const { plan, set: setPlan } = useMealPlan();
