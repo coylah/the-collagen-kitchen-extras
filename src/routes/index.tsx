@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Search, Filter, Salad, BookOpen, Info } from "lucide-react";
+import { Search, Filter, Salad, IceCreamBowl, BookOpen, Info } from "lucide-react";
 import { listRecipes } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
 import { RecipeCard } from "@/components/recipe-card";
@@ -12,7 +12,7 @@ const recipesQuery = queryOptions({
   queryFn: () => listRecipes(),
 });
 
-export const Route = createFileRoute("/")(({
+export const Route = createFileRoute("/")((({
   head: () => ({
     meta: [
       { title: "The Collagen Kitchen — Love Coylah" },
@@ -34,9 +34,17 @@ export const Route = createFileRoute("/")(({
       <p className="mx-auto max-w-6xl p-8">No recipes yet.</p>
     </AppShell>
   ),
-}));
+})));
 
-const MEAL_ORDER = ["breakfast", "lunch", "dinner", "snack", "smoothie", "dessert"];
+const MEAL_ORDER = ["breakfast", "yoghurt bowl", "lunch", "dinner", "snack", "smoothie", "dessert"];
+
+const MEAL_LABELS: Record<string, string> = {
+  "yoghurt bowl": "Yoghurt Bowl",
+};
+
+function mealLabel(type: string): string {
+  return MEAL_LABELS[type] ?? type.charAt(0).toUpperCase() + type.slice(1);
+}
 
 const ALLOWED_TAGS = new Set([
   "quick",
@@ -130,7 +138,6 @@ function Cookbook() {
 
   return (
     <AppShell>
-      {/* Hero — pure white */}
       <section className="border-b border-border">
         <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
           <div className="flex items-center gap-3 mb-3">
@@ -154,6 +161,13 @@ function Cookbook() {
               <Salad className="h-4 w-4" />
               Build a Glow Bowl
             </Link>
+            <Link
+              to="/build/yoghurt-bowl"
+              className="inline-flex items-center gap-2 rounded-full border border-secondary/40 px-4 py-2 text-sm font-medium text-secondary hover:bg-secondary/5 transition-colors"
+            >
+              <IceCreamBowl className="h-4 w-4" />
+              Build a Yoghurt Bowl
+            </Link>
             <button
               onClick={() => setShowGuide(v => !v)}
               className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm text-muted-foreground hover:border-secondary hover:text-secondary transition-colors"
@@ -170,15 +184,15 @@ function Cookbook() {
                 <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Recipes</strong> — every recipe actively supports your skin. Browse, filter and explore.</span></li>
                 <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Save</strong> — tap the heart on any recipe to save it to your Saved tab.</span></li>
                 <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Planner</strong> — add recipes to plan your week. Your shopping list builds automatically.</span></li>
-                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Shopping</strong> — everything from your plan in one clean grouped list. Add anything else you need too.</span></li>
-                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Glow Bowl</strong> — build a collagen-supporting lunch from whatever's in your fridge.</span></li>
+                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Shopping</strong> — everything from your plan in one clean grouped list.</span></li>
+                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Glow Bowl</strong> — build a collagen-supporting salad bowl from whatever's in your fridge.</span></li>
+                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Yoghurt Bowl</strong> — build a protein-rich bowl for breakfast or lunch in five steps.</span></li>
               </ul>
             </div>
           )}
         </div>
       </section>
 
-      {/* Filter bar */}
       <section className="sticky top-[63px] z-30 border-b border-border bg-white/98 backdrop-blur shadow-sm">
         <div className="mx-auto max-w-6xl px-4 py-3 space-y-2.5 overflow-x-auto">
           <div className="relative min-w-0">
@@ -196,7 +210,7 @@ function Cookbook() {
             </span>
             <FilterChip label="All" active={meal === "all"} onClick={() => setMeal("all")} />
             {mealTypes.map((m) => (
-              <FilterChip key={m} label={m} active={meal === m} onClick={() => setMeal(m)} />
+              <FilterChip key={m} label={mealLabel(m)} active={meal === m} onClick={() => setMeal(m)} />
             ))}
             {tags.length > 0 && (
               <>
@@ -231,7 +245,6 @@ function Cookbook() {
         </div>
       </section>
 
-      {/* Recipe grid */}
       <section className="mx-auto max-w-6xl px-4 py-8">
         {filtered.length === 0 ? (
           <p className="py-16 text-center text-muted-foreground">
@@ -242,7 +255,7 @@ function Cookbook() {
             {Object.entries(grouped).map(([mealType, items]) => (
               <div key={mealType}>
                 <div className="mb-5 flex items-center gap-4">
-                  <h2 className="font-serif text-2xl sm:text-3xl font-light capitalize">{mealType}</h2>
+                  <h2 className="font-serif text-2xl sm:text-3xl font-light">{mealLabel(mealType)}</h2>
                   <span className="h-px flex-1 bg-border" />
                   <span className="text-xs uppercase tracking-wider text-muted-foreground shrink-0">
                     {items.length} {items.length === 1 ? "recipe" : "recipes"}
@@ -268,7 +281,7 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
       type="button"
       onClick={onClick}
       className={
-        "rounded-full border px-3 py-1 text-xs capitalize transition-colors shrink-0 " +
+        "rounded-full border px-3 py-1 text-xs transition-colors shrink-0 " +
         (active
           ? "border-secondary bg-secondary text-secondary-foreground font-medium"
           : "border-border bg-background text-foreground/60 hover:border-secondary/40 hover:text-foreground")
