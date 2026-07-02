@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Search, Filter, Salad, IceCreamBowl, BookOpen, Info } from "lucide-react";
+import { Search, Filter, Salad, IceCreamBowl, Soup, BookOpen, Info } from "lucide-react";
 import { listRecipes } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
 import { RecipeCard } from "@/components/recipe-card";
@@ -38,6 +38,8 @@ export const Route = createFileRoute("/")((({
 
 const MEAL_ORDER = ["breakfast", "yoghurt bowl", "lunch", "dinner", "snack", "smoothie", "dessert"];
 
+const EXCLUDED_MEAL_TYPES = new Set(["bone broth"]);
+
 const MEAL_LABELS: Record<string, string> = {
   "yoghurt bowl": "Yoghurt Bowl",
 };
@@ -68,17 +70,22 @@ function Cookbook() {
   const [maxTime, setMaxTime] = useState<number>(0);
   const [showGuide, setShowGuide] = useState(false);
 
+  const gridRecipes = useMemo(
+    () => recipes.filter((r) => !EXCLUDED_MEAL_TYPES.has(r.meal_type)),
+    [recipes],
+  );
+
   const mealTypes = useMemo(
     () =>
-      Array.from(new Set(recipes.map((r) => r.meal_type))).sort(
+      Array.from(new Set(gridRecipes.map((r) => r.meal_type))).sort(
         (a, b) => (MEAL_ORDER.indexOf(a) + 99) - (MEAL_ORDER.indexOf(b) + 99),
       ),
-    [recipes],
+    [gridRecipes],
   );
 
   const tags = useMemo(() => {
     const counts = new Map<string, number>();
-    for (const r of recipes) {
+    for (const r of gridRecipes) {
       for (const t of r.tags) {
         const lower = t.toLowerCase();
         if (!ALLOWED_TAGS.has(lower)) continue;
@@ -89,11 +96,11 @@ function Cookbook() {
       .filter(([, count]) => count >= 3)
       .sort((a, b) => b[1] - a[1])
       .map(([t]) => t);
-  }, [recipes]);
+  }, [gridRecipes]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return recipes
+    return gridRecipes
       .filter((r) => {
         if (meal !== "all" && r.meal_type !== meal) return false;
         if (tag !== "all" && !r.tags.map(t => t.toLowerCase()).includes(tag)) return false;
@@ -117,7 +124,7 @@ function Cookbook() {
         if (oa !== ob) return oa - ob;
         return a.name.localeCompare(b.name);
       });
-  }, [recipes, search, meal, tag, maxTime]);
+  }, [gridRecipes, search, meal, tag, maxTime]);
 
   const grouped = useMemo(() => {
     const g: Record<string, typeof filtered> = {};
@@ -167,6 +174,13 @@ function Cookbook() {
             >
               <IceCreamBowl className="h-4 w-4" />
               Build a Yoghurt Bowl
+            </Link>
+            <Link
+              to="/recipes/coylah-collagen-bone-broth"
+              className="inline-flex items-center gap-2 rounded-full border border-secondary/40 px-4 py-2 text-sm font-medium text-secondary hover:bg-secondary/5 transition-colors"
+            >
+              <Soup className="h-4 w-4" />
+              Coylah's Bone Broth
             </Link>
             <button
               onClick={() => setShowGuide(v => !v)}
