@@ -176,7 +176,7 @@ function Cookbook() {
               Build a Yoghurt Bowl
             </Link>
             <Link
-              to="/recipes/coylah-collagen-bone-broth"
+              to="/recipes/bone-broth"
               className="inline-flex items-center gap-2 rounded-full border border-secondary/40 px-4 py-2 text-sm font-medium text-secondary hover:bg-secondary/5 transition-colors"
             >
               <Soup className="h-4 w-4" />
