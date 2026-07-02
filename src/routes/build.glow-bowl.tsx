@@ -209,6 +209,7 @@ function GlowBowlBuilder() {
       bowlName,
       bowlIngredients: allPicked,
     });
+    add(allPicked);
     setShowPlanPicker(false);
     setPlannedTo(`${day} ${slot}`);
   }
