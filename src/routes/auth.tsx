@@ -48,13 +48,6 @@ function AuthPage() {
     }
   }
 
-  async function handleGoogle() {
-    try {
-      await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    } catch (e: any) {
-      setMsg(e.message);
-    }
-  }
 
   return (
     <AppShell>
