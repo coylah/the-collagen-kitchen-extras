@@ -82,12 +82,6 @@ function AuthPage() {
           </button>
         </form>
 
-        <button
-          onClick={handleGoogle}
-          className="mt-3 w-full rounded-xl border border-border py-3 text-sm hover:bg-muted/40"
-        >
-          Continue with Google
-        </button>
 
         <button
           onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setMsg(null); }}
