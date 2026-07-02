@@ -1,8 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Recipe } from "./recipe-types";
 import type { Database } from "@/integrations/supabase/types";
+
 
 function publicClient() {
   return createClient<Database>(
@@ -65,11 +67,11 @@ function slugify(s: string) {
 }
 
 export const importRecipes = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
     z.object({ recipes: z.array(RecipeImportSchema) }).parse(d),
   )
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  .handler(async ({ data, context }) => {
     const rows = data.recipes.map((r) => ({
       name: r.name,
       slug: slugify(r.name),
@@ -85,10 +87,11 @@ export const importRecipes = createServerFn({ method: "POST" })
       collagen_tip: r.collagen_tip ?? null,
       image_url: r.image_url ?? null,
     }));
-    const { error, data: out } = await supabaseAdmin
+    const { error, data: out } = await context.supabase
       .from("recipes")
       .upsert(rows, { onConflict: "slug" })
       .select("id");
     if (error) throw new Error(error.message);
     return { imported: out?.length ?? 0 };
   });
+

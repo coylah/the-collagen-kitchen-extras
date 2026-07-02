@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { importRecipes } from "@/lib/recipes.functions";
+import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/admin/import")({
+export const Route = createFileRoute("/_authenticated/admin/import")({
   component: ImportPage,
 });
 
@@ -11,6 +12,23 @@ function ImportPage() {
   const [json, setJson] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data: userRes } = await supabase.auth.getUser();
+      setEmail(userRes.user?.email ?? null);
+      if (!userRes.user) return setIsAdmin(false);
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userRes.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      setIsAdmin(!!data);
+    })();
+  }, []);
 
   async function handleSubmit() {
     setLoading(true);
@@ -27,11 +45,31 @@ function ImportPage() {
     }
   }
 
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    window.location.href = "/auth";
+  }
+
   return (
     <AppShell>
       <div className="mx-auto max-w-2xl px-4 py-10">
-        <h1 className="font-serif text-3xl mb-2">Import recipes</h1>
-        <p className="text-sm text-muted-foreground mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="font-serif text-3xl">Import recipes</h1>
+          {email && (
+            <button onClick={handleSignOut} className="text-xs text-muted-foreground hover:text-foreground underline">
+              Sign out ({email})
+            </button>
+          )}
+        </div>
+
+        {isAdmin === false && (
+          <div className="mt-6 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm">
+            Your account doesn't have the <strong>admin</strong> role, so imports will be rejected by the database.
+            Ask a project owner to grant you admin, then reload this page.
+          </div>
+        )}
+
+        <p className="text-sm text-muted-foreground mb-6 mt-4">
           Paste a JSON array of recipes matching the cookbook schema. Existing recipes with the same slug will be updated.
         </p>
         <textarea
@@ -42,7 +80,7 @@ function ImportPage() {
         />
         <button
           onClick={handleSubmit}
-          disabled={loading || !json.trim()}
+          disabled={loading || !json.trim() || isAdmin === false}
           className="mt-4 w-full rounded-xl bg-secondary py-3 text-sm font-medium text-secondary-foreground disabled:opacity-40 hover:bg-secondary/90"
         >
           {loading ? "Importing…" : "Import recipes"}
