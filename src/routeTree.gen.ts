@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ShoppingRouteImport } from './routes/shopping'
 import { Route as PlannerRouteImport } from './routes/planner'
 import { Route as FavouritesRouteImport } from './routes/favourites'
+import { Route as BoneBrothRouteImport } from './routes/bone-broth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RecipesSlugRouteImport } from './routes/recipes.$slug'
 import { Route as BuildYoghurtBowlRouteImport } from './routes/build.yoghurt-bowl'
@@ -31,6 +32,11 @@ const PlannerRoute = PlannerRouteImport.update({
 const FavouritesRoute = FavouritesRouteImport.update({
   id: '/favourites',
   path: '/favourites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoneBrothRoute = BoneBrothRouteImport.update({
+  id: '/bone-broth',
+  path: '/bone-broth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -61,6 +67,7 @@ const AdminImportRoute = AdminImportRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bone-broth': typeof BoneBrothRoute
   '/favourites': typeof FavouritesRoute
   '/planner': typeof PlannerRoute
   '/shopping': typeof ShoppingRoute
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bone-broth': typeof BoneBrothRoute
   '/favourites': typeof FavouritesRoute
   '/planner': typeof PlannerRoute
   '/shopping': typeof ShoppingRoute
@@ -82,6 +90,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bone-broth': typeof BoneBrothRoute
   '/favourites': typeof FavouritesRoute
   '/planner': typeof PlannerRoute
   '/shopping': typeof ShoppingRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/bone-broth'
     | '/favourites'
     | '/planner'
     | '/shopping'
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/bone-broth'
     | '/favourites'
     | '/planner'
     | '/shopping'
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/bone-broth'
     | '/favourites'
     | '/planner'
     | '/shopping'
@@ -125,6 +137,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BoneBrothRoute: typeof BoneBrothRoute
   FavouritesRoute: typeof FavouritesRoute
   PlannerRoute: typeof PlannerRoute
   ShoppingRoute: typeof ShoppingRoute
@@ -155,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: '/favourites'
       fullPath: '/favourites'
       preLoaderRoute: typeof FavouritesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bone-broth': {
+      id: '/bone-broth'
+      path: '/bone-broth'
+      fullPath: '/bone-broth'
+      preLoaderRoute: typeof BoneBrothRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -197,6 +217,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BoneBrothRoute: BoneBrothRoute,
   FavouritesRoute: FavouritesRoute,
   PlannerRoute: PlannerRoute,
   ShoppingRoute: ShoppingRoute,
@@ -208,13 +229,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
