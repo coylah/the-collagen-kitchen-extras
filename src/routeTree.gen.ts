@@ -13,6 +13,7 @@ import { Route as ShoppingRouteImport } from './routes/shopping'
 import { Route as PlannerRouteImport } from './routes/planner'
 import { Route as FavouritesRouteImport } from './routes/favourites'
 import { Route as BoneBrothRouteImport } from './routes/bone-broth'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RecipesSlugRouteImport } from './routes/recipes.$slug'
@@ -38,6 +39,11 @@ const FavouritesRoute = FavouritesRouteImport.update({
 const BoneBrothRoute = BoneBrothRouteImport.update({
   id: '/bone-broth',
   path: '/bone-broth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -73,6 +79,7 @@ const AuthenticatedAdminImportRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/bone-broth': typeof BoneBrothRoute
   '/favourites': typeof FavouritesRoute
   '/planner': typeof PlannerRoute
@@ -84,6 +91,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/bone-broth': typeof BoneBrothRoute
   '/favourites': typeof FavouritesRoute
   '/planner': typeof PlannerRoute
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/bone-broth': typeof BoneBrothRoute
   '/favourites': typeof FavouritesRoute
   '/planner': typeof PlannerRoute
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/bone-broth'
     | '/favourites'
     | '/planner'
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/bone-broth'
     | '/favourites'
     | '/planner'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/auth'
     | '/bone-broth'
     | '/favourites'
     | '/planner'
@@ -146,6 +158,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   BoneBrothRoute: typeof BoneBrothRoute
   FavouritesRoute: typeof FavouritesRoute
   PlannerRoute: typeof PlannerRoute
@@ -183,6 +196,13 @@ declare module '@tanstack/react-router' {
       path: '/bone-broth'
       fullPath: '/bone-broth'
       preLoaderRoute: typeof BoneBrothRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated': {
@@ -244,6 +264,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   BoneBrothRoute: BoneBrothRoute,
   FavouritesRoute: FavouritesRoute,
   PlannerRoute: PlannerRoute,
