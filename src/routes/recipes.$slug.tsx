@@ -6,7 +6,6 @@ import {
   Heart,
   Minus,
   Plus,
-  Sparkles,
   CalendarPlus,
   Lightbulb,
 } from "lucide-react";
@@ -61,6 +60,9 @@ export const Route = createFileRoute("/recipes/$slug")({
   ),
 });
 
+// Meal types that should not appear in the meal planner
+const NO_PLAN_TYPES = new Set(["snack"]);
+
 function RecipePage() {
   const recipe = Route.useLoaderData() as import("@/lib/recipe-types").Recipe;
   const { isFav, toggle } = useFavourites();
@@ -69,6 +71,8 @@ function RecipePage() {
   const [checkedIng, setCheckedIng] = useState<Record<number, boolean>>({});
   const [checkedStep, setCheckedStep] = useState<Record<number, boolean>>({});
   const [showPlanPicker, setShowPlanPicker] = useState(false);
+
+  const canPlan = !NO_PLAN_TYPES.has(recipe.meal_type);
 
   useEffect(() => {
     setCheckedIng({});
@@ -143,21 +147,25 @@ function RecipePage() {
                 <Heart className={cn("h-3.5 w-3.5", isFav(recipe.slug) && "fill-secondary-foreground")} />
                 {isFav(recipe.slug) ? "Saved" : "Save recipe"}
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setShowPlanPicker(v => !v)}
-                className="border-secondary/40 hover:border-secondary hover:text-secondary"
-              >
-                <CalendarPlus className="h-3.5 w-3.5" />
-                {showPlanPicker ? "Cancel" : "Add to meal plan"}
-              </Button>
+
+              {canPlan && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowPlanPicker(v => !v)}
+                  className="border-secondary/40 hover:border-secondary hover:text-secondary"
+                >
+                  <CalendarPlus className="h-3.5 w-3.5" />
+                  {showPlanPicker ? "Cancel" : "Add to meal plan"}
+                </Button>
+              )}
+
               <Button size="sm" variant="ghost" onClick={() => window.print()} className="hover:text-secondary">
                 Print
               </Button>
             </div>
 
-            {showPlanPicker && (
+            {showPlanPicker && canPlan && (
               <PlanPicker
                 onPick={(day, slot) => {
                   setPlan(day, slot, { slug: recipe.slug, servings });
