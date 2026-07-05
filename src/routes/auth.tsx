@@ -28,14 +28,24 @@ function AuthPage() {
     setMsg(null);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        setMsg("Check your email to confirm, then sign in.");
-        setMode("signin");
+        if (data.session) {
+          navigate({ to: "/admin/import" });
+        } else {
+          // Not auto-confirmed — try signing in directly (auto-confirm may be on server-side)
+          const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+          if (signInErr) {
+            setMsg("Account created. Check your email to confirm, then sign in.");
+            setMode("signin");
+          } else {
+            navigate({ to: "/admin/import" });
+          }
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
