@@ -1,36 +1,23 @@
-## What's going on
+## Why sign-in fails
 
-Lovable Cloud is our managed backend (built on Supabase's open-source stack). It was wired in automatically when the project was created — that's why you see `SUPABASE_*` names in the code even though you never set up an account. On Lovable Cloud, the **service role key is intentionally not exposed** to app code. It's a god-mode key that bypasses all security rules, so the platform blocks it by design.
+Auth logs show repeated `invalid_credentials` on `/token` for `hello@lovecoylah.com`. On Lovable Cloud, new email/password signups require email confirmation by default. Until the confirmation link is clicked, the account exists but cannot sign in — Supabase returns `invalid_credentials` (not a clearer "email not confirmed" message) for unconfirmed accounts on password grant.
 
-Your `/admin/import` page currently uses `supabaseAdmin` (service role) to upsert recipes. That worked earlier only by accident — now the guard is enforced and it throws `Missing SUPABASE_SERVICE_ROLE_KEY`. Nothing is broken with the connection; the regular (publishable) client and auth still work fine.
+The current auth page also doesn't tell the user this — it just says "Check your email to confirm" once, then silently fails on later sign-in attempts.
 
-## Fix
+## Fix (two parts)
 
-Stop using the admin client for imports. Do the write as the signed-in user, protected by a proper admin role check in the database.
+**1. Enable auto-confirm for email signups** via `supabase--configure_auth` with `auto_confirm_email: true`. This lets new signups sign in immediately without clicking a confirmation link — appropriate for a single-admin importer tool. Existing unconfirmed account (`hello@lovecoylah.com`) will need to be re-signed-up OR I'll confirm it via a one-off admin action (see step 3).
 
-### Steps
+**2. Improve auth page feedback** in `src/routes/auth.tsx`:
+- After successful signup, if a session is returned (auto-confirm on), navigate straight to `/admin/import` instead of asking to check email.
+- Surface clearer error text when sign-in fails.
 
-1. **Add a roles system** (migration)
-   - `app_role` enum (`admin`, `user`)
-   - `user_roles` table (`user_id`, `role`) with RLS + grants
-   - `has_role(_user_id, _role)` security-definer function
-   - RLS policy on `recipes`: allow `INSERT`/`UPDATE` when `has_role(auth.uid(), 'admin')`
-   - Grant yourself the `admin` role (I'll ask for your user id / email after the migration)
+**3. Unblock the existing account**: since the current `hello@lovecoylah.com` was created before auto-confirm, I'll either (a) ask you to sign up again with any email after step 1, or (b) mark that specific user confirmed via a one-off SQL update on `auth.users.email_confirmed_at`. Option (a) is simpler; option (b) is one migration.
 
-2. **Rewrite `importRecipes`** in `src/lib/recipes.functions.ts`
-   - Drop `supabaseAdmin` import
-   - Use `.middleware([requireSupabaseAuth])` so the call runs as the logged-in user
-   - The DB policy enforces admin-only; no service role needed
+## Then: grant admin role
 
-3. **Gate `/admin/import`**
-   - Move file to `src/routes/_authenticated/admin.import.tsx` so unauthenticated users are redirected to `/auth`
-   - Show a friendly "you need admin role" message if the insert is rejected
+Once you can sign in, I'll insert a `user_roles` row (`role='admin'`) for your user id so the importer works.
 
-4. **Ensure auth exists**
-   - If there's no `/auth` route yet, add a minimal email/password (+ Google) sign-in page so you can log in and use the importer
+## Out of scope
 
-### Not doing
-- Not reconnecting or recreating the backend — the existing connection is fine.
-- Not touching any other page; regular read queries continue to use the publishable client.
-
-After you approve, I'll run the migration first (you'll see it for review), then update the code.
+No changes to the DB schema, RLS, or other routes.
