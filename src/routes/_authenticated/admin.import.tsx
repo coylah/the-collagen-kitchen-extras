@@ -14,6 +14,7 @@ function ImportPage() {
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+  const [slugToDelete, setSlugToDelete] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -45,6 +46,25 @@ function ImportPage() {
     }
   }
 
+  async function handleDelete() {
+    if (!slugToDelete.trim()) return;
+    setLoading(true);
+    setStatus(null);
+    try {
+      const { error } = await supabase
+        .from("recipes")
+        .delete()
+        .eq("slug", slugToDelete.trim());
+      if (error) throw error;
+      setStatus(`Done — "${slugToDelete.trim()}" deleted.`);
+      setSlugToDelete("");
+    } catch (e: any) {
+      setStatus(`Error: ${e.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleSignOut() {
     await supabase.auth.signOut();
     window.location.href = "/auth";
@@ -52,44 +72,71 @@ function ImportPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-2xl px-4 py-10">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="font-serif text-3xl">Import recipes</h1>
-          {email && (
-            <button onClick={handleSignOut} className="text-xs text-muted-foreground hover:text-foreground underline">
-              Sign out ({email})
-            </button>
+      <div className="mx-auto max-w-2xl px-4 py-10 space-y-10">
+
+        {/* Import section — unchanged */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="font-serif text-3xl">Import recipes</h1>
+            {email && (
+              <button onClick={handleSignOut} className="text-xs text-muted-foreground hover:text-foreground underline">
+                Sign out ({email})
+              </button>
+            )}
+          </div>
+          {isAdmin === false && (
+            <div className="mt-6 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm">
+              Your account doesn't have the <strong>admin</strong> role, so imports will be rejected by the database.
+              Ask a project owner to grant you admin, then reload this page.
+            </div>
           )}
+          <p className="text-sm text-muted-foreground mb-6 mt-4">
+            Paste a JSON array of recipes matching the cookbook schema. Existing recipes with the same slug will be updated.
+          </p>
+          <textarea
+            value={json}
+            onChange={(e) => setJson(e.target.value)}
+            className="w-full h-64 rounded-xl border border-border bg-muted/30 p-4 font-mono text-xs outline-none focus:border-secondary"
+            placeholder='[{ "name": "...", "meal_type": "...", ... }]'
+          />
+          <button
+            onClick={handleSubmit}
+            disabled={loading || !json.trim() || isAdmin === false}
+            className="mt-4 w-full rounded-xl bg-secondary py-3 text-sm font-medium text-secondary-foreground disabled:opacity-40 hover:bg-secondary/90"
+          >
+            {loading ? "Importing…" : "Import recipes"}
+          </button>
         </div>
 
-        {isAdmin === false && (
-          <div className="mt-6 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm">
-            Your account doesn't have the <strong>admin</strong> role, so imports will be rejected by the database.
-            Ask a project owner to grant you admin, then reload this page.
-          </div>
-        )}
+        {/* Delete section — new */}
+        <div>
+          <h2 className="font-serif text-2xl mb-2">Delete a recipe</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Enter the exact slug of the recipe to delete. This cannot be undone.
+          </p>
+          <input
+            type="text"
+            value={slugToDelete}
+            onChange={(e) => setSlugToDelete(e.target.value)}
+            placeholder="e.g. tuna-smash"
+            className="w-full rounded-xl border border-border bg-muted/30 p-4 text-sm outline-none focus:border-destructive"
+          />
+          <button
+            onClick={handleDelete}
+            disabled={loading || !slugToDelete.trim() || isAdmin === false}
+            className="mt-4 w-full rounded-xl bg-destructive py-3 text-sm font-medium text-destructive-foreground disabled:opacity-40 hover:bg-destructive/90"
+          >
+            {loading ? "Deleting…" : "Delete recipe"}
+          </button>
+        </div>
 
-        <p className="text-sm text-muted-foreground mb-6 mt-4">
-          Paste a JSON array of recipes matching the cookbook schema. Existing recipes with the same slug will be updated.
-        </p>
-        <textarea
-          value={json}
-          onChange={(e) => setJson(e.target.value)}
-          className="w-full h-64 rounded-xl border border-border bg-muted/30 p-4 font-mono text-xs outline-none focus:border-secondary"
-          placeholder='[{ "name": "...", "meal_type": "...", ... }]'
-        />
-        <button
-          onClick={handleSubmit}
-          disabled={loading || !json.trim() || isAdmin === false}
-          className="mt-4 w-full rounded-xl bg-secondary py-3 text-sm font-medium text-secondary-foreground disabled:opacity-40 hover:bg-secondary/90"
-        >
-          {loading ? "Importing…" : "Import recipes"}
-        </button>
+        {/* Status message */}
         {status && (
-          <p className={`mt-4 text-sm ${status.startsWith("Error") ? "text-destructive" : "text-secondary"}`}>
+          <p className={`text-sm ${status.startsWith("Error") ? "text-destructive" : "text-secondary"}`}>
             {status}
           </p>
         )}
+
       </div>
     </AppShell>
   );
