@@ -16,6 +16,7 @@ import { useFavourites, useMealPlan, DAYS, SLOTS, type Slot } from "@/lib/user-s
 import { scaleRecipe } from "@/lib/recipe-math";
 import { cn } from "@/lib/utils";
 import { BuildYourBeautyOats } from "@/components/build-your-beauty-oats";
+import { OmeletteAdditions } from "@/components/omelette-additions";
 
 const recipeQuery = (slug: string) =>
   queryOptions({
@@ -60,7 +61,6 @@ export const Route = createFileRoute("/recipes/$slug")({
   ),
 });
 
-// Meal types that should not appear in the meal planner
 const NO_PLAN_TYPES = new Set(["snack"]);
 
 function RecipePage() {
@@ -91,6 +91,9 @@ function RecipePage() {
   const hasOatsBuilder =
     recipe.tags.includes("beauty-oats-builder") ||
     recipe.slug === "overnight-beauty-oats";
+
+  const hasOmeletteBuilder =
+    recipe.slug === "build-your-own-glow-omelette";
 
   const glowFactorIsDuplicate =
     recipe.collagen_tip &&
@@ -177,6 +180,12 @@ function RecipePage() {
             {hasOatsBuilder && (
               <p className="mt-5 text-xs text-muted-foreground border-l-2 border-secondary/40 pl-3">
                 This is the base recipe — scroll down to build your own version with toppings and flavour combos.
+              </p>
+            )}
+
+            {hasOmeletteBuilder && (
+              <p className="mt-5 text-xs text-muted-foreground border-l-2 border-secondary/40 pl-3">
+                Scroll down to pick your fillings — each one is mapped to the collagen matrix and adds straight to your shopping list.
               </p>
             )}
           </div>
@@ -294,6 +303,7 @@ function RecipePage() {
         </div>
 
         {hasOatsBuilder && <BuildYourBeautyOats />}
+        {hasOmeletteBuilder && <OmeletteAdditions />}
       </article>
     </AppShell>
   );
@@ -364,10 +374,10 @@ function PlanPicker({ onPick }: { onPick: (day: string, slot: Slot) => void }) {
         Tap a slot to add this recipe. Filled slots shown in rose.
       </p>
       <div className="overflow-x-auto">
-        <div className="grid grid-cols-[auto_repeat(4,1fr)] gap-1 text-xs min-w-[320px]">
+        <div className="grid grid-cols-[auto_repeat(5,1fr)] gap-1 text-xs min-w-[340px]">
           <div />
           {SLOTS.map(s => (
-            <div key={s} className="px-1 text-center capitalize text-muted-foreground">{s}</div>
+            <div key={s} className="px-1 text-center capitalize text-muted-foreground text-[10px]">{s.slice(0,4)}</div>
           ))}
           {DAYS.map(d => (
             <PlanRow key={d} day={d} plan={plan} onPick={onPick} />
