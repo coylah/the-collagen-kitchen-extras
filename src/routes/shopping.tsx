@@ -49,6 +49,26 @@ const CATEGORY_ORDER = [
   "cupboard", "pantry", "fats", "spices", "herbs", "nuts_seeds", "other",
 ];
 
+// Granola ingredients — expanded automatically when granola appears in shopping list
+const GRANOLA_INGREDIENTS = [
+  { item: "rolled oats", category: "grains" },
+  { item: "coconut oil", category: "fats" },
+  { item: "honey", category: "cupboard" },
+  { item: "vanilla extract", category: "cupboard" },
+  { item: "cinnamon", category: "cupboard" },
+  { item: "walnuts", category: "cupboard" },
+  { item: "almonds", category: "cupboard" },
+  { item: "pumpkin seeds", category: "cupboard" },
+  { item: "ground flaxseed", category: "cupboard" },
+  { item: "coconut flakes", category: "cupboard" },
+];
+
+const GRANOLA_SLUGS = new Set(["homemade granola", "homemade-granola", "the collagen kitchen granola"]);
+
+function isGranola(item: string) {
+  return GRANOLA_SLUGS.has(item.toLowerCase().trim());
+}
+
 function ShoppingPage() {
   const { data: recipes } = useSuspenseQuery(recipesQuery);
   const bySlug = new Map(recipes.map((r) => [r.slug, r]));
@@ -59,11 +79,14 @@ function ShoppingPage() {
   const [bought, setBought] = useState<Record<string, boolean>>({});
   const [boughtExtras, setBoughtExtras] = useState<Record<string, boolean>>({});
   const [manualInput, setManualInput] = useState("");
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showExtrasConfirm, setShowExtrasConfirm] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const entries = useMemo(() => {
     return Object.values(plan)
-      .filter((e): e is { slug: string; servings: number } => !!e)
+      .filter((e): e is { slug: string; servings: number } => !!e && !("isCustomBowl" in e && e.isCustomBowl))
       .map((e) => {
         const r = bySlug.get(e.slug);
         return r ? { recipe: r, servings: e.servings } : null;
@@ -109,6 +132,7 @@ function ShoppingPage() {
     clearManual();
     setBought({});
     setBoughtExtras({});
+    setShowClearConfirm(false);
   }
 
   function handleAddManual(e: React.FormEvent) {
@@ -129,6 +153,57 @@ function ShoppingPage() {
 
   return (
     <AppShell>
+      {/* Confirm — clear all */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-foreground/50 backdrop-blur-sm" onClick={() => setShowClearConfirm(false)} />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl border border-border bg-background p-6 shadow-xl">
+            <h2 className="font-serif text-xl mb-2">Clear your shopping list?</h2>
+            <p className="text-sm text-muted-foreground mb-5">
+              This will remove your bowl extras, any items you've added manually, and reset your "I have" list. Ingredients from your meal plan will stay until you clear your planner.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowClearConfirm(false)} className="flex-1 rounded-lg border border-border py-2.5 text-sm text-muted-foreground hover:bg-accent">Cancel</button>
+              <button onClick={clearAll} className="flex-1 rounded-lg bg-destructive py-2.5 text-sm font-medium text-destructive-foreground hover:bg-destructive/90">Yes, clear</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm — clear extras */}
+      {showExtrasConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-foreground/50 backdrop-blur-sm" onClick={() => setShowExtrasConfirm(false)} />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl border border-border bg-background p-6 shadow-xl">
+            <h2 className="font-serif text-xl mb-2">Clear bowl extras?</h2>
+            <p className="text-sm text-muted-foreground mb-5">
+              This will remove all the ingredients added from your Glow Bowl and Yoghurt Bowl builders.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowExtrasConfirm(false)} className="flex-1 rounded-lg border border-border py-2.5 text-sm text-muted-foreground hover:bg-accent">Cancel</button>
+              <button onClick={() => { clearExtras(); setShowExtrasConfirm(false); }} className="flex-1 rounded-lg bg-destructive py-2.5 text-sm font-medium text-destructive-foreground hover:bg-destructive/90">Yes, clear</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm — reset I have */}
+      {showResetConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-foreground/50 backdrop-blur-sm" onClick={() => setShowResetConfirm(false)} />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl border border-border bg-background p-6 shadow-xl">
+            <h2 className="font-serif text-xl mb-2">Reset "I have"?</h2>
+            <p className="text-sm text-muted-foreground mb-5">
+              This will bring back all the items you've marked as already in your cupboard.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowResetConfirm(false)} className="flex-1 rounded-lg border border-border py-2.5 text-sm text-muted-foreground hover:bg-accent">Cancel</button>
+              <button onClick={() => { reset(); setShowResetConfirm(false); }} className="flex-1 rounded-lg bg-secondary py-2.5 text-sm font-medium text-secondary-foreground hover:bg-secondary/90">Yes, reset</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <section className="mx-auto max-w-4xl px-4 py-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -138,17 +213,17 @@ function ShoppingPage() {
           {hasContent && (
             <div className="flex items-center gap-2">
               {had.length > 0 && (
-                <Button variant="ghost" size="sm" onClick={reset}>
+                <Button variant="ghost" size="sm" onClick={() => setShowResetConfirm(true)}>
                   <RotateCcw className="h-4 w-4" /> Reset "I have"
                 </Button>
               )}
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={clearAll}
+                onClick={() => setShowClearConfirm(true)}
                 className="text-muted-foreground hover:text-destructive"
               >
-                <Trash2 className="h-4 w-4" /> Clear extras & manual
+                <Trash2 className="h-4 w-4" /> Clear list
               </Button>
               <Button variant="outline" size="sm" onClick={() => window.print()}>
                 <Printer className="h-4 w-4" /> Print
@@ -197,12 +272,12 @@ function ShoppingPage() {
               </div>
             ))}
 
-            {/* Bowl extras — now with checkboxes */}
+            {/* Bowl extras */}
             {extras.length > 0 && (
               <div className="rounded-2xl border border-secondary/30 bg-card p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-serif text-lg">Bowl extras</h2>
-                  <button onClick={clearExtras} className="text-xs text-muted-foreground hover:text-foreground">
+                  <button onClick={() => setShowExtrasConfirm(true)} className="text-xs text-muted-foreground hover:text-foreground">
                     Clear all
                   </button>
                 </div>
@@ -213,26 +288,29 @@ function ShoppingPage() {
                     </p>
                     <ul className="divide-y divide-border/60">
                       {items.map((e) => (
-                        <li key={e.item} className="flex items-center gap-3 py-2.5">
-                          <input
-                            type="checkbox"
-                            className="h-4 w-4 accent-secondary"
-                            checked={!!boughtExtras[e.item]}
-                            onChange={() => setBoughtExtras(b => ({ ...b, [e.item]: !b[e.item] }))}
-                          />
-                          <span className={cn(
-                            "flex-1 text-sm",
-                            boughtExtras[e.item] && "text-muted-foreground line-through"
-                          )}>
-                            {e.item}
-                          </span>
-                          <button
-                            onClick={() => removeExtra(e.item)}
-                            className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted"
-                            aria-label="Remove"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
+                        <li key={e.item}>
+                          {isGranola(e.item) ? (
+                            <GranolaRow
+                              checked={!!boughtExtras[e.item]}
+                              onCheck={() => setBoughtExtras(b => ({ ...b, [e.item]: !b[e.item] }))}
+                              onRemove={() => removeExtra(e.item)}
+                            />
+                          ) : (
+                            <li className="flex items-center gap-3 py-2.5">
+                              <input
+                                type="checkbox"
+                                className="h-4 w-4 accent-secondary"
+                                checked={!!boughtExtras[e.item]}
+                                onChange={() => setBoughtExtras(b => ({ ...b, [e.item]: !b[e.item] }))}
+                              />
+                              <span className={cn("flex-1 text-sm", boughtExtras[e.item] && "text-muted-foreground line-through")}>
+                                {e.item}
+                              </span>
+                              <button onClick={() => removeExtra(e.item)} className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted" aria-label="Remove">
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </li>
+                          )}
                         </li>
                       ))}
                     </ul>
@@ -297,10 +375,7 @@ function ShoppingPage() {
                       <span className={cn("flex-1 text-sm", item.checked && "text-muted-foreground line-through")}>
                         {item.text}
                       </span>
-                      <button
-                        onClick={() => removeItem(item.addedAt)}
-                        className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted"
-                      >
+                      <button onClick={() => removeItem(item.addedAt)} className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted">
                         <X className="h-3.5 w-3.5" />
                       </button>
                     </li>
@@ -319,6 +394,42 @@ function ShoppingPage() {
   );
 }
 
+function GranolaRow({ checked, onCheck, onRemove }: { checked: boolean; onCheck: () => void; onRemove: () => void }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <li className="py-2.5">
+      <div className="flex items-center gap-3">
+        <input type="checkbox" className="h-4 w-4 accent-secondary" checked={checked} onChange={onCheck} />
+        <span className={cn("flex-1 text-sm", checked && "text-muted-foreground line-through")}>
+          Homemade granola
+        </span>
+        <button
+          onClick={() => setExpanded(v => !v)}
+          className="text-[11px] text-secondary underline underline-offset-2 shrink-0"
+        >
+          {expanded ? "Hide ingredients" : "See ingredients"}
+        </button>
+        <button onClick={onRemove} className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted" aria-label="Remove">
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      {expanded && (
+        <div className="mt-2 ml-7 rounded-xl border border-border bg-muted/30 p-3">
+          <p className="text-[10px] uppercase tracking-wider text-secondary mb-2">Homemade granola ingredients</p>
+          <ul className="space-y-1">
+            {GRANOLA_INGREDIENTS.map((ing) => (
+              <li key={ing.item} className="text-sm text-muted-foreground">· {ing.item}</li>
+            ))}
+          </ul>
+          <p className="mt-3 text-[11px] text-muted-foreground border-t border-border/60 pt-2">
+            Most shop-bought granola contains more sugar per 100g than a chocolate digestive. This homemade version has none of that — just real ingredients. Worth the 45 minutes.
+          </p>
+        </div>
+      )}
+    </li>
+  );
+}
+
 function ShoppingRow({ item, checked, onCheck, onHave }: {
   item: ShoppingItem;
   checked: boolean;
@@ -327,12 +438,7 @@ function ShoppingRow({ item, checked, onCheck, onHave }: {
 }) {
   return (
     <li className="flex items-start gap-3 py-2.5">
-      <input
-        type="checkbox"
-        className="mt-1 h-4 w-4 accent-secondary"
-        checked={checked}
-        onChange={onCheck}
-      />
+      <input type="checkbox" className="mt-1 h-4 w-4 accent-secondary" checked={checked} onChange={onCheck} />
       <div className="flex-1 min-w-0">
         <p className={cn("text-sm", checked && "text-muted-foreground line-through")}>
           {item.qtyText && <strong>{item.qtyText} </strong>}
