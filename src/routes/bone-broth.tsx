@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { listRecipes } from "@/lib/recipes.functions";
+import { Sparkles } from "lucide-react";
 
 const recipesQuery = queryOptions({
   queryKey: ["recipes"],
@@ -124,7 +125,21 @@ function BoneBrothPage() {
             )}
           </div>
 
-          <div className="mt-8 text-center">
+          {/* Link to Why This Works */}
+          <div className="mt-8 rounded-2xl border border-border bg-card p-6 text-center">
+            <p className="text-sm text-muted-foreground mb-3">
+              Bone broth is part of the Build phase — the foundation of the collagen matrix.
+            </p>
+            <Link
+              to="/why-this-works"
+              className="inline-flex items-center gap-2 text-sm text-secondary font-medium hover:underline underline-offset-2"
+            >
+              <Sparkles className="h-4 w-4" />
+              See the full collagen matrix — why this works →
+            </Link>
+          </div>
+
+          <div className="mt-6 text-center">
             <Link to="/" className="text-sm text-secondary underline underline-offset-2">
               Back to the cookbook →
             </Link>
