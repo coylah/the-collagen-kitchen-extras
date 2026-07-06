@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { BookOpen, Heart, CalendarDays, ShoppingBasket, Salad, X, Smartphone } from "lucide-react";
+import { BookOpen, Heart, CalendarDays, ShoppingBasket, Salad, X, Smartphone, Sparkles } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 const STORAGE_KEY = "ck.welcomed";
 const FAQ_DIRECT_KEY = "ck.openFaqDirect";
@@ -44,7 +45,7 @@ export function WelcomeModal() {
     {
       icon: <CalendarDays className="h-8 w-8 text-secondary" />,
       title: "Plan your week",
-      body: "Add recipes to your weekly planner — breakfast, lunch, dinner, snacks — and your shopping list builds itself automatically. Tap any slot to add a meal. Tap the little x to remove it. Job done.\n\nNo more staring into the fridge wondering what to make.",
+      body: "Add recipes to your weekly planner — breakfast, lunch, dinner, snacks, desserts — and your shopping list builds itself automatically. Tap any slot to add a meal. Tap the little x to remove it.\n\nNo more staring into the fridge wondering what to make.",
     },
     {
       icon: <ShoppingBasket className="h-8 w-8 text-secondary" />,
@@ -54,12 +55,12 @@ export function WelcomeModal() {
     {
       icon: <Salad className="h-8 w-8 text-secondary" />,
       title: "Build a Glow Bowl",
-      body: "This one's a proper treat. Tap your way through six steps — Support, Build, Activate, Protect, Fortify, Finish — and you've built yourself a collagen-supporting lunch from whatever's in your fridge.\n\nStart from a preset or build entirely from scratch — and you can always tweak a preset afterwards too. Add it straight to your shopping list, or your meal plan, in one tap.",
+      body: "Six steps to a collagen-supporting lunch bowl. Support, Build, Activate, Protect, Fortify, Finish — each step feeding a different part of your collagen story.\n\nStart from a preset or build entirely your own. Add it straight to your shopping list or meal plan in one tap.",
     },
     {
       icon: <Smartphone className="h-8 w-8 text-secondary" />,
       title: "Save to your home screen",
-      body: "One last thing — save this to your phone's home screen so it's always one tap away, just like an app.\n\nOn iPhone: tap the Share button at the bottom of your browser, then tap \"Add to Home Screen.\"\n\nOn Android: tap the three dots menu at the top right, then tap \"Add to Home Screen.\"\n\nNo App Store needed.",
+      body: "Save this to your phone's home screen so it's always one tap away — just like a proper app.\n\nOn iPhone: tap the Share button at the bottom of your browser, then tap \"Add to Home Screen.\"\n\nOn Android: tap the three dots menu at the top right, then tap \"Add to Home Screen.\"\n\nNo App Store needed.",
     },
   ];
 
@@ -67,11 +68,12 @@ export function WelcomeModal() {
     { q: "How do I add recipes to my meal plan?", a: "Open any recipe and tap \"Add to meal plan\" — then pick the day and slot. Or go straight to the Planner tab and tap any empty slot to choose from the full recipe list." },
     { q: "How do I clear my planner?", a: "Go to the Planner tab and tap \"Clear week\" in the top right. This clears your meals but never touches your saved favourites." },
     { q: "Why are some shopping list items generated automatically?", a: "Your shopping list builds from whatever you've added to your planner. Remove a recipe from the planner and those ingredients disappear from the list automatically." },
-    { q: "How do I clear my shopping list?", a: "Tap \"Clear extras & manual\" to remove bowl extras and anything you've typed in manually. To clear the planner ingredients, go to the Planner and clear your week from there." },
+    { q: "How do I clear my shopping list?", a: "Tap \"Clear list\" to remove bowl extras and anything you've typed in manually. To clear the planner ingredients, go to the Planner and clear your week from there." },
     { q: "Can I add my own extras like coffee or milk?", a: "Yes — scroll to the bottom of the shopping list and type anything into the \"Add anything else\" box. It becomes a tappable checkbox item on your list." },
     { q: "Can I save recipes?", a: "Yes — tap the heart on any recipe card or recipe page to save it. Find everything you've saved under the Saved tab." },
-    { q: "Can I personalise my Glow Bowl?", a: "Absolutely. Pick from the presets to get started then tap any ingredient to swap it out. Your bowl summary updates as you go. You can also add your finished bowl straight to your meal plan or shopping list." },
-    { q: "How do I use this like an app on my phone?", a: "On iPhone, tap the Share button in your browser and select \"Add to Home Screen.\" On Android, tap the three dots menu and select \"Add to Home Screen.\" It'll sit on your phone just like a regular app." },
+    { q: "Can I personalise my Glow Bowl?", a: "Absolutely. Pick from the presets to get started then tap any ingredient to swap it out. Your bowl summary updates as you go. Add it straight to your shopping list or meal plan in one tap." },
+    { q: "Why are the recipes built the way they are?", a: "Every recipe is designed around four phases and eleven specific nutrients your body needs to make collagen properly. It's all explained in Why This Works — tap the link below." },
+    { q: "How do I use this like an app on my phone?", a: "On iPhone, tap the Share button in your browser and select \"Add to Home Screen.\" On Android, tap the three dots menu and select \"Add to Home Screen.\"" },
     { q: "I need help with something else.", a: "Email us at hello@lovecoylah.com — we're always happy to help." },
   ];
 
@@ -186,6 +188,17 @@ export function WelcomeModal() {
                 ))}
               </div>
               <div className="mt-6 rounded-xl bg-secondary/5 border border-secondary/20 p-4 text-center">
+                <p className="text-sm text-muted-foreground mb-2">Want to understand the science behind every recipe?</p>
+                <Link
+                  to="/why-this-works"
+                  onClick={close}
+                  className="inline-flex items-center gap-1.5 text-sm text-secondary font-medium hover:underline underline-offset-2"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Why This Works →
+                </Link>
+              </div>
+              <div className="mt-4 rounded-xl bg-secondary/5 border border-secondary/20 p-4 text-center">
                 <p className="text-sm text-muted-foreground">Need more help?</p>
                 <a href="mailto:hello@lovecoylah.com" className="text-sm text-secondary font-medium hover:underline">
                   hello@lovecoylah.com
