@@ -11,9 +11,9 @@ export function useFavourites() {
   return { favs, toggle, isFav, clearFavs };
 }
 
-export type Slot = "breakfast" | "lunch" | "dinner" | "snack";
+export type Slot = "breakfast" | "lunch" | "dinner" | "snack" | "dessert";
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
-export const SLOTS: Slot[] = ["breakfast", "lunch", "dinner", "snack"];
+export const SLOTS: Slot[] = ["breakfast", "lunch", "dinner", "snack", "dessert"];
 
 // PlanEntry is now either a recipe (slug) or a custom bowl (name + ingredient list)
 export type PlanEntry = {
