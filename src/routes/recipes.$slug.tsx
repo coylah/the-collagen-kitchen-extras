@@ -18,32 +18,38 @@ import { cn } from "@/lib/utils";
 import { BuildYourBeautyOats } from "@/components/build-your-beauty-oats";
 import { OmeletteAdditions } from "@/components/omelette-additions";
 
-// Phase detection — maps ingredient keywords to collagen phases
 const PHASE_KEYWORDS = {
   build: [
     "chicken", "turkey", "beef", "salmon", "mackerel", "sardine", "tuna", "prawn",
     "egg", "eggs", "cottage cheese", "halloumi", "skyr", "greek yoghurt", "yoghurt",
     "bone broth", "gelatine", "milk", "cream cheese", "pork", "lamb", "mince",
     "meatball", "steak", "fish", "seafood", "smoked salmon", "trout", "protein",
+    "mussel", "clam", "anchovy", "herring", "cod", "haddock",
   ],
   activate: [
     "red pepper", "yellow pepper", "green pepper", "pepper", "kiwi", "broccoli",
     "strawberr", "blackcurrant", "guava", "lemon", "lime", "orange", "grapefruit",
     "kale", "spinach", "watercress", "tomato", "mango", "pineapple", "papaya",
-    "brussels sprout", "berries", "berry", "citrus", "vitamin c",
+    "brussels sprout", "berries", "berry", "citrus", "vitamin c", "raspberr",
+    "blueberr", "blackberr", "mixed berries", "pomegranate", "passion fruit",
+    "cherry", "peach", "apricot", "watermelon", "goji",
   ],
   support: [
     "pumpkin seed", "sesame seed", "sesame", "tahini", "cashew", "oat", "oats",
     "brown rice", "dark chocolate", "walnut", "sunflower seed", "hemp seed",
     "chia seed", "flaxseed", "flax", "almond", "hazelnut", "pecan", "pine nut",
     "chickpea", "lentil", "cacao", "cocoa", "zinc", "copper", "manganese",
+    "oatcake", "coconut", "peanut butter", "almond butter", "cashew butter",
+    "dark choc", "70%", "seed", "nut", "quinoa", "butter bean",
   ],
   protect: [
     "avocado", "sweet potato", "carrot", "butternut", "squash", "salmon",
     "mackerel", "sardine", "olive oil", "blueberr", "raspberr", "pomegranate",
     "dark chocolate", "walnut", "leafy green", "rocket", "kale", "spinach",
     "mixed berries", "antioxidant", "omega", "vitamin a", "vitamin e",
-    "blackberr", "cherry", "grape", "strawberr",
+    "blackberr", "cherry", "grape", "strawberr", "apple", "banana", "honey",
+    "date", "dried apricot", "coconut oil", "extra virgin", "avocado oil",
+    "beetroot", "red cabbage", "turmeric", "ginger", "cinnamon",
   ],
 };
 
@@ -59,6 +65,7 @@ function detectPhases(ingredients: { item: string }[]): string[] {
 }
 
 const NO_PLAN_TYPES = new Set(["snack"]);
+const ALL_PHASES = ["Build", "Activate", "Support", "Protect"];
 
 const recipeQuery = (slug: string) =>
   queryOptions({
@@ -103,8 +110,6 @@ export const Route = createFileRoute("/recipes/$slug")({
   ),
 });
 
-const ALL_PHASES = ["Build", "Activate", "Support", "Protect"];
-
 function RecipePage() {
   const recipe = Route.useLoaderData() as import("@/lib/recipe-types").Recipe;
   const { isFav, toggle } = useFavourites();
@@ -134,7 +139,6 @@ function RecipePage() {
   );
 
   const missingPhases = ALL_PHASES.filter(p => !phases.includes(p));
-
   const total = recipe.prep_min + recipe.cook_min;
 
   const hasOatsBuilder =
@@ -154,14 +158,12 @@ function RecipePage() {
   return (
     <AppShell>
       <article className="mx-auto max-w-4xl px-4 py-8">
-        <Link
-          to="/"
-          <button
-  onClick={() => window.history.back()}
-  className="no-print mb-6 inline-flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
->
-  <ArrowLeft className="h-3 w-3" /> Back
-</button>
+        <button
+          onClick={() => window.history.back()}
+          className="no-print mb-6 inline-flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-3 w-3" /> Back
+        </button>
 
         <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
 
@@ -258,7 +260,7 @@ function RecipePage() {
             )}
           </div>
 
-          {/* Coylah's Tips — TOP */}
+          {/* Coylah's Tips */}
           {recipe.notes && (
             <div className="border-b border-border bg-[#fef2f4] px-8 py-6 sm:px-12">
               <p className="mb-2 flex items-center gap-2 text-[9px] uppercase tracking-[0.22em] text-secondary font-medium">
@@ -357,7 +359,7 @@ function RecipePage() {
             </section>
           </div>
 
-          {/* Glow Factor — BOTTOM */}
+          {/* Glow Factor */}
           {recipe.collagen_tip && !glowFactorIsDuplicate && (
             <div className="border-t border-border bg-[#fef2f4] px-8 py-8 sm:px-12">
               <p className="mb-3 text-[9px] uppercase tracking-[0.22em] text-secondary font-medium">
