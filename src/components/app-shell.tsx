@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, BookOpen, CalendarDays, ShoppingBasket, Salad, HelpCircle, Soup, Sparkles } from "lucide-react";
+import { Heart, BookOpen, CalendarDays, ShoppingBasket, Salad, HelpCircle, Sparkles } from "lucide-react";
 import type { ReactNode } from "react";
 import { WelcomeModal } from "@/components/welcome-modal";
 
@@ -33,7 +33,6 @@ function Header() {
         <nav className="flex items-center overflow-x-auto no-scrollbar">
           <NavLink to="/" icon={<BookOpen className="h-4 w-4" />} label="Recipes" />
           <NavLink to="/build/glow-bowl" icon={<Salad className="h-4 w-4" />} label="Glow Bowl" />
-          <NavLink to="/bone-broth" icon={<Soup className="h-4 w-4" />} label="Bone Broth" />
           <NavLink to="/why-this-works" icon={<Sparkles className="h-4 w-4" />} label="Why This Works" />
           <NavLink to="/favourites" icon={<Heart className="h-4 w-4" />} label="Saved" />
           <NavLink to="/planner" icon={<CalendarDays className="h-4 w-4" />} label="Planner" />
