@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WhyThisWorksRouteImport } from './routes/why-this-works'
 import { Route as ShoppingRouteImport } from './routes/shopping'
 import { Route as PlannerRouteImport } from './routes/planner'
 import { Route as FavouritesRouteImport } from './routes/favourites'
@@ -21,6 +22,11 @@ import { Route as BuildYoghurtBowlRouteImport } from './routes/build.yoghurt-bow
 import { Route as BuildGlowBowlRouteImport } from './routes/build.glow-bowl'
 import { Route as AuthenticatedAdminImportRouteImport } from './routes/_authenticated/admin.import'
 
+const WhyThisWorksRoute = WhyThisWorksRouteImport.update({
+  id: '/why-this-works',
+  path: '/why-this-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShoppingRoute = ShoppingRouteImport.update({
   id: '/shopping',
   path: '/shopping',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/favourites': typeof FavouritesRoute
   '/planner': typeof PlannerRoute
   '/shopping': typeof ShoppingRoute
+  '/why-this-works': typeof WhyThisWorksRoute
   '/build/glow-bowl': typeof BuildGlowBowlRoute
   '/build/yoghurt-bowl': typeof BuildYoghurtBowlRoute
   '/recipes/$slug': typeof RecipesSlugRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/favourites': typeof FavouritesRoute
   '/planner': typeof PlannerRoute
   '/shopping': typeof ShoppingRoute
+  '/why-this-works': typeof WhyThisWorksRoute
   '/build/glow-bowl': typeof BuildGlowBowlRoute
   '/build/yoghurt-bowl': typeof BuildYoghurtBowlRoute
   '/recipes/$slug': typeof RecipesSlugRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/favourites': typeof FavouritesRoute
   '/planner': typeof PlannerRoute
   '/shopping': typeof ShoppingRoute
+  '/why-this-works': typeof WhyThisWorksRoute
   '/build/glow-bowl': typeof BuildGlowBowlRoute
   '/build/yoghurt-bowl': typeof BuildYoghurtBowlRoute
   '/recipes/$slug': typeof RecipesSlugRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/favourites'
     | '/planner'
     | '/shopping'
+    | '/why-this-works'
     | '/build/glow-bowl'
     | '/build/yoghurt-bowl'
     | '/recipes/$slug'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/favourites'
     | '/planner'
     | '/shopping'
+    | '/why-this-works'
     | '/build/glow-bowl'
     | '/build/yoghurt-bowl'
     | '/recipes/$slug'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/favourites'
     | '/planner'
     | '/shopping'
+    | '/why-this-works'
     | '/build/glow-bowl'
     | '/build/yoghurt-bowl'
     | '/recipes/$slug'
@@ -163,6 +175,7 @@ export interface RootRouteChildren {
   FavouritesRoute: typeof FavouritesRoute
   PlannerRoute: typeof PlannerRoute
   ShoppingRoute: typeof ShoppingRoute
+  WhyThisWorksRoute: typeof WhyThisWorksRoute
   BuildGlowBowlRoute: typeof BuildGlowBowlRoute
   BuildYoghurtBowlRoute: typeof BuildYoghurtBowlRoute
   RecipesSlugRoute: typeof RecipesSlugRoute
@@ -170,6 +183,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/why-this-works': {
+      id: '/why-this-works'
+      path: '/why-this-works'
+      fullPath: '/why-this-works'
+      preLoaderRoute: typeof WhyThisWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/shopping': {
       id: '/shopping'
       path: '/shopping'
@@ -269,6 +289,7 @@ const rootRouteChildren: RootRouteChildren = {
   FavouritesRoute: FavouritesRoute,
   PlannerRoute: PlannerRoute,
   ShoppingRoute: ShoppingRoute,
+  WhyThisWorksRoute: WhyThisWorksRoute,
   BuildGlowBowlRoute: BuildGlowBowlRoute,
   BuildYoghurtBowlRoute: BuildYoghurtBowlRoute,
   RecipesSlugRoute: RecipesSlugRoute,
@@ -276,3 +297,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
