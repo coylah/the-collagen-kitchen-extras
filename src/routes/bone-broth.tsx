@@ -22,7 +22,7 @@ export const Route = createFileRoute("/bone-broth")({
 
 function BoneBrothPage() {
   const { data: recipes } = useSuspenseQuery(recipesQuery);
-  const broth = recipes.find(r => r.slug === "coylahs-collagen-bone-broth");
+  const broth = recipes.find(r => r.slug === "bone-broth");
 
   return (
     <AppShell>
