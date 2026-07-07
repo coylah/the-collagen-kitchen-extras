@@ -1,0 +1,3 @@
+UPDATE recipes 
+SET notes = 'This works just as well for lunch or a light dinner as it does for breakfast — an omelette doesn''t know what time it is, and neither should you. The base recipe is already collagen-rich on its own. Always finish with the chia and flaxseed scatter — it takes two seconds and adds meaningful omega-3s. If you''ve ever watched Gavin & Stacey, you''ll know Gwen is famous for her omelettes. Hers were magnificent but basic. These are better. Coylah Collagen Glow factor hits hard in this staple meal.'
+WHERE slug = 'build-your-own-glow-omelette';
