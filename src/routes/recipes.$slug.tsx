@@ -156,10 +156,12 @@ function RecipePage() {
       <article className="mx-auto max-w-4xl px-4 py-8">
         <Link
           to="/"
-          className="no-print mb-6 inline-flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-3 w-3" /> Back to cookbook
-        </Link>
+          <button
+  onClick={() => window.history.back()}
+  className="no-print mb-6 inline-flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
+>
+  <ArrowLeft className="h-3 w-3" /> Back
+</button>
 
         <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
 
