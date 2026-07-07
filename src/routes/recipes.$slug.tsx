@@ -18,6 +18,48 @@ import { cn } from "@/lib/utils";
 import { BuildYourBeautyOats } from "@/components/build-your-beauty-oats";
 import { OmeletteAdditions } from "@/components/omelette-additions";
 
+// Phase detection — maps ingredient keywords to collagen phases
+const PHASE_KEYWORDS = {
+  build: [
+    "chicken", "turkey", "beef", "salmon", "mackerel", "sardine", "tuna", "prawn",
+    "egg", "eggs", "cottage cheese", "halloumi", "skyr", "greek yoghurt", "yoghurt",
+    "bone broth", "gelatine", "milk", "cream cheese", "pork", "lamb", "mince",
+    "meatball", "steak", "fish", "seafood", "smoked salmon", "trout", "protein",
+  ],
+  activate: [
+    "red pepper", "yellow pepper", "green pepper", "pepper", "kiwi", "broccoli",
+    "strawberr", "blackcurrant", "guava", "lemon", "lime", "orange", "grapefruit",
+    "kale", "spinach", "watercress", "tomato", "mango", "pineapple", "papaya",
+    "brussels sprout", "berries", "berry", "citrus", "vitamin c",
+  ],
+  support: [
+    "pumpkin seed", "sesame seed", "sesame", "tahini", "cashew", "oat", "oats",
+    "brown rice", "dark chocolate", "walnut", "sunflower seed", "hemp seed",
+    "chia seed", "flaxseed", "flax", "almond", "hazelnut", "pecan", "pine nut",
+    "chickpea", "lentil", "cacao", "cocoa", "zinc", "copper", "manganese",
+  ],
+  protect: [
+    "avocado", "sweet potato", "carrot", "butternut", "squash", "salmon",
+    "mackerel", "sardine", "olive oil", "blueberr", "raspberr", "pomegranate",
+    "dark chocolate", "walnut", "leafy green", "rocket", "kale", "spinach",
+    "mixed berries", "antioxidant", "omega", "vitamin a", "vitamin e",
+    "blackberr", "cherry", "grape", "strawberr",
+  ],
+};
+
+function detectPhases(ingredients: { item: string }[]): string[] {
+  const text = ingredients.map(i => i.item.toLowerCase()).join(" ");
+  const phases: string[] = [];
+  for (const [phase, keywords] of Object.entries(PHASE_KEYWORDS)) {
+    if (keywords.some(kw => text.includes(kw))) {
+      phases.push(phase.charAt(0).toUpperCase() + phase.slice(1));
+    }
+  }
+  return phases;
+}
+
+const NO_PLAN_TYPES = new Set(["snack"]);
+
 const recipeQuery = (slug: string) =>
   queryOptions({
     queryKey: ["recipe", slug],
@@ -61,7 +103,7 @@ export const Route = createFileRoute("/recipes/$slug")({
   ),
 });
 
-const NO_PLAN_TYPES = new Set(["snack"]);
+const ALL_PHASES = ["Build", "Activate", "Support", "Protect"];
 
 function RecipePage() {
   const recipe = Route.useLoaderData() as import("@/lib/recipe-types").Recipe;
@@ -85,6 +127,13 @@ function RecipePage() {
     () => scaleRecipe(recipe, servings),
     [recipe, servings],
   );
+
+  const phases = useMemo(
+    () => detectPhases(recipe.ingredients),
+    [recipe.ingredients],
+  );
+
+  const missingPhases = ALL_PHASES.filter(p => !phases.includes(p));
 
   const total = recipe.prep_min + recipe.cook_min;
 
@@ -138,6 +187,23 @@ function RecipePage() {
                 {recipe.cook_min > 0 && ` · ${recipe.cook_min} cook)`}
               </span>
               <span>· Serves {servings}</span>
+            </div>
+
+            {/* Phase badges */}
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              {ALL_PHASES.map(phase => (
+                <span
+                  key={phase}
+                  className={cn(
+                    "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider",
+                    phases.includes(phase)
+                      ? "bg-secondary/10 text-secondary border border-secondary/20"
+                      : "bg-muted text-muted-foreground border border-border opacity-40"
+                  )}
+                >
+                  {phase}
+                </span>
+              ))}
             </div>
 
             <div className="no-print mt-5 flex flex-wrap gap-2">
@@ -298,6 +364,11 @@ function RecipePage() {
               <p className="font-serif text-xl font-light leading-relaxed text-foreground/80">
                 {recipe.collagen_tip}
               </p>
+              {missingPhases.length > 0 && (
+                <p className="mt-4 text-xs text-muted-foreground border-t border-border/40 pt-4">
+                  This recipe covers <span className="text-secondary font-medium">{phases.join(" · ")}</span>. For a complete collagen week, make sure your other meals are covering <span className="font-medium text-foreground/60">{missingPhases.join(" · ")}</span> too.
+                </p>
+              )}
             </div>
           )}
         </div>
