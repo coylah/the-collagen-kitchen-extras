@@ -26,7 +26,6 @@ function BoneBrothPage() {
 
   return (
     <AppShell>
-      {/* Hero */}
       <section className="border-b border-border">
         <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
           <div className="flex items-center gap-3 mb-3">
@@ -36,7 +35,7 @@ function BoneBrothPage() {
           </div>
           <p className="font-script text-2xl text-secondary -mb-1">Love Coylah</p>
           <h1 className="font-serif text-4xl sm:text-5xl font-light leading-tight text-foreground mb-3">
-            Bone Broth
+            Coylah's Collagen Bone Broth
           </h1>
           <div className="w-8 h-px bg-secondary mb-5" />
           <div className="max-w-2xl space-y-4 text-sm text-muted-foreground leading-relaxed font-light">
@@ -64,8 +63,7 @@ function BoneBrothPage() {
         </div>
       </section>
 
-      {/* Recipe */}
-      {broth && (
+      {broth ? (
         <section className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
           <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
             <div className="bg-white px-8 py-8 sm:px-12 border-b border-border">
@@ -125,7 +123,6 @@ function BoneBrothPage() {
             )}
           </div>
 
-          {/* Link to Why This Works */}
           <div className="mt-8 rounded-2xl border border-border bg-card p-6 text-center">
             <p className="text-sm text-muted-foreground mb-3">
               Bone broth is part of the Build phase — the foundation of the collagen matrix.
@@ -144,6 +141,10 @@ function BoneBrothPage() {
               Back to the cookbook →
             </Link>
           </div>
+        </section>
+      ) : (
+        <section className="mx-auto max-w-4xl px-4 py-10 text-center">
+          <p className="text-muted-foreground">Recipe loading...</p>
         </section>
       )}
     </AppShell>
