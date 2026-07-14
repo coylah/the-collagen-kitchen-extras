@@ -17,6 +17,7 @@ import { scaleRecipe } from "@/lib/recipe-math";
 import { cn } from "@/lib/utils";
 import { BuildYourBeautyOats } from "@/components/build-your-beauty-oats";
 import { OmeletteAdditions } from "@/components/omelette-additions";
+import { useNavigate } from "@tanstack/react-router";
 
 const PHASE_KEYWORDS = {
   build: [
@@ -24,7 +25,8 @@ const PHASE_KEYWORDS = {
     "egg", "eggs", "cottage cheese", "halloumi", "skyr", "greek yoghurt", "yoghurt",
     "bone broth", "gelatine", "milk", "cream cheese", "pork", "lamb", "mince",
     "meatball", "steak", "fish", "seafood", "smoked salmon", "trout", "protein",
-    "mussel", "clam", "anchovy", "herring", "cod", "haddock",
+    "mussel", "clam", "anchovy", "herring", "cod", "haddock", "feta", "parmesan",
+    "cream", "single cream", "double cream",
   ],
   activate: [
     "red pepper", "yellow pepper", "green pepper", "pepper", "kiwi", "broccoli",
@@ -32,7 +34,8 @@ const PHASE_KEYWORDS = {
     "kale", "spinach", "watercress", "tomato", "mango", "pineapple", "papaya",
     "brussels sprout", "berries", "berry", "citrus", "vitamin c", "raspberr",
     "blueberr", "blackberr", "mixed berries", "pomegranate", "passion fruit",
-    "cherry", "peach", "apricot", "watermelon", "goji",
+    "cherry", "peach", "apricot", "watermelon", "goji", "tenderstem", "broccoli",
+    "sugar snap", "courgette", "sweetcorn", "corn", "red cabbage",
   ],
   support: [
     "pumpkin seed", "sesame seed", "sesame", "tahini", "cashew", "oat", "oats",
@@ -40,7 +43,8 @@ const PHASE_KEYWORDS = {
     "chia seed", "flaxseed", "flax", "almond", "hazelnut", "pecan", "pine nut",
     "chickpea", "lentil", "cacao", "cocoa", "zinc", "copper", "manganese",
     "oatcake", "coconut", "peanut butter", "almond butter", "cashew butter",
-    "dark choc", "70%", "seed", "nut", "quinoa", "butter bean",
+    "dark choc", "70%", "seed", "nut", "quinoa", "butter bean", "peanut",
+    "pine nut", "edamame", "wholewheat", "wholegrain",
   ],
   protect: [
     "avocado", "sweet potato", "carrot", "butternut", "squash", "salmon",
@@ -49,7 +53,8 @@ const PHASE_KEYWORDS = {
     "mixed berries", "antioxidant", "omega", "vitamin a", "vitamin e",
     "blackberr", "cherry", "grape", "strawberr", "apple", "banana", "honey",
     "date", "dried apricot", "coconut oil", "extra virgin", "avocado oil",
-    "beetroot", "red cabbage", "turmeric", "ginger", "cinnamon",
+    "beetroot", "red cabbage", "turmeric", "ginger", "cinnamon", "sun-dried tomato",
+    "sun dried tomato", "harissa", "miso", "soy sauce",
   ],
 };
 
@@ -114,10 +119,11 @@ function RecipePage() {
   const recipe = Route.useLoaderData() as import("@/lib/recipe-types").Recipe;
   const { isFav, toggle } = useFavourites();
   const { set: setPlan } = useMealPlan();
+  const navigate = useNavigate();
   const [servings, setServings] = useState(recipe.servings);
   const [checkedIng, setCheckedIng] = useState<Record<number, boolean>>({});
   const [checkedStep, setCheckedStep] = useState<Record<number, boolean>>({});
-  const [showPlanPicker, setShowPlanPicker] = useState(false);
+  const [addedToPlan, setAddedToPlan] = useState(false);
 
   const canPlan = !NO_PLAN_TYPES.has(recipe.meal_type);
 
@@ -125,7 +131,7 @@ function RecipePage() {
     setCheckedIng({});
     setCheckedStep({});
     setServings(recipe.servings);
-    setShowPlanPicker(false);
+    setAddedToPlan(false);
   }, [recipe.slug, recipe.servings]);
 
   const scaledIngredients = useMemo(
@@ -154,6 +160,12 @@ function RecipePage() {
     recipe.collagen_tip.toLowerCase().startsWith(
       recipe.name.toLowerCase().slice(0, 20),
     );
+
+  function handleAddToPlan() {
+    // Save the recipe slug to localStorage so planner can highlight it
+    localStorage.setItem("ck.pendingPlanRecipe", JSON.stringify({ slug: recipe.slug, servings }));
+    navigate({ to: "/planner" });
+  }
 
   return (
     <AppShell>
@@ -225,11 +237,11 @@ function RecipePage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setShowPlanPicker(v => !v)}
+                  onClick={handleAddToPlan}
                   className="border-secondary/40 hover:border-secondary hover:text-secondary"
                 >
                   <CalendarPlus className="h-3.5 w-3.5" />
-                  {showPlanPicker ? "Cancel" : "Add to meal plan"}
+                  Add to meal plan
                 </Button>
               )}
 
@@ -237,15 +249,6 @@ function RecipePage() {
                 Print
               </Button>
             </div>
-
-            {showPlanPicker && canPlan && (
-              <PlanPicker
-                onPick={(day, slot) => {
-                  setPlan(day, slot, { slug: recipe.slug, servings });
-                  setShowPlanPicker(false);
-                }}
-              />
-            )}
 
             {hasOatsBuilder && (
               <p className="mt-5 text-xs text-muted-foreground border-l-2 border-secondary/40 pl-3">
@@ -438,52 +441,5 @@ function RecipeStamp({ mealType }: { mealType: string }) {
       <path d="M38 28 Q38 22 38 18" stroke="#1C1917" strokeWidth="0.55" fill="none" strokeLinecap="round"/>
       <path d="M46 30 Q46 24 44 22" stroke="#1C1917" strokeWidth="0.55" fill="none" strokeLinecap="round"/>
     </svg>
-  );
-}
-
-function PlanPicker({ onPick }: { onPick: (day: string, slot: Slot) => void }) {
-  const { plan } = useMealPlan();
-  return (
-    <div className="mt-4 rounded-xl border border-border p-4">
-      <p className="mb-3 text-xs text-muted-foreground">
-        Tap a slot to add this recipe. Filled slots shown in rose.
-      </p>
-      <div className="overflow-x-auto">
-        <div className="grid grid-cols-[auto_repeat(5,1fr)] gap-1 text-xs min-w-[340px]">
-          <div />
-          {SLOTS.map(s => (
-            <div key={s} className="px-1 text-center capitalize text-muted-foreground text-[10px]">{s.slice(0,4)}</div>
-          ))}
-          {DAYS.map(d => (
-            <PlanRow key={d} day={d} plan={plan} onPick={onPick} />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PlanRow({ day, plan, onPick }: { day: string; plan: Record<string, any>; onPick: (d: string, s: Slot) => void }) {
-  return (
-    <>
-      <div className="px-1 py-1 text-muted-foreground">{day}</div>
-      {SLOTS.map(s => {
-        const key = `${day}-${s}`;
-        const filled = !!plan[key];
-        return (
-          <button
-            key={s}
-            onClick={() => onPick(day, s)}
-            className={`rounded-md border py-1 text-xs transition-colors ${
-              filled
-                ? "border-secondary bg-secondary/10 text-secondary font-medium"
-                : "border-border text-muted-foreground hover:border-secondary hover:text-secondary"
-            }`}
-          >
-            {filled ? "✓" : "+"}
-          </button>
-        );
-      })}
-    </>
   );
 }
