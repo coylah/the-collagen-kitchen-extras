@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/why-this-works")({
   head: () => ({
@@ -20,34 +21,30 @@ const PHASES = [
   {
     key: "build",
     label: "BUILD",
-    color: "bg-[#fef2f4] border-secondary/20",
     cofactors: "Glycine · Proline · Lysine",
-    description: "The raw material. Your body cannot make collagen without these three amino acids. They come from protein — meat, fish, eggs, dairy and bone broth.",
-    foods: "Chicken, salmon, sardines, eggs, cottage cheese, bone broth, Greek yoghurt",
+    description: "The raw material. Your body cannot make collagen without these three amino acids — and it can't borrow them from anywhere else. They come from protein. Real protein. Meat, fish, eggs, dairy and bone broth.",
+    foods: "Chicken, salmon, sardines, eggs, cottage cheese, bone broth, Greek yoghurt, skyr",
   },
   {
     key: "activate",
     label: "ACTIVATE",
-    color: "bg-[#fef2f4] border-secondary/20",
     cofactors: "Vitamin C · Iron",
-    description: "The spark. Vitamin C and iron trigger the enzymes that convert those amino acids into stable collagen fibres. Without vitamin C, synthesis stops completely. This is literally what scurvy is.",
+    description: "The spark that gets everything moving. Vitamin C and iron trigger the enzymes that convert those amino acids into stable collagen fibres. Without vitamin C, synthesis stops completely — this is literally what scurvy is. Without iron, the same enzymes don't work properly even when vitamin C is plentiful.",
     foods: "Red pepper, kiwi, broccoli, strawberries, blackcurrants, sardines, lentils, spinach",
   },
   {
     key: "support",
     label: "SUPPORT",
-    color: "bg-[#fef2f4] border-secondary/20",
     cofactors: "Zinc · Copper · Manganese · Silica",
-    description: "The enablers. Zinc activates the building enzymes. Copper cross-links the fibres to make them strong. Manganese supports the amino acid metabolism needed. Silica supports the connective tissue framework collagen sits within.",
-    foods: "Pumpkin seeds, sesame seeds, oats, walnuts, dark chocolate, brown rice, cashews",
+    description: "The enablers that most people have never even heard of. Zinc activates the building enzymes. Copper cross-links the fibres to make them strong — without it, collagen forms but falls apart. Manganese and silica support the connective tissue framework everything sits within.",
+    foods: "Pumpkin seeds, sesame seeds, oats, walnuts, dark chocolate, brown rice, cashews, mussels",
   },
   {
     key: "protect",
     label: "PROTECT",
-    color: "bg-[#fef2f4] border-secondary/20",
     cofactors: "Vitamin A · Omega-3 · Antioxidants · Blood sugar stability",
-    description: "The defenders. Vitamin A protects and regenerates. Omega-3 reduces the inflammation that destroys collagen. Antioxidants neutralise oxidative damage. Stable blood sugar prevents glycation — where sugar literally attaches to collagen fibres and makes them stiff and brittle.",
-    foods: "Avocado, mackerel, sweet potato, berries, leafy greens, dark chocolate, oily fish",
+    description: "The defenders. Because building collagen is only half the job — you also have to stop it being destroyed. Vitamin A protects and regenerates. Omega-3 reduces the inflammation that breaks it down. Antioxidants neutralise the oxidative damage from UV, stress and pollution. And stable blood sugar stops sugar literally attaching to your collagen fibres and making them stiff.",
+    foods: "Avocado, mackerel, sweet potato, berries, leafy greens, dark chocolate, oily fish, olive oil",
   },
 ];
 
@@ -56,106 +53,105 @@ const MATRIX_SECTIONS = [
     phase: "BUILD",
     number: "01",
     name: "Protein — glycine, proline and lysine",
-    why: "The amino acids collagen is literally made from. Without them your body cannot form collagen at all. Glycine makes up one third of the collagen structure.",
+    why: "The amino acids collagen is literally made from. Glycine makes up one third of the collagen structure. Proline provides stability. Lysine is essential for the hydroxylation step that locks the triple helix in place. Bone broth and gelatine deliver these in their already-processed form — which is why they're so valuable.",
     rda: "45g protein/day minimum — more if active",
-    top: "Tuna (30g/100g), turkey (29g), chicken (27g), beef (26g), salmon (25g), sardines (25g), eggs (13g)",
-    note: "Animal protein delivers glycine, proline and lysine most efficiently. Gelatine and bone broth deliver these in their already-processed form.",
+    examples: "Salmon, chicken, eggs, sardines, cottage cheese, Greek yoghurt, bone broth",
+    note: "Animal protein delivers glycine, proline and lysine most efficiently. If you eat mostly plant-based, pay particular attention to lysine — it's low in most plant foods except legumes.",
   },
   {
     phase: "ACTIVATE",
     number: "02",
     name: "Vitamin C",
-    why: "Activates the enzymes that convert amino acids into stable collagen. Without it, synthesis stops. The recommended 75-90mg/day is a minimum — research suggests 200-500mg better supports collagen.",
-    rda: "75-90mg/day",
-    top: "Guava (228mg/100g), blackcurrants (181mg), yellow pepper (184mg), red pepper (128mg), kale (120mg), kiwi (93mg), broccoli (89mg)",
-    note: "Raw or lightly cooked is best — vitamin C degrades with prolonged heat.",
+    why: "Non-negotiable. Activates prolyl hydroxylase and lysyl hydroxylase — the enzymes that convert proline and lysine into the stable forms needed for a collagen triple helix. Raw or lightly cooked is best — vitamin C degrades with prolonged heat.",
+    rda: "75-90mg/day minimum",
+    examples: "Red pepper, blackcurrants, kiwi, broccoli, strawberries, Brussels sprouts, citrus",
+    note: "Half a raw red pepper covers your daily vitamin C needs entirely. It contains more vitamin C than an orange.",
   },
   {
     phase: "ACTIVATE",
     number: "03",
     name: "Iron",
-    why: "Works alongside vitamin C in the same hydroxylation enzymes. Without iron these enzymes don't function properly even if vitamin C is plentiful. Iron deficiency is one of the most common deficiencies in women.",
+    why: "Works alongside vitamin C in the same hydroxylation enzymes. Without iron these enzymes can't function properly even when vitamin C is plentiful. One of the most common deficiencies in women — and one that directly impairs collagen synthesis.",
     rda: "14.8mg/day (reproductive age) · 8.7mg/day (post-menopause)",
-    top: "Clams (28mg/100g), pumpkin seeds (8.8mg), sesame seeds (8-9mg), sardines (2.9mg), beef (2.6-3mg), lentils (3.3mg cooked)",
-    note: "⚠️ Liver is very high in iron but maximum once a week. Avoid entirely in pregnancy. Always pair plant iron sources with vitamin C to boost absorption.",
+    examples: "Clams, pumpkin seeds, sesame seeds, sardines, beef, lentils, spinach",
+    note: "⚠️ Liver is very high in iron but maximum once a week — avoid entirely in pregnancy. Always pair plant iron sources with vitamin C to increase absorption.",
   },
   {
     phase: "SUPPORT",
     number: "04",
     name: "Zinc",
-    why: "Activates the enzymes that build and renew collagen. Cannot be stored — you need it daily. Many women are quietly deficient, particularly during perimenopause.",
+    why: "Activates the enzymes that build and renew collagen. Cannot be stored — you need it daily. Many women are quietly deficient, particularly during perimenopause, without ever knowing it.",
     rda: "7mg/day for women",
-    top: "Oysters (16-90mg/100g), beef (4-8mg), pumpkin seeds (7-8mg), cashews (5.6mg), cheddar (3-4mg), oats (2-3mg)",
-    note: "Animal zinc is significantly more bioavailable than plant zinc.",
+    examples: "Oysters, beef, pumpkin seeds, cashews, cheddar, oats, hemp seeds",
+    note: "Oysters contain more zinc per gram than any other food on earth. Animal zinc is significantly more bioavailable than plant zinc.",
   },
   {
     phase: "SUPPORT",
     number: "05",
     name: "Copper",
-    why: "Activates lysyl oxidase — the enzyme that weaves collagen fibres together and makes them strong. Without copper, collagen forms but is weak and unstable.",
+    why: "Activates lysyl oxidase — the enzyme that weaves collagen fibres together and makes them strong. Without copper, collagen forms but is weak and unstable. Copper deficiency directly affects skin elasticity.",
     rda: "1.2mg/day",
-    top: "Oysters (4-8mg/100g), sesame seeds/tahini (4mg), cashews (2.2mg), hazelnuts (1.7mg), dark chocolate (1-2mg), walnuts (1.6mg)",
-    note: "Zinc and copper compete for absorption — if you supplement zinc, make sure copper intake is adequate.",
+    examples: "Oysters, sesame seeds, tahini, cashews, hazelnuts, dark chocolate, walnuts",
+    note: "Zinc and copper compete for absorption. If you supplement zinc, make sure your copper intake is adequate. Oysters contain both in naturally balanced proportions.",
   },
   {
     phase: "SUPPORT",
     number: "06",
     name: "Manganese",
-    why: "Helps the body metabolise the amino acids used to build collagen and is involved in forming procollagen — the precursor to mature collagen.",
+    why: "Helps metabolise the amino acids used to build collagen and is involved in forming procollagen — the precursor to mature collagen. Also supports the broader extracellular matrix that collagen sits within.",
     rda: "1.8mg/day",
-    top: "Mussels (6-7mg/100g), pine nuts (8mg), hazelnuts (6mg), pumpkin seeds (4.5mg), oats (4-5mg), brown rice (1-2mg cooked)",
-    note: "Mussels are one of the richest manganese sources available and are massively underused.",
+    examples: "Mussels, pine nuts, hazelnuts, pumpkin seeds, oats, brown rice, chickpeas",
+    note: "Mussels are one of the richest manganese sources available — and massively underused in British cooking.",
   },
   {
     phase: "SUPPORT",
     number: "07",
     name: "Silica",
-    why: "Supports the connective tissue framework that collagen sits within. Low silica levels are directly linked to reduced collagen formation and signs of premature skin ageing.",
+    why: "Supports the connective tissue framework that collagen sits within. Low silica levels are directly linked to reduced collagen formation. Absorption varies significantly — wholegrains are the most reliable source.",
     rda: "No official RDA — estimated 20-50mg/day",
-    top: "Brown rice (~1240mg/100g), oats (~595mg), sweet potato (~12mg), cucumber (~7mg), carrots (~5mg), strawberries (~5mg)",
-    note: "Brown rice has over double the silica of white rice. Wholegrains are the most reliable source.",
+    examples: "Brown rice, oats, sweet potato, cucumber, strawberries, carrots",
+    note: "Brown rice has over double the silica of white rice. This is one reason the recipes use wholegrains rather than refined alternatives.",
   },
   {
     phase: "PROTECT",
     number: "08",
     name: "Vitamin A",
-    why: "Protects collagen from breakdown, stimulates new production and improves blood circulation to skin tissue. Supports fibroblasts — the cells that manufacture collagen in your dermis.",
+    why: "Protects collagen from breakdown, stimulates new production and improves blood circulation to skin tissue. Supports fibroblasts — the cells in your dermis that actually manufacture collagen. Fat-soluble — always pair with a healthy fat for absorption.",
     rda: "600mcg RAE/day",
-    top: "Sweet potato (961mcg/100g), carrots (835mcg), butternut squash (532mcg), spinach (469mcg), eggs (148mcg preformed)",
-    note: "⚠️ Liver is very high in preformed vitamin A — maximum once a week. Avoid in pregnancy. Always pair beta-carotene vegetables with a healthy fat for absorption.",
+    examples: "Sweet potato, carrots, butternut squash, spinach, kale, eggs, mackerel",
+    note: "⚠️ Liver is very high in vitamin A — maximum once a week, avoid entirely in pregnancy.",
   },
   {
     phase: "PROTECT",
     number: "09",
     name: "Omega-3",
-    why: "Reduces the chronic inflammation that destroys collagen. Maintains skin barrier integrity. Plant omega-3 (ALA) converts to the usable forms at only 5-10% efficiency — oily fish delivers directly.",
+    why: "Reduces the chronic inflammation that destroys collagen. Maintains skin barrier integrity — affecting how plump and hydrated skin actually looks. Plant omega-3 converts to usable forms at only 5-10% efficiency. Oily fish delivers directly.",
     rda: "250-500mg EPA+DHA/day",
-    top: "Mackerel (2.5-5g/100g), salmon (1.5-2.5g), sardines (1.4-2g), herring (1.7-2.4g), trout (0.9-1.2g)",
-    note: "Two portions of oily fish a week covers most people's omega-3 needs entirely.",
+    examples: "Mackerel, salmon, sardines, herring, trout, anchovies, mussels",
+    note: "Two portions of oily fish a week covers most people's needs. Mackerel is cheap, sustainable and criminally underrated.",
   },
   {
     phase: "PROTECT",
     number: "10",
     name: "Antioxidants",
-    why: "Protect existing collagen from oxidative damage. Includes vitamin E (cell membrane protection), lycopene (UV protection), ellagic acid (may slow breakdown), resveratrol (inhibits breakdown enzymes) and selenium (works with vitamin E).",
+    why: "UV, pollution, stress, poor sleep and processed food all create oxidative stress that breaks collagen down. Antioxidants neutralise the free radicals responsible. Different ones protect in different ways — vitamin E protects cell membranes, lycopene protects from UV, ellagic acid may slow breakdown, resveratrol inhibits breakdown enzymes, selenium works alongside vitamin E.",
     rda: "Vitamin E 3mg/day · Selenium 60µg/day",
-    top: "Pomegranate seeds, berries, dark chocolate (70%+), avocado, sunflower seeds, almonds, red/purple grapes",
-    note: "⚠️ Brazil nuts are very high in selenium — 1-2 per day maximum. A small handful exceeds the safe daily limit.",
+    examples: "Pomegranate seeds, berries, dark chocolate, avocado, sunflower seeds, red grapes, almonds",
+    note: "⚠️ Brazil nuts — 1-2 per day maximum. A small handful exceeds the safe daily selenium limit.",
   },
   {
     phase: "PROTECT",
     number: "11",
     name: "Blood sugar stability",
-    why: "Sugar molecules attach to collagen fibres (glycation) making them rigid and damaged. This is a major cause of skin losing elasticity. Stable blood sugar prevents this happening.",
-    rda: "No RDA — aim for low GI foods and limit refined sugar",
-    top: "Oats, lentils, chickpeas, brown rice, sweet potato, quinoa, leafy greens, berries",
+    why: "Sugar molecules attach to collagen fibres in a process called glycation — making them rigid, brittle and damaged. Glycated collagen cannot be repaired, only replaced. This is a major cause of skin losing elasticity and developing a dull, grey tone over time.",
+    rda: "No RDA — aim for low GI foods and limit refined sugar and alcohol",
+    examples: "Oats, lentils, chickpeas, brown rice, sweet potato, quinoa, leafy greens, berries, cinnamon",
     note: "Alcohol depletes both zinc and vitamin C — two of the most critical collagen cofactors. Refined sugar causes direct collagen damage through glycation.",
   },
 ];
 
 function WhyThisWorksPage() {
   const [showMatrix, setShowMatrix] = useState(false);
-  const [accepted, setAccepted] = useState(false);
 
   return (
     <AppShell>
@@ -178,25 +174,28 @@ function WhyThisWorksPage() {
         {/* Coylah's story */}
         <div className="space-y-5 text-sm font-light leading-relaxed text-foreground/80 mb-10">
           <p>
-            I spent ten years working in skin. I took the powders. I recommended the powders. I genuinely believed in the powders.
+            I spent ten years working in skin. I genuinely loved it — the ingredients, the formulations, the science. I was that person reading clinical studies on retinoids at midnight for fun.
           </p>
           <p>
-            Then I started actually reading the research.
+            And I took the collagen powders. Of course I did. I recommended them. I believed in them.
           </p>
           <p>
-            Collagen powder delivers amino acids — and that's it. Your body can only turn those amino acids into actual collagen if everything else is already in place. The vitamin C to trigger synthesis. The zinc and copper to build and cross-link the fibres. The iron to stabilise the structure. The antioxidants to protect what you've made. Without those things, the amino acids just get used for something else entirely.
-          </p>
-          <p>
-            That was the missing piece. Not the collagen — but everything your body needs alongside it to actually use it.
-          </p>
-          <p>
-            Four years of cross-referencing research papers, nutritional databases and recipe testing later, this is what I built.
+            Then I actually started reading the research properly. Not the brand-funded stuff. The actual peer-reviewed research. And something kept coming up that nobody in the supplement industry was talking about.
           </p>
           <p className="font-normal text-foreground">
-            Every recipe in this cookbook is built around four phases — Build, Activate, Support, Protect. Inside those four phases live eleven specific nutrients your body needs to make collagen properly. Complex? A bit. But you don't need to understand all of it. That's what this cookbook is for.
+            Collagen powder delivers amino acids. That's it. Your body can only turn those amino acids into actual collagen if everything else is already in place — the vitamin C to trigger synthesis, the zinc and copper to build and cross-link the fibres, the iron to stabilise the structure, the antioxidants to protect what you've made. Without those things already present, the amino acids just get used for something else.
           </p>
           <p>
-            Follow the recipes. Use the planner. Build a Glow Bowl. Have a dessert. Every single thing in here has been lovingly thought through to make sure you're hitting every cofactor, every phase, every week — without the guesswork, without the confusion, and without spending a fortune on half the solution.
+            The powders weren't the problem. The missing picture was the problem.
+          </p>
+          <p>
+            Four years of cross-referencing nutritional databases, research papers and recipe testing later, I built The Collagen Kitchen Matrix — a complete framework mapping every food against every cofactor involved in collagen synthesis and protection. Every single recipe in this cookbook has been built using it.
+          </p>
+          <p>
+            You don't need to understand all of it. Honestly — that's the whole point. I've done that bit so you don't have to.
+          </p>
+          <p>
+            Follow the recipes. Use the planner. Build a Glow Bowl. Have a dessert. The matrix is working behind the scenes on every single plate.
           </p>
           <p>
             The science is here if you want it. But mostly? Just eat the food.
@@ -207,10 +206,10 @@ function WhyThisWorksPage() {
         {/* The four phases */}
         <div className="mb-10">
           <h2 className="font-serif text-2xl font-light mb-1">The four phases</h2>
-          <p className="text-sm text-muted-foreground mb-6">Eleven cofactors. Four phases. One system.</p>
+          <p className="text-sm text-muted-foreground mb-6">Every recipe is built around all four. Miss one and the whole system underperforms.</p>
           <div className="space-y-4">
             {PHASES.map((phase) => (
-              <div key={phase.key} className={`rounded-2xl border p-6 ${phase.color}`}>
+              <div key={phase.key} className="rounded-2xl border border-secondary/20 bg-[#fef2f4] p-6">
                 <div className="flex items-start gap-4">
                   <span className="inline-flex h-8 w-20 shrink-0 items-center justify-center rounded-full bg-secondary text-[10px] font-semibold uppercase tracking-wider text-secondary-foreground">
                     {phase.label}
@@ -219,7 +218,7 @@ function WhyThisWorksPage() {
                     <p className="text-xs text-secondary font-medium tracking-wider mb-1">{phase.cofactors}</p>
                     <p className="text-sm font-light leading-relaxed text-foreground/80 mb-2">{phase.description}</p>
                     <p className="text-[11px] text-muted-foreground">
-                      <span className="font-medium text-foreground/60">Key foods:</span> {phase.foods}
+                      <span className="font-medium text-foreground/60">You'll see these throughout the cookbook:</span> {phase.foods}
                     </p>
                   </div>
                 </div>
@@ -228,16 +227,16 @@ function WhyThisWorksPage() {
           </div>
         </div>
 
-        {/* Full matrix toggle */}
+        {/* Matrix toggle */}
         <div className="rounded-2xl border border-border bg-card mb-8">
           <button
             onClick={() => setShowMatrix(v => !v)}
             className="w-full flex items-center justify-between p-6 text-left"
           >
             <div>
-              <h2 className="font-serif text-xl font-light">The full collagen matrix</h2>
+              <h2 className="font-serif text-xl font-light">Inside the Collagen Kitchen Matrix</h2>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Every cofactor. Every food. Ordered by amount per realistic portion.
+                Examples from the nutritional framework used to build every recipe in this cookbook.
               </p>
             </div>
             {showMatrix
@@ -248,6 +247,9 @@ function WhyThisWorksPage() {
 
           {showMatrix && (
             <div className="border-t border-border px-6 pb-6 pt-5 space-y-8">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Every recipe has been built using the complete Collagen Kitchen Matrix — every food mapped against every cofactor across all four phases. Below are examples of the foods you'll regularly see throughout the cookbook and exactly why they've earned their place.
+              </p>
               {MATRIX_SECTIONS.map((s) => (
                 <div key={s.number} className="border-b border-border/40 pb-6 last:border-0 last:pb-0">
                   <div className="flex items-center gap-3 mb-3">
@@ -263,7 +265,7 @@ function WhyThisWorksPage() {
                       <span className="font-medium text-foreground/60">Daily target:</span> {s.rda}
                     </p>
                     <p className="text-[11px] text-muted-foreground">
-                      <span className="font-medium text-foreground/60">Best sources:</span> {s.top}
+                      <span className="font-medium text-foreground/60">Examples include:</span> {s.examples}
                     </p>
                     {s.note && (
                       <p className="text-[11px] text-secondary/80 italic mt-1">{s.note}</p>
@@ -278,12 +280,14 @@ function WhyThisWorksPage() {
         {/* Disclaimer */}
         <div className="rounded-2xl border border-border/60 bg-muted/20 p-5 text-center">
           <p className="text-xs text-muted-foreground leading-relaxed">
-            This page is an educational guide, not medical advice. Always speak to your GP before making significant dietary changes — especially during pregnancy, if you have a health condition, or if you take medication. Figures sourced from USDA FoodData Central, UK CoFID and peer-reviewed research.{" "}
+            This page is an educational guide, not medical advice. Always speak to your GP before making significant dietary changes — especially during pregnancy, if you have a health condition, or if you take medication. Figures referenced from USDA FoodData Central, UK CoFID and peer-reviewed research.{" "}
             <span className="font-medium text-foreground/60">
-              ⚠️ Liver: maximum once a week, avoid in pregnancy.
-              Brazil nuts: 1-2 per day maximum.
+              ⚠️ Liver: maximum once a week, avoid in pregnancy. Brazil nuts: 1-2 per day maximum.
             </span>
           </p>
+          <Link to="/bone-broth" className="mt-3 inline-block text-xs text-secondary hover:underline underline-offset-2">
+            Read about bone broth — the most direct collagen food in this cookbook →
+          </Link>
         </div>
 
       </article>
