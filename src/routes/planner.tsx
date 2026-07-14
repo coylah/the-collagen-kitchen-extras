@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Trash2, X, ShoppingBasket } from "lucide-react";
 import { listRecipes } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import type { Recipe } from "@/lib/recipe-types";
 import { DAYS, SLOTS, planKey, useMealPlan, useShoppingExtras, useManualItems, type Slot, type PlanEntry } from "@/lib/user-state";
+import { cn } from "@/lib/utils";
 
 const recipesQuery = queryOptions({
   queryKey: ["recipes"],
@@ -29,7 +30,6 @@ export const Route = createFileRoute("/planner")({
   ),
 });
 
-// Which meal types are valid for each slot
 const SLOT_MEAL_TYPES: Record<string, string[]> = {
   breakfast: ["breakfast"],
   lunch: ["lunch"],
@@ -45,6 +45,21 @@ function PlannerPage() {
   const { clear: clearExtras } = useShoppingExtras();
   const { clearAll: clearManual } = useManualItems();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [pendingRecipe, setPendingRecipe] = useState<{ slug: string; servings: number; name: string } | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("ck.pendingPlanRecipe");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        const recipe = recipes.find(r => r.slug === parsed.slug);
+        if (recipe) {
+          setPendingRecipe({ slug: parsed.slug, servings: parsed.servings, name: recipe.name });
+        }
+        localStorage.removeItem("ck.pendingPlanRecipe");
+      } catch (e) {}
+    }
+  }, [recipes]);
 
   const totalMeals = Object.values(plan).filter(Boolean).length;
 
@@ -53,6 +68,12 @@ function PlannerPage() {
     clearExtras();
     clearManual();
     setShowClearConfirm(false);
+  }
+
+  function addPendingToSlot(day: string, slot: Slot) {
+    if (!pendingRecipe) return;
+    set(day, slot, { slug: pendingRecipe.slug, servings: pendingRecipe.servings });
+    setPendingRecipe(null);
   }
 
   return (
@@ -105,7 +126,25 @@ function PlannerPage() {
         </div>
       </section>
 
-      {/* Mobile — one slot at a time */}
+      {/* Pending recipe banner */}
+      {pendingRecipe && (
+        <div className="bg-secondary/10 border-b border-secondary/20 px-4 py-3">
+          <div className="mx-auto max-w-6xl">
+            <p className="text-sm font-medium text-secondary mb-2">
+              Adding: <span className="font-serif">{pendingRecipe.name}</span>
+            </p>
+            <p className="text-xs text-muted-foreground mb-3">Tap a slot below to add it to your week.</p>
+            <button
+              onClick={() => setPendingRecipe(null)}
+              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile layout */}
       <section className="lg:hidden mx-auto max-w-6xl px-4 py-4">
         <div className="space-y-6">
           {SLOTS.map((slot) => (
@@ -117,14 +156,25 @@ function PlannerPage() {
                   const isCustom = entry?.isCustomBowl;
                   const r = entry && !isCustom ? bySlug.get(entry.slug) : null;
                   const isFilled = !!entry && (isCustom || !!r);
+                  const isPending = !!pendingRecipe;
                   const slotRecipes = recipes.filter(rc =>
                     SLOT_MEAL_TYPES[slot]?.includes(rc.meal_type)
                   );
 
                   return (
-                    <div key={day} className={`rounded-lg border text-[10px] transition-all ${isFilled ? "border-secondary/40 bg-[#fef2f4]" : "border-border bg-white"}`}>
+                    <div
+                      key={day}
+                      className={cn(
+                        "rounded-lg border text-[10px] transition-all",
+                        isFilled ? "border-secondary/40 bg-[#fef2f4]" : "border-border bg-white",
+                        isPending && !isFilled && "border-secondary/40 bg-secondary/5 cursor-pointer"
+                      )}
+                      onClick={() => isPending && !isFilled ? addPendingToSlot(day, slot) : undefined}
+                    >
                       <div className="px-1 pt-1 text-center text-muted-foreground font-medium">{day}</div>
-                      {isCustom && entry ? (
+                      {isPending && !isFilled ? (
+                        <div className="p-1 text-center text-secondary text-[9px]">+ tap</div>
+                      ) : isCustom && entry ? (
                         <div className="p-1 flex flex-col gap-1">
                           <p className="line-clamp-2 text-[9px] leading-tight text-foreground">{entry.bowlName}</p>
                           <button onClick={() => set(day, slot, null)} className="text-destructive text-[9px]">✕</button>
@@ -159,7 +209,7 @@ function PlannerPage() {
         </div>
       </section>
 
-      {/* Desktop — full grid */}
+      {/* Desktop layout */}
       <section className="hidden lg:block mx-auto max-w-6xl px-4 py-6 sm:px-6">
         <div className="w-full overflow-x-auto">
           <div className="min-w-[700px] grid grid-cols-[56px_repeat(5,1fr)] gap-1.5">
@@ -170,7 +220,16 @@ function PlannerPage() {
               </div>
             ))}
             {DAYS.map((d) => (
-              <DayRow key={d} day={d} plan={plan} bySlug={bySlug} onSet={set} recipes={recipes} />
+              <DayRow
+                key={d}
+                day={d}
+                plan={plan}
+                bySlug={bySlug}
+                onSet={set}
+                recipes={recipes}
+                pendingRecipe={pendingRecipe}
+                onAddPending={addPendingToSlot}
+              />
             ))}
           </div>
         </div>
@@ -182,12 +241,14 @@ function PlannerPage() {
   );
 }
 
-function DayRow({ day, plan, bySlug, onSet, recipes }: {
+function DayRow({ day, plan, bySlug, onSet, recipes, pendingRecipe, onAddPending }: {
   day: string;
   plan: ReturnType<typeof useMealPlan>["plan"];
   bySlug: Map<string, Recipe>;
   onSet: ReturnType<typeof useMealPlan>["set"];
   recipes: Recipe[];
+  pendingRecipe: { slug: string; servings: number; name: string } | null;
+  onAddPending: (day: string, slot: Slot) => void;
 }) {
   const [confirmSlot, setConfirmSlot] = useState<string | null>(null);
 
@@ -202,13 +263,22 @@ function DayRow({ day, plan, bySlug, onSet, recipes }: {
         const r = entry && !isCustom ? bySlug.get(entry.slug) : null;
         const isFilled = !!entry && (isCustom || !!r);
         const slotKey = `${day}-${s}`;
+        const isPending = !!pendingRecipe;
         const slotRecipes = recipes.filter(rc =>
           SLOT_MEAL_TYPES[s]?.includes(rc.meal_type)
         );
 
         return (
-          <div key={s} className={`min-h-[80px] rounded-lg border text-xs transition-all duration-150 relative ${isFilled ? "border-secondary/40 bg-[#fef2f4]" : "border-border bg-white hover:border-secondary/40"}`}>
-
+          <div
+            key={s}
+            className={cn(
+              "min-h-[80px] rounded-lg border text-xs transition-all duration-150 relative",
+              isFilled ? "border-secondary/40 bg-[#fef2f4]" : "border-border bg-white hover:border-secondary/40",
+              isPending && !isFilled && "border-secondary border-dashed bg-secondary/5 cursor-pointer"
+            )}
+            onClick={() => isPending && !isFilled ? onAddPending(day, s) : undefined}
+          >
+            {/* Confirm remove */}
             {confirmSlot === slotKey && (
               <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-lg bg-background/95 p-2 text-center">
                 <p className="text-[11px] text-foreground font-medium">Remove?</p>
@@ -219,7 +289,11 @@ function DayRow({ day, plan, bySlug, onSet, recipes }: {
               </div>
             )}
 
-            {isCustom && entry ? (
+            {isPending && !isFilled ? (
+              <div className="flex h-full min-h-[80px] items-center justify-center">
+                <span className="text-secondary text-xs font-medium">+ Add here</span>
+              </div>
+            ) : isCustom && entry ? (
               <div className="flex h-full flex-col justify-between p-2 min-h-[80px]">
                 <p className="line-clamp-3 font-serif text-sm leading-snug text-foreground">{entry.bowlName}</p>
                 <div className="mt-1 flex items-center justify-between">
