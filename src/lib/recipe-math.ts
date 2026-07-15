@@ -4,6 +4,25 @@ export function parseQty(qty: string): number | null {
   if (!qty) return null;
   const s = qty.trim();
   if (!s) return null;
+
+  // Handle unicode fractions directly
+  const unicodeFracs: Record<string, number> = {
+    "½": 0.5, "¼": 0.25, "¾": 0.75,
+    "⅓": 0.333, "⅔": 0.667,
+    "⅛": 0.125, "⅜": 0.375, "⅝": 0.625, "⅞": 0.875,
+  };
+
+  // Check for whole number + unicode fraction e.g. "1½"
+  for (const [frac, val] of Object.entries(unicodeFracs)) {
+    if (s.endsWith(frac)) {
+      const whole = s.slice(0, -frac.length).trim();
+      const wholeNum = whole ? parseFloat(whole) : 0;
+      if (!isNaN(wholeNum)) return wholeNum + val;
+    }
+    if (s === frac) return val;
+  }
+
+  // Handle slash fractions e.g. "1/2"
   if (s.includes("/")) {
     const parts = s.split("/");
     if (parts.length === 2) {
@@ -13,10 +32,13 @@ export function parseQty(qty: string): number | null {
     }
     return null;
   }
+
+  // Handle ranges e.g. "1-2" — take the lower
   if (s.includes("-")) {
     const [a] = s.split("-").map((x) => parseFloat(x));
     if (!isNaN(a)) return a;
   }
+
   const n = parseFloat(s);
   return isNaN(n) ? null : n;
 }
@@ -61,8 +83,6 @@ export type ShoppingItem = {
   key: string;
 };
 
-// Prep/descriptive words to strip before matching so
-// "tomatoes, chopped" and "2 tomatoes" merge into one item
 const PREP_WORDS = [
   "chopped", "diced", "sliced", "minced", "crushed", "grated",
   "peeled", "shredded", "cubed", "halved", "quartered", "julienned",
@@ -72,7 +92,6 @@ const PREP_WORDS = [
   "small", "medium", "large", "whole", "ripe",
 ];
 
-// Aliases — different names for the same buyable item merge together
 const ITEM_ALIASES: Record<string, string> = {
   "chicken breast": "chicken breast",
   "chicken breasts": "chicken breast",
@@ -113,7 +132,6 @@ function stripPrepWords(s: string): string {
   for (const word of PREP_WORDS) {
     result = result.replace(new RegExp(`\\b${word}\\b`, "g"), "");
   }
-  // Clean up leftover commas, double spaces, "a", "an"
   result = result
     .replace(/,/g, " ")
     .replace(/\ba\b/g, " ")
@@ -157,8 +175,6 @@ const UNIT_ALIASES: Record<string, string> = {
   cup: "cup",
 };
 
-// Convert cup measurements to grams for common items so they merge with gram-based entries
-// Rough kitchen conversions — good enough for shopping purposes
 const CUP_TO_GRAMS: Record<string, number> = {
   "greek yoghurt": 245,
   "flour": 120,
@@ -174,15 +190,11 @@ function normUnit(u: string): string {
   return UNIT_ALIASES[lower] ?? lower;
 }
 
-// Staple categories — show on list but no qty needed, just a tick
 const STAPLE_CATEGORIES = new Set(["cupboard", "pantry", "herbs", "spices", "fats"]);
-
-// Very small units — treat as staple, no precise qty needed
 const STAPLE_UNITS = new Set([
   "tsp", "tbsp", "teaspoon", "tablespoon",
   "pinch", "pinches", "dash", "splash", "drizzle",
 ]);
-
 const PRODUCE_CATEGORIES = new Set(["produce"]);
 
 function isStaple(ing: { category: string; unit: string }): boolean {
@@ -203,7 +215,6 @@ function shoppingDisplayName(item: string): string {
   return normed.charAt(0).toUpperCase() + normed.slice(1);
 }
 
-// Items that should always show as whole numbers (you can't buy half an avocado at most shops)
 const WHOLE_ITEM_NAMES = new Set([
   "avocado", "banana", "onion", "lemon", "lime", "orange",
   "apple", "cucumber", "pepper", "carrot", "egg", "eggs",
@@ -225,7 +236,6 @@ export function buildShoppingList(
       let n = parseQty(ing.qty);
       let unit = normUnit(ing.unit);
 
-      // Convert cup measurements to grams where we have a conversion
       if (unit === "cup" && CUP_TO_GRAMS[itemName] && n != null) {
         n = n * CUP_TO_GRAMS[itemName];
         unit = "g";
@@ -258,7 +268,6 @@ export function buildShoppingList(
     }
   }
 
-  // Format final display quantities — round to realistic shopping units
   for (const item of map.values()) {
     if (item.staple) {
       item.qtyText = "";
@@ -274,7 +283,6 @@ export function buildShoppingList(
       (PRODUCE_CATEGORIES.has(item.category.toLowerCase()) && !item.unit);
 
     if (isWholeItem) {
-      // Round UP to a whole number — you can't buy half an avocado
       item.qty = Math.ceil(item.qty);
       item.qtyText = String(item.qty);
       item.unit = "";
