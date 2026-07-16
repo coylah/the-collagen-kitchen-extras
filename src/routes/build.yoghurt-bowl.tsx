@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Check, ShoppingBasket, CalendarPlus, X } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { useShoppingExtras, useMealPlan, DAYS, SLOTS, type Slot } from "@/lib/user-state";
+import { useShoppingExtras } from "@/lib/user-state";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/build/yoghurt-bowl")({
@@ -40,7 +40,7 @@ const STEPS: Step[] = [
     category: "dairy",
     options: [
       { label: "Greek yoghurt", note: "The classic. Around 10g protein per 100g. Thick, creamy, brilliant." },
-      { label: "Skyr", note: "Icelandic style — even thicker than Greek yoghurt. Highest protein of all, around 11g per 100g." },
+      { label: "Skyr", note: "Icelandic style — even thicker than Greek yoghurt. Exceptionally high in protein at around 11g per 100g." },
       { label: "Coconut yoghurt", note: "Dairy free. Naturally sweet and creamy. Lower in protein but great if you're avoiding dairy." },
     ],
   },
@@ -52,26 +52,11 @@ const STEPS: Step[] = [
     intro: "Pick two or three. The more colour the better.",
     category: "produce",
     options: [
-      { label: "Blueberries" },
-      { label: "Raspberries" },
-      { label: "Strawberries" },
-      { label: "Blackberries" },
-      { label: "Mixed berries" },
-      { label: "Mango chunks" },
-      { label: "Kiwi" },
-      { label: "Banana" },
-      { label: "Peach" },
-      { label: "Cherries" },
-      { label: "Pomegranate seeds" },
-      { label: "Passion fruit" },
-      { label: "Papaya" },
-      { label: "Pineapple chunks" },
-      { label: "Apple slices" },
-      { label: "Pear slices" },
-      { label: "Watermelon" },
-      { label: "Goji berries" },
-      { label: "Dried apricots" },
-      { label: "Dried cranberries" },
+      { label: "Blueberries" }, { label: "Raspberries" }, { label: "Strawberries" }, { label: "Blackberries" },
+      { label: "Mixed berries" }, { label: "Mango chunks" }, { label: "Kiwi" }, { label: "Banana" },
+      { label: "Peach" }, { label: "Cherries" }, { label: "Pomegranate seeds" }, { label: "Passion fruit" },
+      { label: "Papaya" }, { label: "Pineapple chunks" }, { label: "Apple slices" }, { label: "Pear slices" },
+      { label: "Watermelon" }, { label: "Goji berries" }, { label: "Dried apricots" }, { label: "Dried cranberries" },
       { label: "Fig slices" },
     ],
   },
@@ -83,22 +68,10 @@ const STEPS: Step[] = [
     intro: "Pick two or three.",
     category: "cupboard",
     options: [
-      { label: "Homemade granola" },
-      { label: "Oats" },
-      { label: "Crushed almonds" },
-      { label: "Walnuts" },
-      { label: "Pecans" },
-      { label: "Cashews" },
-      { label: "Hazelnuts" },
-      { label: "Macadamia nuts" },
-      { label: "Pumpkin seeds" },
-      { label: "Sunflower seeds" },
-      { label: "Chia seeds" },
-      { label: "Flaxseed" },
-      { label: "Hemp seeds" },
-      { label: "Sesame seeds" },
-      { label: "Coconut flakes" },
-      { label: "Cacao nibs" },
+      { label: "Homemade granola" }, { label: "Oats" }, { label: "Crushed almonds" }, { label: "Walnuts" },
+      { label: "Pecans" }, { label: "Cashews" }, { label: "Hazelnuts" }, { label: "Macadamia nuts" },
+      { label: "Pumpkin seeds" }, { label: "Sunflower seeds" }, { label: "Chia seeds" }, { label: "Flaxseed" },
+      { label: "Hemp seeds" }, { label: "Sesame seeds" }, { label: "Coconut flakes" }, { label: "Cacao nibs" },
       { label: "Dark chocolate chips (70%+)" },
     ],
   },
@@ -110,13 +83,8 @@ const STEPS: Step[] = [
     intro: "Pick one.",
     category: "cupboard",
     options: [
-      { label: "Honey" },
-      { label: "Peanut butter" },
-      { label: "Almond butter" },
-      { label: "Cashew butter" },
-      { label: "Tahini" },
-      { label: "Maple syrup" },
-      { label: "Melted dark chocolate" },
+      { label: "Honey" }, { label: "Peanut butter" }, { label: "Almond butter" }, { label: "Cashew butter" },
+      { label: "Tahini" }, { label: "Maple syrup" }, { label: "Melted dark chocolate" },
     ],
   },
   {
@@ -158,32 +126,26 @@ type Picks = Record<string, string[]>;
 function YoghurtBowlBuilder() {
   const [picks, setPicks] = useState<Picks>({});
   const [added, setAdded] = useState(false);
-  const [showPlanPicker, setShowPlanPicker] = useState(false);
-  const [plannedTo, setPlannedTo] = useState<string | null>(null);
   const { add } = useShoppingExtras();
-  const { plan, set: setPlan } = useMealPlan();
 
   useEffect(() => { setAdded(false); }, []);
 
   function togglePick(stepKey: string, optionLabel: string) {
     setAdded(false);
-    setPlannedTo(null);
     setPicks((prev) => {
       const cur = prev[stepKey] ?? [];
-      if (cur.includes(optionLabel))
-        return { ...prev, [stepKey]: cur.filter((o) => o !== optionLabel) };
+      if (cur.includes(optionLabel)) return { ...prev, [stepKey]: cur.filter((o) => o !== optionLabel) };
       return { ...prev, [stepKey]: [...cur, optionLabel] };
     });
   }
 
   function applyPreset(p: Preset) {
     setAdded(false);
-    setPlannedTo(null);
     setPicks(p.pick as Picks);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function reset() { setPicks({}); setAdded(false); setPlannedTo(null); }
+  function reset() { setPicks({}); setAdded(false); }
 
   const allPicked = useMemo(() => {
     const out: { item: string; category: string }[] = [];
@@ -209,16 +171,15 @@ function YoghurtBowlBuilder() {
     setAdded(true);
   }
 
-  function addToPlan(day: string, slot: Slot) {
-    setPlan(day, slot, {
+  function addToPlan() {
+    if (allPicked.length === 0) return;
+    localStorage.setItem("ck.pendingPlanRecipe", JSON.stringify({
       slug: "",
       servings: 1,
       isCustomBowl: true,
       bowlName,
       bowlIngredients: allPicked,
-    });
-    setShowPlanPicker(false);
-    setPlannedTo(`${day} ${slot}`);
+    }));
   }
 
   const totalPicked = Object.values(picks).flat().length;
@@ -239,7 +200,7 @@ function YoghurtBowlBuilder() {
           </h1>
           <div className="w-8 h-px bg-secondary mb-4" />
           <p className="max-w-xl text-sm text-muted-foreground leading-relaxed font-light">
-            Five steps to a collagen-supporting bowl — brilliant for breakfast or light enough for lunch. Base, Activate, Fortify, Protect, Boost — each layer doing something specific for your skin.
+            Five steps to a collagen-supporting bowl — brilliant for breakfast or light enough for lunch. Base, Activate, Fortify, Protect, Boost — each layer doing something specific for your skin. Start from a preset or build entirely your own.
           </p>
           {stepsComplete > 0 && (
             <div className="flex items-center gap-3 mt-4">
@@ -261,11 +222,7 @@ function YoghurtBowlBuilder() {
             <p className="text-sm text-muted-foreground mb-3">Tap one to pre-fill your bowl, then tweak to taste.</p>
             <div className="flex flex-wrap gap-2">
               {PRESETS.map((p) => (
-                <button
-                  key={p.name}
-                  onClick={() => applyPreset(p)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-sm transition-all hover:border-secondary hover:bg-secondary/5 hover:text-secondary"
-                >
+                <button key={p.name} onClick={() => applyPreset(p)} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-sm transition-all hover:border-secondary hover:bg-secondary/5 hover:text-secondary">
                   ✦ {p.name}
                 </button>
               ))}
@@ -362,47 +319,16 @@ function YoghurtBowlBuilder() {
               </Button>
               {added && <Link to="/shopping" className="text-center text-xs text-secondary underline underline-offset-2 -mt-1">View shopping list →</Link>}
 
-              <Button
-                variant="outline"
-                onClick={() => setShowPlanPicker(v => !v)}
-                disabled={totalPicked === 0}
-                className="w-full border-secondary/40 hover:border-secondary hover:text-secondary h-11"
-              >
-                <CalendarPlus className="h-4 w-4" />
-                {showPlanPicker ? "Cancel" : "Add to meal plan"}
-              </Button>
-              {plannedTo && (
-                <p className="text-center text-xs text-secondary -mt-1">Added to {plannedTo} ✓</p>
-              )}
-
-              {showPlanPicker && (
-                <div className="mt-1 rounded-xl border border-border p-4">
-                  <p className="mb-3 text-xs text-muted-foreground">Tap a slot to add this bowl:</p>
-                  <div className="overflow-x-auto">
-                    <div className="grid grid-cols-[36px_repeat(4,1fr)] gap-1.5 text-[11px] min-w-[280px]">
-                      <div />
-                      {SLOTS.map(s => <div key={s} className="text-center capitalize text-muted-foreground py-1">{s.slice(0,4)}</div>)}
-                      {DAYS.map(d => (
-                        <div key={d} className="contents">
-                          <div className="py-1.5 text-muted-foreground">{d}</div>
-                          {SLOTS.map(s => {
-                            const filled = !!plan[`${d}-${s}`];
-                            return (
-                              <button
-                                key={s}
-                                onClick={() => addToPlan(d, s)}
-                                className={`rounded-md border py-1.5 text-[11px] transition-colors ${filled ? "border-secondary bg-secondary/10 text-secondary" : "border-border text-muted-foreground hover:border-secondary hover:text-secondary"}`}
-                              >
-                                {filled ? "✓" : "+"}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
+              <Link to="/planner" onClick={addToPlan}>
+                <Button
+                  variant="outline"
+                  disabled={totalPicked === 0}
+                  className="w-full border-secondary/40 hover:border-secondary hover:text-secondary h-11"
+                >
+                  <CalendarPlus className="h-4 w-4" />
+                  Add to meal plan
+                </Button>
+              </Link>
 
               {totalPicked > 0 && <button onClick={reset} className="text-center text-xs text-muted-foreground hover:text-foreground pt-1">Start over</button>}
             </div>
