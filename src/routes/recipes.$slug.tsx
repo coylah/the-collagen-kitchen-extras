@@ -66,7 +66,7 @@ function detectPhases(ingredients: { item: string }[]): string[] {
   return phases;
 }
 
-const NO_PLAN_TYPES = new Set(["snack"]);
+const NO_PLAN_TYPES = new Set<string>();
 const ALL_PHASES = ["Build", "Activate", "Support", "Protect"];
 
 const recipeQuery = (slug: string) =>
