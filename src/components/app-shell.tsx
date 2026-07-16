@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, BookOpen, CalendarDays, ShoppingBasket, Salad, HelpCircle, Sparkles } from "lucide-react";
+import { Heart, BookOpen, CalendarDays, ShoppingBasket, HelpCircle, FlaskConical } from "lucide-react";
 import type { ReactNode } from "react";
 import { WelcomeModal } from "@/components/welcome-modal";
 
@@ -32,12 +32,10 @@ function Header() {
         </Link>
         <nav className="flex items-center overflow-x-auto no-scrollbar">
           <NavLink to="/" icon={<BookOpen className="h-4 w-4" />} label="Recipes" />
-          <NavLink to="/build/glow-bowl" icon={<Salad className="h-4 w-4" />} label="Glow Bowl" />
-          <NavLink to="/build/yoghurt-bowl" icon={<span className="text-sm leading-none">🥣</span>} label="Yoghurt Bowl" />
-          <NavLink to="/why-this-works" icon={<Sparkles className="h-4 w-4" />} label="Why This Works" />
-          <NavLink to="/favourites" icon={<Heart className="h-4 w-4" />} label="Saved" />
           <NavLink to="/planner" icon={<CalendarDays className="h-4 w-4" />} label="Planner" />
           <NavLink to="/shopping" icon={<ShoppingBasket className="h-4 w-4" />} label="Shopping" />
+          <NavLink to="/favourites" icon={<Heart className="h-4 w-4" />} label="Saved" />
+          <NavLink to="/why-this-works" icon={<FlaskConical className="h-4 w-4" />} label="The Science Bit" />
           <button
             onClick={openFaq}
             className="inline-flex flex-col items-center gap-0.5 rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground shrink-0"
