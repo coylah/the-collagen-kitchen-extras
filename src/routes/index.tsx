@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Search, Filter, Salad, BookOpen, Info, Soup, Sparkles } from "lucide-react";
+import { Search, Filter, Salad, BookOpen, Soup } from "lucide-react";
 import { listRecipes } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
 import { RecipeCard } from "@/components/recipe-card";
@@ -44,7 +44,6 @@ function Cookbook() {
   const [search, setSearch] = useState("");
   const [meal, setMeal] = useState<string>("all");
   const [maxTime, setMaxTime] = useState<number>(0);
-  const [showGuide, setShowGuide] = useState(false);
 
   const visibleRecipes = useMemo(
     () => recipes.filter(r => !EXCLUDED_MEAL_TYPES.has(r.meal_type)),
@@ -127,7 +126,14 @@ function Cookbook() {
               className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/90 transition-colors"
             >
               <Salad className="h-4 w-4" />
-              Build a Glow Bowl
+              Glow Bowl
+            </Link>
+            <Link
+              to="/build/yoghurt-bowl"
+              className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/90 transition-colors"
+            >
+              <span>🥣</span>
+              Yoghurt Bowl
             </Link>
             <Link
               to="/bone-broth"
@@ -136,34 +142,7 @@ function Cookbook() {
               <Soup className="h-4 w-4" />
               Bone Broth
             </Link>
-            <button
-              onClick={() => setShowGuide(v => !v)}
-              className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm text-muted-foreground hover:border-secondary hover:text-secondary transition-colors"
-            >
-              <Info className="h-4 w-4" />
-              {showGuide ? "Hide guide" : "Get the most out of this"}
-            </button>
           </div>
-
-          {showGuide && (
-            <div className="mt-5 max-w-xl rounded-2xl border border-border bg-white p-6">
-              <p className="font-serif text-lg mb-4">Getting the best from this cookbook</p>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Recipes</strong> — every recipe actively supports your skin. Browse, filter and explore.</span></li>
-                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Save</strong> — tap the heart on any recipe to save it to your Saved tab.</span></li>
-                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Planner</strong> — add recipes to plan your week. Your shopping list builds automatically.</span></li>
-                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Shopping</strong> — everything from your plan in one clean grouped list.</span></li>
-                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Glow Bowl</strong> — build a collagen-supporting lunch from whatever's in your fridge.</span></li>
-                <li className="flex gap-3"><span className="text-secondary mt-0.5 shrink-0">✦</span><span><strong className="text-foreground">Bone Broth</strong> — the backbone of everything in this cookbook. Start here.</span></li>
-              </ul>
-              <div className="mt-4 pt-4 border-t border-border">
-                <Link to="/why-this-works" className="inline-flex items-center gap-2 text-sm text-secondary hover:underline underline-offset-2">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  New here? Understand the science behind every recipe →
-                </Link>
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
