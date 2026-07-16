@@ -12,10 +12,11 @@ import {
 import { getRecipeBySlug } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { useFavourites, useMealPlan, DAYS, SLOTS, type Slot } from "@/lib/user-state";
+import { useFavourites, useMealPlan } from "@/lib/user-state";
 import { scaleRecipe } from "@/lib/recipe-math";
 import { cn } from "@/lib/utils";
 import { BuildYourBeautyOats } from "@/components/build-your-beauty-oats";
+import { OmeletteAdditions } from "@/components/omelette-additions";
 
 const PHASE_KEYWORDS = {
   build: [
@@ -145,6 +146,8 @@ function RecipePage() {
     recipe.tags.includes("beauty-oats-builder") ||
     recipe.slug === "overnight-beauty-oats";
 
+  const hasOmeletteBuilder = recipe.slug === "build-your-own-glow-omelette";
+
   const glowFactorIsDuplicate =
     recipe.collagen_tip &&
     recipe.name &&
@@ -240,6 +243,12 @@ function RecipePage() {
             {hasOatsBuilder && (
               <p className="mt-5 text-xs text-muted-foreground border-l-2 border-secondary/40 pl-3">
                 This is the base recipe — scroll down to build your own version with toppings and flavour combos.
+              </p>
+            )}
+
+            {hasOmeletteBuilder && (
+              <p className="mt-5 text-xs text-muted-foreground border-l-2 border-secondary/40 pl-3">
+                Scroll down to pick your fillings — each one is mapped to the collagen matrix and adds straight to your shopping list.
               </p>
             )}
           </div>
@@ -362,6 +371,7 @@ function RecipePage() {
         </div>
 
         {hasOatsBuilder && <BuildYourBeautyOats />}
+        {hasOmeletteBuilder && <OmeletteAdditions />}
       </article>
     </AppShell>
   );
