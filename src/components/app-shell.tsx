@@ -33,6 +33,7 @@ function Header() {
         <nav className="flex items-center overflow-x-auto no-scrollbar">
           <NavLink to="/" icon={<BookOpen className="h-4 w-4" />} label="Recipes" />
           <NavLink to="/build/glow-bowl" icon={<Salad className="h-4 w-4" />} label="Glow Bowl" />
+          <NavLink to="/build/yoghurt-bowl" icon={<span className="text-sm leading-none">🥣</span>} label="Yoghurt Bowl" />
           <NavLink to="/why-this-works" icon={<Sparkles className="h-4 w-4" />} label="Why This Works" />
           <NavLink to="/favourites" icon={<Heart className="h-4 w-4" />} label="Saved" />
           <NavLink to="/planner" icon={<CalendarDays className="h-4 w-4" />} label="Planner" />
