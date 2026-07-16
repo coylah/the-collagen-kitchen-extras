@@ -5,24 +5,21 @@ export function parseQty(qty: string): number | null {
   const s = qty.trim();
   if (!s) return null;
 
-  // Handle unicode fractions directly
   const unicodeFracs: Record<string, number> = {
     "½": 0.5, "¼": 0.25, "¾": 0.75,
     "⅓": 0.333, "⅔": 0.667,
     "⅛": 0.125, "⅜": 0.375, "⅝": 0.625, "⅞": 0.875,
   };
 
-  // Check for whole number + unicode fraction e.g. "1½"
   for (const [frac, val] of Object.entries(unicodeFracs)) {
+    if (s === frac) return val;
     if (s.endsWith(frac)) {
       const whole = s.slice(0, -frac.length).trim();
       const wholeNum = whole ? parseFloat(whole) : 0;
       if (!isNaN(wholeNum)) return wholeNum + val;
     }
-    if (s === frac) return val;
   }
 
-  // Handle slash fractions e.g. "1/2"
   if (s.includes("/")) {
     const parts = s.split("/");
     if (parts.length === 2) {
@@ -33,7 +30,6 @@ export function parseQty(qty: string): number | null {
     return null;
   }
 
-  // Handle ranges e.g. "1-2" — take the lower
   if (s.includes("-")) {
     const [a] = s.split("-").map((x) => parseFloat(x));
     if (!isNaN(a)) return a;
@@ -69,8 +65,6 @@ export function scaleRecipe(r: Recipe, newServings: number) {
   const factor = newServings / r.servings;
   return r.ingredients.map((i) => scaleIngredient(i, factor));
 }
-
-// --- Shopping list aggregation ---
 
 export type ShoppingItem = {
   item: string;
@@ -123,8 +117,19 @@ const ITEM_ALIASES: Record<string, string> = {
   "garlic powder": "garlic granules",
   "avocado": "avocado",
   "avocados": "avocado",
+  "avocado sliced": "avocado",
+  "avocado diced": "avocado",
   "egg": "eggs",
   "eggs": "eggs",
+  "salmon fillets": "salmon",
+  "king prawns": "prawns",
+  "sirloin steak": "steak",
+  "baby spinach": "spinach",
+  "mixed berries": "berries",
+  "tenderstem broccoli": "broccoli",
+  "cherry tomatoes halved": "tomatoes",
+  "roasted red pepper": "red pepper",
+  "roasted red peppers": "red pepper",
 };
 
 function stripPrepWords(s: string): string {
