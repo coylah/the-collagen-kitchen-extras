@@ -284,8 +284,8 @@ export function buildShoppingList(
     }
 
     const lowerName = item.item.toLowerCase();
-    const isWholeItem = WHOLE_ITEM_NAMES.has(lowerName) ||
-      (PRODUCE_CATEGORIES.has(item.category.toLowerCase()) && !item.unit);
+    const isWholeItem = (WHOLE_ITEM_NAMES.has(lowerName) && !item.unit) ||
+  (PRODUCE_CATEGORIES.has(item.category.toLowerCase()) && !item.unit);
 
     if (isWholeItem) {
       item.qty = Math.ceil(item.qty);
