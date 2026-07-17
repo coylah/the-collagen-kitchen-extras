@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BookOpen, Heart, CalendarDays, ShoppingBasket, Salad, X, Smartphone, Sparkles } from "lucide-react";
+import { X, Smartphone, Sparkles } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 const STORAGE_KEY = "ck.welcomed";
@@ -13,6 +13,7 @@ export function WelcomeModal() {
   useEffect(() => {
     const seen = localStorage.getItem(STORAGE_KEY);
     const wantsFaq = localStorage.getItem(FAQ_DIRECT_KEY);
+
     if (wantsFaq) {
       localStorage.removeItem(FAQ_DIRECT_KEY);
       setShowFaq(true);
@@ -33,48 +34,34 @@ export function WelcomeModal() {
 
   const steps = [
     {
-      icon: <BookOpen className="h-8 w-8 text-secondary" />,
-      title: "Your cookbook",
-      body: "Every single recipe in here is real food that actively feeds your glow — collagen, vitamin C, healthy fats, antioxidants. Browse by meal type, search by ingredient, or just have a nose around. There's a lot to love.\n\nWhen you're cooking, tap each ingredient or step to tick it off as you go. No more losing your place halfway through.",
+      image: "/images/coylah.jpg",
+      title: "Welcome to The Collagen Kitchen",
+      subtitle: "Real food. Real glow.",
+      body: "Everything here is built around your skin.",
     },
     {
-      icon: <Heart className="h-8 w-8 text-secondary" />,
-      title: "Save what you love",
-      body: "See a recipe that's calling your name? Tap the little heart and it saves straight to your Saved tab. It'll be waiting for you every time you come back — no scrolling, no searching, just your favourites ready to go.",
+      image: "/images/salmon.jpg",
+      title: "Eat for your skin",
+      body: "Every recipe is designed to support collagen, strengthen your skin barrier, and build your glow.",
     },
     {
-      icon: <CalendarDays className="h-8 w-8 text-secondary" />,
-      title: "Plan your week",
-      body: "Add recipes to your weekly planner — breakfast, lunch, dinner, snacks, desserts — and your shopping list builds itself automatically. Tap any slot to add a meal. Tap the little x to remove it.\n\nNo more staring into the fridge wondering what to make.",
+      title: "Everything in one place",
+      body: "Cook. Plan. Shop. All connected.",
+      features: [
+        { title: "Recipes", desc: "Collagen-rich meals to fuel your glow." },
+        { title: "Planner", desc: "Plan your meals your way." },
+        { title: "Shopping", desc: "Smart lists that build themselves." },
+      ],
     },
     {
-      icon: <ShoppingBasket className="h-8 w-8 text-secondary" />,
-      title: "Your shopping list",
-      body: "Everything from your planner comes together in one clean list, grouped by category and ready to shop. Tap items to tick them off as you go, or tap \"I have\" to move them out of the way.\n\nNeed to add anything else for the week? Type it straight into the list — it becomes a checkbox item just like everything else.",
+      image: "/images/glow-bowl.jpg",
+      title: "Build your Glow Bowl",
+      body: "A simple system to create collagen-supporting meals — without thinking about it.",
     },
     {
-      icon: <Salad className="h-8 w-8 text-secondary" />,
-      title: "Build a Glow Bowl",
-      body: "Six steps to a collagen-supporting lunch bowl. Support, Build, Activate, Protect, Fortify, Finish — each step feeding a different part of your collagen story.\n\nStart from a preset or build entirely your own. Add it straight to your shopping list or meal plan in one tap.",
-    },
-    {
-      icon: <Smartphone className="h-8 w-8 text-secondary" />,
       title: "Save to your home screen",
-      body: "Save this to your phone's home screen so it's always one tap away — just like a proper app.\n\nOn iPhone: tap the Share button at the bottom of your browser, then tap \"Add to Home Screen.\"\n\nOn Android: tap the three dots menu at the top right, then tap \"Add to Home Screen.\"\n\nNo App Store needed.",
+      body: "One tap access. Just like a real app.",
     },
-  ];
-
-  const faqs = [
-    { q: "How do I add recipes to my meal plan?", a: "Open any recipe and tap \"Add to meal plan\" — then pick the day and slot. Or go straight to the Planner tab and tap any empty slot to choose from the full recipe list." },
-    { q: "How do I clear my planner?", a: "Go to the Planner tab and tap \"Clear week\" in the top right. This clears your meals but never touches your saved favourites." },
-    { q: "Why are some shopping list items generated automatically?", a: "Your shopping list builds from whatever you've added to your planner. Remove a recipe from the planner and those ingredients disappear from the list automatically." },
-    { q: "How do I clear my shopping list?", a: "Tap \"Clear list\" to remove bowl extras and anything you've typed in manually. To clear the planner ingredients, go to the Planner and clear your week from there." },
-    { q: "Can I add my own extras like coffee or milk?", a: "Yes — scroll to the bottom of the shopping list and type anything into the \"Add anything else\" box. It becomes a tappable checkbox item on your list." },
-    { q: "Can I save recipes?", a: "Yes — tap the heart on any recipe card or recipe page to save it. Find everything you've saved under the Saved tab." },
-    { q: "Can I personalise my Glow Bowl?", a: "Absolutely. Pick from the presets to get started then tap any ingredient to swap it out. Your bowl summary updates as you go. Add it straight to your shopping list or meal plan in one tap." },
-    { q: "Why are the recipes built the way they are?", a: "Every recipe is designed around four phases and eleven specific nutrients your body needs to make collagen properly. It's all explained in Why This Works — tap the link below." },
-    { q: "How do I use this like an app on my phone?", a: "On iPhone, tap the Share button in your browser and select \"Add to Home Screen.\" On Android, tap the three dots menu and select \"Add to Home Screen.\"" },
-    { q: "I need help with something else.", a: "Email us at hello@lovecoylah.com — we're always happy to help." },
   ];
 
   const current = steps[step];
@@ -83,132 +70,142 @@ export function WelcomeModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-foreground/50 backdrop-blur-sm" onClick={close} />
-      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-border bg-background shadow-xl max-h-[90vh] overflow-y-auto">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={close} />
 
+      <div className="relative z-10 w-full max-w-md rounded-2xl bg-white shadow-xl overflow-hidden">
+
+        {/* Close */}
         <button
           onClick={close}
-          className="absolute right-4 top-4 grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:bg-accent z-10"
+          className="absolute right-4 top-4 grid h-7 w-7 place-items-center rounded-full text-gray-500 hover:bg-gray-100 z-10"
         >
           <X className="h-4 w-4" />
         </button>
 
         {!showFaq ? (
           <>
-            {isFirst && (
-              <div className="border-b border-border px-8 pt-8 pb-5 text-center">
-                <p className="font-script text-2xl text-secondary">Love Coylah</p>
-                <h2 className="mt-1 font-serif text-2xl font-light">Welcome, my lovely.</h2>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  You've just unlocked The Collagen Kitchen — your personal skin-food cookbook, meal planner and weekly shopping list, all in one place and all built around your skin.
-                </p>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Let me show you around. Tap through — I promise it's quick.
-                </p>
-              </div>
-            )}
-
-            <div className="flex gap-1.5 justify-center pt-5 px-6">
+            {/* Progress dots */}
+            <div className="flex gap-2 justify-center pt-5">
               {steps.map((_, i) => (
                 <div
                   key={i}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    i === step ? "w-6 bg-secondary" : i < step ? "w-1.5 bg-secondary/40" : "w-1.5 bg-border"
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === step
+                      ? "w-6 bg-red-500"
+                      : "w-1.5 bg-gray-300"
                   }`}
                 />
               ))}
             </div>
 
-            <div className="px-8 py-6 text-center">
-              <div className="flex justify-center mb-4">
-                <div className="grid h-14 w-14 place-items-center rounded-full bg-secondary/10">
-                  {current.icon}
-                </div>
-              </div>
-              <h3 className="font-serif text-xl mb-3">{current.title}</h3>
-              <div className="text-sm text-muted-foreground leading-relaxed text-left space-y-3">
-                {current.body.split("\n\n").map((para, i) => (
-                  <p key={i}>{para}</p>
-                ))}
+            {/* CONTENT */}
+            <div className="py-6 text-center">
+
+              {/* IMAGE */}
+              {current.image && (
+                <img
+                  src={current.image}
+                  alt=""
+                  className="w-full h-56 object-cover"
+                />
+              )}
+
+              <div className="px-8 mt-4">
+
+                <h3 className="font-serif text-2xl mb-2">
+                  {current.title}
+                </h3>
+
+                {current.subtitle && (
+                  <p className="text-sm text-gray-500 mb-3">
+                    {current.subtitle}
+                  </p>
+                )}
+
+                {current.body && (
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {current.body}
+                  </p>
+                )}
+
+                {current.features && (
+                  <div className="mt-5 space-y-3 text-left">
+                    {current.features.map((f, i) => (
+                      <div key={i} className="border rounded-lg p-3">
+                        <p className="text-sm font-medium">{f.title}</p>
+                        <p className="text-xs text-gray-500">{f.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
               </div>
             </div>
 
-            <div className="flex gap-3 px-8 pb-4">
+            {/* BUTTONS */}
+            <div className="flex gap-3 px-6 pb-4">
               {!isFirst && (
                 <button
                   onClick={() => setStep((s) => s - 1)}
-                  className="flex-1 rounded-lg border border-border py-2.5 text-sm text-muted-foreground hover:bg-accent transition-colors"
+                  className="flex-1 border rounded-lg py-2.5 text-sm text-gray-500"
                 >
                   Back
                 </button>
               )}
+
               {!isLast ? (
                 <button
                   onClick={() => setStep((s) => s + 1)}
-                  className="flex-1 rounded-lg bg-secondary py-2.5 text-sm font-medium text-secondary-foreground hover:bg-secondary/90 transition-colors"
+                  className="flex-1 bg-red-500 text-white rounded-lg py-2.5 text-sm font-medium"
                 >
-                  Next
+                  Next →
                 </button>
               ) : (
                 <button
                   onClick={close}
-                  className="flex-1 rounded-lg bg-secondary py-2.5 text-sm font-medium text-secondary-foreground hover:bg-secondary/90 transition-colors"
+                  className="flex-1 bg-red-500 text-white rounded-lg py-2.5 text-sm font-medium"
                 >
-                  I'm ready — show me the recipes! →
+                  I'm ready →
                 </button>
               )}
             </div>
 
-            <div className="pb-5 flex items-center justify-center gap-4">
+            {/* FOOTER */}
+            <div className="pb-5 flex justify-center gap-4 text-xs">
               {!isLast && (
-                <button onClick={close} className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2">
+                <button onClick={close} className="text-gray-500 underline">
                   Skip intro
                 </button>
               )}
-              <button onClick={() => setShowFaq(true)} className="text-xs text-secondary hover:underline underline-offset-2">
+              <button onClick={() => setShowFaq(true)} className="text-red-500 underline">
                 FAQs & help
               </button>
             </div>
+
           </>
         ) : (
           <>
-            <div className="px-8 pt-8 pb-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="font-serif text-2xl font-light">FAQs</h2>
-                <button onClick={() => { setShowFaq(false); setStep(0); }} className="text-xs text-secondary hover:underline">
-                  See full intro →
-                </button>
-              </div>
-              <div className="space-y-4">
-                {faqs.map((faq, i) => (
-                  <div key={i} className="border-b border-border/60 pb-4 last:border-0">
-                    <p className="text-sm font-medium text-foreground mb-1">{faq.q}</p>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 rounded-xl bg-secondary/5 border border-secondary/20 p-4 text-center">
-                <p className="text-sm text-muted-foreground mb-2">Want to understand the science behind every recipe?</p>
-                <Link
-                  to="/why-this-works"
-                  onClick={close}
-                  className="inline-flex items-center gap-1.5 text-sm text-secondary font-medium hover:underline underline-offset-2"
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Why This Works →
-                </Link>
-              </div>
-              <div className="mt-4 rounded-xl bg-secondary/5 border border-secondary/20 p-4 text-center">
-                <p className="text-sm text-muted-foreground">Need more help?</p>
-                <a href="mailto:hello@lovecoylah.com" className="text-sm text-secondary font-medium hover:underline">
-                  hello@lovecoylah.com
-                </a>
-              </div>
+            <div className="px-6 py-8 text-center">
+              <h2 className="font-serif text-2xl mb-4">FAQs</h2>
+
+              <p className="text-sm text-gray-500 mb-6">
+                Need help? We've got you.
+              </p>
+
+              <Link
+                to="/why-this-works"
+                onClick={close}
+                className="inline-flex items-center gap-2 text-red-500 text-sm font-medium"
+              >
+                <Sparkles className="h-4 w-4" />
+                Why This Works →
+              </Link>
+
               <button
                 onClick={close}
-                className="mt-4 w-full rounded-lg bg-secondary py-2.5 text-sm font-medium text-secondary-foreground hover:bg-secondary/90"
+                className="mt-6 w-full bg-red-500 text-white rounded-lg py-2.5 text-sm font-medium"
               >
-                Got it — take me to the recipes
+                Take me to recipes
               </button>
             </div>
           </>
