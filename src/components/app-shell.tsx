@@ -5,10 +5,13 @@ import WelcomeModal from "@/components/welcome-modal";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const [hasWelcomed, setHasWelcomed] = useLocalStorage("ck.welcomed", false);
-  const [showWelcome, setShowWelcome] = useLocalStorage("ck.showWelcome", true);
+  const [hasWelcomed, setHasWelcomed, hasWelcomedLoaded] = useLocalStorage("ck.welcomed", false);
+  const [showWelcome, setShowWelcome, showWelcomeLoaded] = useLocalStorage("ck.showWelcome", true);
 
-  const isOpen = !hasWelcomed && showWelcome;
+  // Only decide to show the modal once both flags have actually loaded from
+  // localStorage (post-hydration). Before that, isOpen is false on both
+  // server and client, so there's nothing for React to mismatch on.
+  const isOpen = hasWelcomedLoaded && showWelcomeLoaded && !hasWelcomed && showWelcome;
 
   return (
     <div className="min-h-screen flex flex-col">
