@@ -140,7 +140,8 @@ function expandIngredients(ingredientString: string): string[] {
 function GlowBowlBuilder() {
   const [picks, setPicks] = useState<Picks>({});
   const [added, setAdded] = useState(false);
-  const { add } = useShoppingExtras();
+  const activeWeek = (localStorage.getItem("ck.activeWeek") ?? "1") as "1" | "2";
+const { add } = useShoppingExtras(activeWeek);
 
   useEffect(() => { setAdded(false); }, []);
 
