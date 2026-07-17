@@ -66,6 +66,12 @@ function Header() {
 }
 
 function Footer() {
+  function resetOnboarding() {
+    localStorage.removeItem("ck.welcomed");
+    localStorage.removeItem("ck.showWelcome");
+    window.location.reload();
+  }
+
   return (
     <footer className="no-print mt-20 border-t border-border py-12 text-center">
       <p className="font-script text-3xl text-secondary">Love Coylah</p>
@@ -78,6 +84,14 @@ function Footer() {
       <p className="mt-2 text-xs text-muted-foreground/40 max-w-md mx-auto px-4">
         Coylah is not a doctor, dermatologist or registered nutritionist. Always speak to your GP before making changes to your diet or skincare.
       </p>
+      {/* DEV ONLY — remove before launch. Lets you re-trigger the welcome modal
+          without clearing storage manually via DevTools/incognito. */}
+      <button
+        onClick={resetOnboarding}
+        className="mt-4 text-[10px] text-muted-foreground/30 hover:text-muted-foreground underline"
+      >
+        Reset onboarding (dev)
+      </button>
     </footer>
   );
 }
