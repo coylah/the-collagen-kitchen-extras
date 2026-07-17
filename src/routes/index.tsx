@@ -42,13 +42,18 @@ const EXCLUDED_MEAL_TYPES = new Set(["bone broth"]);
 function Cookbook() {
   const { data: recipes } = useSuspenseQuery(recipesQuery);
   const [search, setSearch] = useState("");
-  const [meal, setMeal] = useState<string>(() => {
-    return localStorage.getItem("ck.lastFilter") ?? "all";
-  });
+  const [meal, setMeal] = useState<string>("all");
   const [maxTime, setMaxTime] = useState<number>(0);
 
   useEffect(() => {
-    localStorage.setItem("ck.lastFilter", meal);
+    if (typeof window === "undefined") return;
+    const saved = window.localStorage.getItem("ck.lastFilter");
+    if (saved) setMeal(saved);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("ck.lastFilter", meal);
   }, [meal]);
 
   const visibleRecipes = useMemo(

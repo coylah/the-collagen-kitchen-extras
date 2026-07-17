@@ -1,12 +1,25 @@
 import { Link } from "@tanstack/react-router";
 import { Heart, BookOpen, CalendarDays, ShoppingBasket, HelpCircle, FlaskConical } from "lucide-react";
 import type { ReactNode } from "react";
-import { WelcomeModal } from "@/components/welcome-modal";
+import WelcomeModal from "@/components/welcome-modal";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const [hasWelcomed, setHasWelcomed] = useLocalStorage("ck.welcomed", false);
+  const [showWelcome, setShowWelcome] = useLocalStorage("ck.showWelcome", true);
+
+  const isOpen = !hasWelcomed && showWelcome;
+
   return (
     <div className="min-h-screen flex flex-col">
-      <WelcomeModal />
+      {isOpen && (
+        <WelcomeModal
+          onClose={() => {
+            setHasWelcomed(true);
+            setShowWelcome(false);
+          }}
+        />
+      )}
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
