@@ -49,7 +49,6 @@ const CATEGORY_ORDER = [
   "cupboard", "pantry", "fats", "spices", "herbs", "nuts_seeds", "other",
 ];
 
-// Items that should never appear on a shopping list
 const EXCLUDED_ITEMS = new Set([
   "water", "boiling water", "cold water", "warm water", "ice water",
   "salt and pepper", "salt & pepper", "black pepper", "white pepper",
@@ -87,11 +86,13 @@ function ShoppingPage() {
   const [bought, setBought] = useState<Record<string, boolean>>({});
   const [boughtExtras, setBoughtExtras] = useState<Record<string, boolean>>({});
   const [hadExtras, setHadExtras] = useState<Record<string, boolean>>({});
+  const [boughtBowls, setBoughtBowls] = useState<Record<string, boolean>>({});
   const [manualInput, setManualInput] = useState("");
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Regular recipe entries
   const entries = useMemo(() => {
     return Object.values(plan)
       .filter((e): e is { slug: string; servings: number } => !!e && !("isCustomBowl" in e && (e as any).isCustomBowl))
@@ -102,9 +103,22 @@ function ShoppingPage() {
       .filter((x): x is { recipe: (typeof recipes)[number]; servings: number } => !!x);
   }, [plan, bySlug, recipes]);
 
+  // Custom bowl entries from planner — aggregated by bowl name
+  const bowlEntries = useMemo(() => {
+    const bowlMap = new Map<string, { bowlName: string; ingredients: { item: string; category: string }[] }>();
+    for (const entry of Object.values(plan)) {
+      if (!entry || !("isCustomBowl" in entry) || !entry.isCustomBowl) continue;
+      const e = entry as any;
+      const name = e.bowlName ?? "Custom Bowl";
+      if (!bowlMap.has(name)) {
+        bowlMap.set(name, { bowlName: name, ingredients: e.bowlIngredients ?? [] });
+      }
+    }
+    return Array.from(bowlMap.values());
+  }, [plan]);
+
   const fullList = useMemo(() => buildShoppingList(entries), [entries]);
 
-  // Filter out water and other excluded items
   const filteredList = useMemo(() =>
     fullList.filter(i => !isExcluded(i.item)),
     [fullList]
@@ -113,7 +127,6 @@ function ShoppingPage() {
   const active = filteredList.filter((i) => !isHad(i.key));
   const had = filteredList.filter((i) => isHad(i.key));
 
-  // Filter extras too
   const filteredExtras = useMemo(() =>
     extras.filter(e => !isExcluded(e.item) && !hadExtras[e.item]),
     [extras, hadExtras]
@@ -150,7 +163,7 @@ function ShoppingPage() {
     return g;
   }, [filteredExtras]);
 
-  const hasContent = entries.length > 0 || extras.length > 0 || manualItems.length > 0;
+  const hasContent = entries.length > 0 || bowlEntries.length > 0 || extras.length > 0 || manualItems.length > 0;
 
   function clearAll() {
     clearExtras();
@@ -159,6 +172,7 @@ function ShoppingPage() {
     setBought({});
     setBoughtExtras({});
     setHadExtras({});
+    setBoughtBowls({});
     setShowClearConfirm(false);
   }
 
@@ -172,7 +186,6 @@ function ShoppingPage() {
 
   return (
     <AppShell>
-      {/* Confirm clear */}
       {showClearConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-foreground/50 backdrop-blur-sm" onClick={() => setShowClearConfirm(false)} />
@@ -189,7 +202,6 @@ function ShoppingPage() {
         </div>
       )}
 
-      {/* Confirm reset I have */}
       {showResetConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-foreground/50 backdrop-blur-sm" onClick={() => setShowResetConfirm(false)} />
@@ -267,6 +279,33 @@ function ShoppingPage() {
                 </ul>
               </div>
             ))}
+
+            {/* Custom bowls from planner */}
+            {bowlEntries.map((bowl) => {
+              const filteredIngredients = bowl.ingredients.filter(i => !isExcluded(i.item));
+              if (filteredIngredients.length === 0) return null;
+              return (
+                <div key={bowl.bowlName} className="rounded-2xl border border-secondary/30 bg-card p-5">
+                  <h2 className="font-serif text-lg mb-1">{bowl.bowlName}</h2>
+                  <p className="text-xs text-muted-foreground mb-3">From your meal plan</p>
+                  <ul className="divide-y divide-border/60">
+                    {filteredIngredients.map((ing) => (
+                      <li key={ing.item} className="flex items-center gap-3 py-2.5">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 accent-secondary"
+                          checked={!!boughtBowls[`${bowl.bowlName}|${ing.item}`]}
+                          onChange={() => setBoughtBowls(b => ({ ...b, [`${bowl.bowlName}|${ing.item}`]: !b[`${bowl.bowlName}|${ing.item}`] }))}
+                        />
+                        <span className={cn("flex-1 text-sm capitalize", boughtBowls[`${bowl.bowlName}|${ing.item}`] && "text-muted-foreground line-through")}>
+                          {ing.item}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
 
             {/* Bowl extras */}
             {(filteredExtras.length > 0 || hadExtrasItems.length > 0) && (
