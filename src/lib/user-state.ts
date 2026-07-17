@@ -1,5 +1,12 @@
 import { useLocalStorage } from "@/hooks/use-local-storage";
 
+// Week context — "1" or "2"
+export type Week = "1" | "2";
+
+function weekKey(base: string, week: Week): string {
+  return week === "1" ? base : `${base}.next`;
+}
+
 export function useFavourites() {
   const [favs, setFavs] = useLocalStorage<string[]>("ck.favs", []);
   const toggle = (slug: string) =>
@@ -15,7 +22,6 @@ export type Slot = "breakfast" | "lunch" | "dinner" | "snack" | "dessert";
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 export const SLOTS: Slot[] = ["breakfast", "lunch", "dinner", "snack", "dessert"];
 
-// PlanEntry is now either a recipe (slug) or a custom bowl (name + ingredient list)
 export type PlanEntry = {
   slug: string;
   servings: number;
@@ -30,20 +36,22 @@ export function planKey(day: string, slot: Slot) {
   return `${day}-${slot}`;
 }
 
-export function useMealPlan() {
-  const [plan, setPlan] = useLocalStorage<MealPlan>("ck.plan", {});
+export function useMealPlan(week: Week = "1") {
+  const key = weekKey("ck.plan", week);
+  const [plan, setPlan] = useLocalStorage<MealPlan>(key, {});
   const set = (day: string, slot: Slot, entry: PlanEntry | null) =>
     setPlan((p) => ({ ...p, [planKey(day, slot)]: entry }));
   const clear = () => setPlan({});
   return { plan, setPlan, set, clear };
 }
 
-export function useHaveList() {
-  const [have, setHave] = useLocalStorage<string[]>("ck.have", []);
-  const isHad = (key: string) => have.includes(key);
-  const toggle = (key: string) =>
+export function useHaveList(week: Week = "1") {
+  const key = weekKey("ck.have", week);
+  const [have, setHave] = useLocalStorage<string[]>(key, []);
+  const isHad = (k: string) => have.includes(k);
+  const toggle = (k: string) =>
     setHave((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+      prev.includes(k) ? prev.filter((h) => h !== k) : [...prev, k],
     );
   const reset = () => setHave([]);
   return { have, isHad, toggle, reset };
@@ -51,8 +59,9 @@ export function useHaveList() {
 
 export type ExtraItem = { item: string; category: string; addedAt: number };
 
-export function useShoppingExtras() {
-  const [extras, setExtras] = useLocalStorage<ExtraItem[]>("ck.extras", []);
+export function useShoppingExtras(week: Week = "1") {
+  const key = weekKey("ck.extras", week);
+  const [extras, setExtras] = useLocalStorage<ExtraItem[]>(key, []);
   const add = (items: { item: string; category: string }[]) =>
     setExtras((prev) => {
       const existing = new Set(prev.map((e) => e.item.toLowerCase()));
@@ -71,8 +80,9 @@ export function useShoppingExtras() {
 
 export type ManualItem = { text: string; checked: boolean; addedAt: number };
 
-export function useManualItems() {
-  const [items, setItems] = useLocalStorage<ManualItem[]>("ck.manual", []);
+export function useManualItems(week: Week = "1") {
+  const key = weekKey("ck.manual", week);
+  const [items, setItems] = useLocalStorage<ManualItem[]>(key, []);
   const addItem = (text: string) => {
     if (!text.trim()) return;
     setItems((prev) => [
