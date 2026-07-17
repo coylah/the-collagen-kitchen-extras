@@ -121,7 +121,6 @@ const ITEM_ALIASES: Record<string, string> = {
   "avocado diced": "avocado",
   "egg": "eggs",
   "eggs": "eggs",
-  "salmon fillets": "salmon",
   "king prawns": "prawns",
   "sirloin steak": "steak",
   "baby spinach": "spinach",

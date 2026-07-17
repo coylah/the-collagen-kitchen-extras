@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Heart, BookOpen, CalendarDays, ShoppingBasket, HelpCircle, FlaskConical } from "lucide-react";
 import type { ReactNode } from "react";
-import { WelcomeModal } from "@/components/welcome-modal";
+import WelcomeModal from "@/components/welcome-modal";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
