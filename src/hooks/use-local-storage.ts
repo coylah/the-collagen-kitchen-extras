@@ -21,13 +21,16 @@ function write<T>(key: string, value: T): void {
 }
 
 export function useLocalStorage<T>(key: string, initial: T) {
-  const [value, setValue] = useState<T>(() => read<T>(key, initial));
+  // Always start with `initial` on both server AND the client's first paint.
+  // This guarantees the hydration render matches the SSR render exactly.
+  // The real stored value is only read after mount, via the effect below.
+  const [value, setValue] = useState<T>(initial);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     setValue(read<T>(key, initial));
     setLoaded(true);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
   // Sync across tabs — if another tab changes localStorage, update here
@@ -43,7 +46,7 @@ export function useLocalStorage<T>(key: string, initial: T) {
     }
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
   const update = useCallback(
