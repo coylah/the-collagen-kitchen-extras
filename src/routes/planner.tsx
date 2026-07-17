@@ -6,7 +6,7 @@ import { listRecipes } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import type { Recipe } from "@/lib/recipe-types";
-import { DAYS, SLOTS, planKey, useMealPlan, useShoppingExtras, useManualItems, type Slot, type PlanEntry } from "@/lib/user-state";
+import { DAYS, SLOTS, planKey, useMealPlan, useShoppingExtras, useManualItems, type Slot, type Week } from "@/lib/user-state";
 import { cn } from "@/lib/utils";
 
 const recipesQuery = queryOptions({
@@ -45,11 +45,26 @@ type PendingEntry =
 function PlannerPage() {
   const { data: recipes } = useSuspenseQuery(recipesQuery);
   const bySlug = new Map(recipes.map((r) => [r.slug, r]));
-  const { plan, set, clear } = useMealPlan();
-  const { clear: clearExtras } = useShoppingExtras();
-  const { clearAll: clearManual } = useManualItems();
+  const [activeWeek, setActiveWeek] = useState<Week>(() => {
+    return (localStorage.getItem("ck.activeWeek") as Week) ?? "1";
+  });
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [pending, setPending] = useState<PendingEntry | null>(null);
+
+  const week1 = useMealPlan("1");
+  const week2 = useMealPlan("2");
+  const extras1 = useShoppingExtras("1");
+  const extras2 = useShoppingExtras("2");
+  const manual1 = useManualItems("1");
+  const manual2 = useManualItems("2");
+
+  const { plan, set, clear } = activeWeek === "1" ? week1 : week2;
+  const { clear: clearExtras } = activeWeek === "1" ? extras1 : extras2;
+  const { clearAll: clearManual } = activeWeek === "1" ? manual1 : manual2;
+
+  useEffect(() => {
+    localStorage.setItem("ck.activeWeek", activeWeek);
+  }, [activeWeek]);
 
   useEffect(() => {
     const stored = localStorage.getItem("ck.pendingPlanRecipe");
@@ -57,7 +72,6 @@ function PlannerPage() {
       try {
         const parsed = JSON.parse(stored);
         localStorage.removeItem("ck.pendingPlanRecipe");
-
         if (parsed.isCustomBowl) {
           setPending({
             type: "bowl",
@@ -103,17 +117,20 @@ function PlannerPage() {
 
   return (
     <AppShell>
+      {/* Confirm clear */}
       {showClearConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-foreground/50 backdrop-blur-sm" onClick={() => setShowClearConfirm(false)} />
           <div className="relative z-10 w-full max-w-sm rounded-2xl border border-border bg-background p-6 shadow-xl">
-            <h2 className="font-serif text-xl mb-2">Clear your week?</h2>
+            <h2 className="font-serif text-xl mb-2">Clear Week {activeWeek}?</h2>
             <p className="text-sm text-muted-foreground mb-5">
-              This will remove all meals from your planner, clear your bowl extras and any items you've added manually to your shopping list. Your saved favourites will not be affected.
+              {activeWeek === "1"
+                ? "This will clear your Week 1 plan, bowl extras and manual items. Week 2 is safe and won't be touched."
+                : "This will clear your Week 2 plan, bowl extras and manual items. Week 1 is safe and won't be touched."}
             </p>
             <div className="flex gap-3">
               <button onClick={() => setShowClearConfirm(false)} className="flex-1 rounded-lg border border-border py-2.5 text-sm text-muted-foreground hover:bg-accent">Cancel</button>
-              <button onClick={handleClearWeek} className="flex-1 rounded-lg bg-destructive py-2.5 text-sm font-medium text-destructive-foreground hover:bg-destructive/90">Yes, clear everything</button>
+              <button onClick={handleClearWeek} className="flex-1 rounded-lg bg-destructive py-2.5 text-sm font-medium text-destructive-foreground hover:bg-destructive/90">Yes, clear Week {activeWeek}</button>
             </div>
           </div>
         </div>
@@ -143,16 +160,48 @@ function PlannerPage() {
               </Link>
             </div>
           </div>
+
+          {/* Week tabs */}
+          <div className="mt-4 flex items-center gap-2">
+            <button
+              onClick={() => setActiveWeek("1")}
+              className={cn(
+                "rounded-full px-4 py-1.5 text-sm font-medium transition-all",
+                activeWeek === "1"
+                  ? "bg-secondary text-secondary-foreground"
+                  : "border border-border text-muted-foreground hover:border-secondary hover:text-secondary"
+              )}
+            >
+              Week 1
+            </button>
+            <button
+              onClick={() => setActiveWeek("2")}
+              className={cn(
+                "rounded-full px-4 py-1.5 text-sm font-medium transition-all",
+                activeWeek === "2"
+                  ? "bg-secondary text-secondary-foreground"
+                  : "border border-border text-muted-foreground hover:border-secondary hover:text-secondary"
+              )}
+            >
+              Week 2
+            </button>
+            <p className="text-xs text-muted-foreground ml-1">
+              {activeWeek === "1"
+                ? "Your current week. Build Week 2 ahead while you're still cooking through this one."
+                : "Plan ahead. Week 1 is safe — nothing here touches it."}
+            </p>
+          </div>
         </div>
       </section>
 
+      {/* Pending banner */}
       {pending && (
         <div className="bg-secondary/10 border-b border-secondary/20 px-4 py-3">
           <div className="mx-auto max-w-6xl">
             <p className="text-sm font-medium text-secondary mb-1">
-              Adding: <span className="font-serif">{pendingName}</span>
+              Adding to Week {activeWeek}: <span className="font-serif">{pendingName}</span>
             </p>
-            <p className="text-xs text-muted-foreground mb-2">Tap any empty slot below to add it to your week.</p>
+            <p className="text-xs text-muted-foreground mb-2">Tap any empty slot below to add it.</p>
             <button onClick={() => setPending(null)} className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2">
               Cancel
             </button>
