@@ -38,6 +38,10 @@ const SLOT_MEAL_TYPES: Record<string, string[]> = {
   dessert: ["dessert"],
 };
 
+type PendingEntry =
+  | { type: "recipe"; slug: string; servings: number; name: string }
+  | { type: "bowl"; bowlName: string; bowlIngredients: { item: string; category: string }[] };
+
 function PlannerPage() {
   const { data: recipes } = useSuspenseQuery(recipesQuery);
   const bySlug = new Map(recipes.map((r) => [r.slug, r]));
@@ -45,18 +49,27 @@ function PlannerPage() {
   const { clear: clearExtras } = useShoppingExtras();
   const { clearAll: clearManual } = useManualItems();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [pendingRecipe, setPendingRecipe] = useState<{ slug: string; servings: number; name: string } | null>(null);
+  const [pending, setPending] = useState<PendingEntry | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("ck.pendingPlanRecipe");
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        const recipe = recipes.find(r => r.slug === parsed.slug);
-        if (recipe) {
-          setPendingRecipe({ slug: parsed.slug, servings: parsed.servings, name: recipe.name });
-        }
         localStorage.removeItem("ck.pendingPlanRecipe");
+
+        if (parsed.isCustomBowl) {
+          setPending({
+            type: "bowl",
+            bowlName: parsed.bowlName ?? "Custom Bowl",
+            bowlIngredients: parsed.bowlIngredients ?? [],
+          });
+        } else {
+          const recipe = recipes.find(r => r.slug === parsed.slug);
+          if (recipe) {
+            setPending({ type: "recipe", slug: parsed.slug, servings: parsed.servings ?? recipe.servings, name: recipe.name });
+          }
+        }
       } catch (e) {}
     }
   }, [recipes]);
@@ -71,14 +84,25 @@ function PlannerPage() {
   }
 
   function addPendingToSlot(day: string, slot: Slot) {
-    if (!pendingRecipe) return;
-    set(day, slot, { slug: pendingRecipe.slug, servings: pendingRecipe.servings });
-    setPendingRecipe(null);
+    if (!pending) return;
+    if (pending.type === "bowl") {
+      set(day, slot, {
+        slug: "",
+        servings: 1,
+        isCustomBowl: true,
+        bowlName: pending.bowlName,
+        bowlIngredients: pending.bowlIngredients,
+      });
+    } else {
+      set(day, slot, { slug: pending.slug, servings: pending.servings });
+    }
+    setPending(null);
   }
+
+  const pendingName = pending?.type === "bowl" ? pending.bowlName : pending?.type === "recipe" ? pending.name : null;
 
   return (
     <AppShell>
-      {/* Confirm clear */}
       {showClearConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-foreground/50 backdrop-blur-sm" onClick={() => setShowClearConfirm(false)} />
@@ -103,13 +127,9 @@ function PlannerPage() {
                 <div className="h-px w-6 bg-secondary" />
                 <p className="text-[9px] uppercase tracking-[0.32em] text-secondary">Plan your week</p>
               </div>
-              <h1 className="font-serif text-2xl sm:text-3xl font-light text-foreground">
-                Weekly planner
-              </h1>
+              <h1 className="font-serif text-2xl sm:text-3xl font-light text-foreground">Weekly planner</h1>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {totalMeals === 0
-                  ? "Tap any slot to add a recipe."
-                  : `${totalMeals} meal${totalMeals === 1 ? "" : "s"} planned.`}
+                {totalMeals === 0 ? "Tap any slot to add a recipe." : `${totalMeals} meal${totalMeals === 1 ? "" : "s"} planned.`}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -126,25 +146,21 @@ function PlannerPage() {
         </div>
       </section>
 
-      {/* Pending recipe banner */}
-      {pendingRecipe && (
+      {pending && (
         <div className="bg-secondary/10 border-b border-secondary/20 px-4 py-3">
           <div className="mx-auto max-w-6xl">
-            <p className="text-sm font-medium text-secondary mb-2">
-              Adding: <span className="font-serif">{pendingRecipe.name}</span>
+            <p className="text-sm font-medium text-secondary mb-1">
+              Adding: <span className="font-serif">{pendingName}</span>
             </p>
-            <p className="text-xs text-muted-foreground mb-3">Tap a slot below to add it to your week.</p>
-            <button
-              onClick={() => setPendingRecipe(null)}
-              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
-            >
+            <p className="text-xs text-muted-foreground mb-2">Tap any empty slot below to add it to your week.</p>
+            <button onClick={() => setPending(null)} className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2">
               Cancel
             </button>
           </div>
         </div>
       )}
 
-      {/* Mobile layout */}
+      {/* Mobile */}
       <section className="lg:hidden mx-auto max-w-6xl px-4 py-4">
         <div className="space-y-6">
           {SLOTS.map((slot) => (
@@ -156,10 +172,8 @@ function PlannerPage() {
                   const isCustom = entry?.isCustomBowl;
                   const r = entry && !isCustom ? bySlug.get(entry.slug) : null;
                   const isFilled = !!entry && (isCustom || !!r);
-                  const isPending = !!pendingRecipe;
-                  const slotRecipes = recipes.filter(rc =>
-                    SLOT_MEAL_TYPES[slot]?.includes(rc.meal_type)
-                  );
+                  const isPending = !!pending;
+                  const slotRecipes = recipes.filter(rc => SLOT_MEAL_TYPES[slot]?.includes(rc.meal_type));
 
                   return (
                     <div
@@ -177,22 +191,20 @@ function PlannerPage() {
                       ) : isCustom && entry ? (
                         <div className="p-1 flex flex-col gap-1">
                           <p className="line-clamp-2 text-[9px] leading-tight text-foreground">{entry.bowlName}</p>
-                          <button onClick={() => set(day, slot, null)} className="text-destructive text-[9px]">✕</button>
+                          <button onClick={(e) => { e.stopPropagation(); set(day, slot, null); }} className="text-destructive text-[9px]">✕</button>
                         </div>
                       ) : r ? (
                         <div className="p-1 flex flex-col gap-1">
                           <Link to="/recipes/$slug" params={{ slug: r.slug }} className="line-clamp-2 text-[9px] leading-tight text-foreground hover:text-secondary">
                             {r.name}
                           </Link>
-                          <button onClick={() => set(day, slot, null)} className="text-destructive text-[9px]">✕</button>
+                          <button onClick={(e) => { e.stopPropagation(); set(day, slot, null); }} className="text-destructive text-[9px]">✕</button>
                         </div>
                       ) : (
                         <select
                           className="w-full bg-transparent text-muted-foreground outline-none px-0.5 py-1 text-[9px] rounded-lg"
                           value=""
-                          onChange={(e) => {
-                            if (e.target.value) set(day, slot, { slug: e.target.value, servings: 2 });
-                          }}
+                          onChange={(e) => { if (e.target.value) set(day, slot, { slug: e.target.value, servings: 2 }); }}
                         >
                           <option value="">+</option>
                           {slotRecipes.map((rc) => (
@@ -209,7 +221,7 @@ function PlannerPage() {
         </div>
       </section>
 
-      {/* Desktop layout */}
+      {/* Desktop */}
       <section className="hidden lg:block mx-auto max-w-6xl px-4 py-6 sm:px-6">
         <div className="w-full overflow-x-auto">
           <div className="min-w-[700px] grid grid-cols-[56px_repeat(5,1fr)] gap-1.5">
@@ -227,7 +239,7 @@ function PlannerPage() {
                 bySlug={bySlug}
                 onSet={set}
                 recipes={recipes}
-                pendingRecipe={pendingRecipe}
+                pending={pending}
                 onAddPending={addPendingToSlot}
               />
             ))}
@@ -241,13 +253,13 @@ function PlannerPage() {
   );
 }
 
-function DayRow({ day, plan, bySlug, onSet, recipes, pendingRecipe, onAddPending }: {
+function DayRow({ day, plan, bySlug, onSet, recipes, pending, onAddPending }: {
   day: string;
   plan: ReturnType<typeof useMealPlan>["plan"];
   bySlug: Map<string, Recipe>;
   onSet: ReturnType<typeof useMealPlan>["set"];
   recipes: Recipe[];
-  pendingRecipe: { slug: string; servings: number; name: string } | null;
+  pending: PendingEntry | null;
   onAddPending: (day: string, slot: Slot) => void;
 }) {
   const [confirmSlot, setConfirmSlot] = useState<string | null>(null);
@@ -263,10 +275,8 @@ function DayRow({ day, plan, bySlug, onSet, recipes, pendingRecipe, onAddPending
         const r = entry && !isCustom ? bySlug.get(entry.slug) : null;
         const isFilled = !!entry && (isCustom || !!r);
         const slotKey = `${day}-${s}`;
-        const isPending = !!pendingRecipe;
-        const slotRecipes = recipes.filter(rc =>
-          SLOT_MEAL_TYPES[s]?.includes(rc.meal_type)
-        );
+        const isPending = !!pending;
+        const slotRecipes = recipes.filter(rc => SLOT_MEAL_TYPES[s]?.includes(rc.meal_type));
 
         return (
           <div
@@ -278,13 +288,12 @@ function DayRow({ day, plan, bySlug, onSet, recipes, pendingRecipe, onAddPending
             )}
             onClick={() => isPending && !isFilled ? onAddPending(day, s) : undefined}
           >
-            {/* Confirm remove */}
             {confirmSlot === slotKey && (
               <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-lg bg-background/95 p-2 text-center">
                 <p className="text-[11px] text-foreground font-medium">Remove?</p>
                 <div className="flex gap-1.5">
-                  <button onClick={() => setConfirmSlot(null)} className="rounded-md border border-border px-2 py-1 text-[10px] text-muted-foreground">Cancel</button>
-                  <button onClick={() => { onSet(day, s, null); setConfirmSlot(null); }} className="rounded-md bg-destructive px-2 py-1 text-[10px] font-medium text-destructive-foreground">Remove</button>
+                  <button onClick={(e) => { e.stopPropagation(); setConfirmSlot(null); }} className="rounded-md border border-border px-2 py-1 text-[10px] text-muted-foreground">Cancel</button>
+                  <button onClick={(e) => { e.stopPropagation(); onSet(day, s, null); setConfirmSlot(null); }} className="rounded-md bg-destructive px-2 py-1 text-[10px] font-medium text-destructive-foreground">Remove</button>
                 </div>
               </div>
             )}
@@ -298,7 +307,7 @@ function DayRow({ day, plan, bySlug, onSet, recipes, pendingRecipe, onAddPending
                 <p className="line-clamp-3 font-serif text-sm leading-snug text-foreground">{entry.bowlName}</p>
                 <div className="mt-1 flex items-center justify-between">
                   <span className="text-[9px] uppercase tracking-wide text-secondary">Custom bowl</span>
-                  <button onClick={() => setConfirmSlot(slotKey)} className="grid h-5 w-5 place-items-center rounded-full text-muted-foreground hover:text-destructive" aria-label="Remove">
+                  <button onClick={(e) => { e.stopPropagation(); setConfirmSlot(slotKey); }} className="grid h-5 w-5 place-items-center rounded-full text-muted-foreground hover:text-destructive" aria-label="Remove">
                     <X className="h-3 w-3" />
                   </button>
                 </div>
@@ -310,7 +319,7 @@ function DayRow({ day, plan, bySlug, onSet, recipes, pendingRecipe, onAddPending
                 </Link>
                 <div className="mt-1 flex items-center justify-between">
                   <span className="text-[9px] uppercase tracking-wide text-secondary">{r.meal_type}</span>
-                  <button onClick={() => setConfirmSlot(slotKey)} className="grid h-5 w-5 place-items-center rounded-full text-muted-foreground hover:text-destructive transition-colors" aria-label="Remove">
+                  <button onClick={(e) => { e.stopPropagation(); setConfirmSlot(slotKey); }} className="grid h-5 w-5 place-items-center rounded-full text-muted-foreground hover:text-destructive transition-colors" aria-label="Remove">
                     <X className="h-3 w-3" />
                   </button>
                 </div>
@@ -319,9 +328,7 @@ function DayRow({ day, plan, bySlug, onSet, recipes, pendingRecipe, onAddPending
               <select
                 className="h-full w-full min-h-[80px] cursor-pointer bg-transparent text-muted-foreground outline-none px-2 py-2 text-xs rounded-lg"
                 value=""
-                onChange={(e) => {
-                  if (e.target.value) onSet(day, s, { slug: e.target.value, servings: 2 });
-                }}
+                onChange={(e) => { if (e.target.value) onSet(day, s, { slug: e.target.value, servings: 2 }); }}
               >
                 <option value="">+ add</option>
                 {slotRecipes.map((rc) => (
