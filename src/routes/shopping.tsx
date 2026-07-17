@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState, useRef } from "react";
-import { Printer, ShoppingBasket, RotateCcw, Check, X, Trash2, Plus } from "lucide-react";
+import { Printer, ShoppingBasket, RotateCcw, Check, X, Trash2, Plus, ShoppingCart } from "lucide-react";
 import { listRecipes } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
-import { useMealPlan, useHaveList, useShoppingExtras, useManualItems, type ExtraItem } from "@/lib/user-state";
+import { useMealPlan, useHaveList, useShoppingExtras, useManualItems, type ExtraItem, type Week } from "@/lib/user-state";
 import { buildShoppingList, type ShoppingItem } from "@/lib/recipe-math";
 import { cn } from "@/lib/utils";
 
@@ -76,24 +76,51 @@ function isGranola(item: string) {
   return item.toLowerCase().includes("granola");
 }
 
+type ViewMode = "week1" | "week2" | "bigshop";
+
 function ShoppingPage() {
   const { data: recipes } = useSuspenseQuery(recipesQuery);
   const bySlug = new Map(recipes.map((r) => [r.slug, r]));
-  const { plan } = useMealPlan();
-  const { isHad, toggle: toggleHave, reset } = useHaveList();
-  const { extras, remove: removeExtra, clear: clearExtras } = useShoppingExtras();
-  const { items: manualItems, addItem, toggleItem, removeItem, clearAll: clearManual } = useManualItems();
+
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem("ck.activeWeek");
+    return saved === "2" ? "week2" : "week1";
+  });
+  const [showBigShopConfirm, setShowBigShopConfirm] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  const week1Plan = useMealPlan("1");
+  const week2Plan = useMealPlan("2");
+  const have1 = useHaveList("1");
+  const have2 = useHaveList("2");
+  const extras1 = useShoppingExtras("1");
+  const extras2 = useShoppingExtras("2");
+  const manual1 = useManualItems("1");
+  const manual2 = useManualItems("2");
+
+  const activeWeek: Week = viewMode === "week2" ? "2" : "1";
+  const { isHad, toggle: toggleHave, reset } = viewMode === "week2" ? have2 : have1;
+  const { extras, remove: removeExtra, clear: clearExtras } = viewMode === "week2" ? extras2 : extras1;
+  const { items: manualItems, addItem, toggleItem, removeItem, clearAll: clearManual } = viewMode === "week2" ? manual2 : manual1;
+
   const [bought, setBought] = useState<Record<string, boolean>>({});
   const [boughtExtras, setBoughtExtras] = useState<Record<string, boolean>>({});
   const [hadExtras, setHadExtras] = useState<Record<string, boolean>>({});
   const [boughtBowls, setBoughtBowls] = useState<Record<string, boolean>>({});
   const [manualInput, setManualInput] = useState("");
-  const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Regular recipe entries
-  const entries = useMemo(() => {
+  // Reset bought state when switching weeks
+  function switchView(mode: ViewMode) {
+    setViewMode(mode);
+    setBought({});
+    setBoughtExtras({});
+    setHadExtras({});
+    setBoughtBowls({});
+  }
+
+  function buildEntries(plan: ReturnType<typeof useMealPlan>["plan"]) {
     return Object.values(plan)
       .filter((e): e is { slug: string; servings: number } => !!e && !("isCustomBowl" in e && (e as any).isCustomBowl))
       .map((e) => {
@@ -101,10 +128,9 @@ function ShoppingPage() {
         return r ? { recipe: r, servings: e.servings } : null;
       })
       .filter((x): x is { recipe: (typeof recipes)[number]; servings: number } => !!x);
-  }, [plan, bySlug, recipes]);
+  }
 
-  // Custom bowl entries from planner — aggregated by bowl name
-  const bowlEntries = useMemo(() => {
+  function buildBowlEntries(plan: ReturnType<typeof useMealPlan>["plan"]) {
     const bowlMap = new Map<string, { bowlName: string; ingredients: { item: string; category: string }[] }>();
     for (const entry of Object.values(plan)) {
       if (!entry || !("isCustomBowl" in entry) || !entry.isCustomBowl) continue;
@@ -115,26 +141,35 @@ function ShoppingPage() {
       }
     }
     return Array.from(bowlMap.values());
-  }, [plan]);
+  }
 
-  const fullList = useMemo(() => buildShoppingList(entries), [entries]);
+  const entries1 = useMemo(() => buildEntries(week1Plan.plan), [week1Plan.plan, bySlug]);
+  const entries2 = useMemo(() => buildEntries(week2Plan.plan), [week2Plan.plan, bySlug]);
+  const bowls1 = useMemo(() => buildBowlEntries(week1Plan.plan), [week1Plan.plan]);
+  const bowls2 = useMemo(() => buildBowlEntries(week2Plan.plan), [week2Plan.plan]);
+
+  const activeEntries = viewMode === "week2" ? entries2 : viewMode === "bigshop" ? [...entries1, ...entries2] : entries1;
+  const activeBowls = viewMode === "week2" ? bowls2 : viewMode === "bigshop" ? [...bowls1, ...bowls2] : bowls1;
+  const activeExtras = viewMode === "bigshop" ? [...extras1.extras, ...extras2.extras] : extras;
+
+  const fullList = useMemo(() => buildShoppingList(activeEntries), [activeEntries]);
 
   const filteredList = useMemo(() =>
     fullList.filter(i => !isExcluded(i.item)),
     [fullList]
   );
 
-  const active = filteredList.filter((i) => !isHad(i.key));
-  const had = filteredList.filter((i) => isHad(i.key));
+  const active = viewMode === "bigshop" ? filteredList : filteredList.filter((i) => !isHad(i.key));
+  const had = viewMode === "bigshop" ? [] : filteredList.filter((i) => isHad(i.key));
 
   const filteredExtras = useMemo(() =>
-    extras.filter(e => !isExcluded(e.item) && !hadExtras[e.item]),
-    [extras, hadExtras]
+    activeExtras.filter(e => !isExcluded(e.item) && (viewMode === "bigshop" || !hadExtras[e.item])),
+    [activeExtras, hadExtras, viewMode]
   );
 
   const hadExtrasItems = useMemo(() =>
-    extras.filter(e => hadExtras[e.item]),
-    [extras, hadExtras]
+    viewMode === "bigshop" ? [] : extras.filter(e => hadExtras[e.item]),
+    [extras, hadExtras, viewMode]
   );
 
   const grouped = useMemo(() => {
@@ -163,7 +198,15 @@ function ShoppingPage() {
     return g;
   }, [filteredExtras]);
 
-  const hasContent = entries.length > 0 || bowlEntries.length > 0 || extras.length > 0 || manualItems.length > 0;
+  const week1HasContent = entries1.length > 0 || bowls1.length > 0 || extras1.extras.length > 0 || manual1.items.length > 0;
+  const week2HasContent = entries2.length > 0 || bowls2.length > 0 || extras2.extras.length > 0 || manual2.items.length > 0;
+  const bothWeeksHaveContent = week1HasContent && week2HasContent;
+
+  const hasContent = viewMode === "bigshop"
+    ? bothWeeksHaveContent
+    : viewMode === "week2"
+    ? week2HasContent
+    : week1HasContent;
 
   function clearAll() {
     clearExtras();
@@ -184,15 +227,37 @@ function ShoppingPage() {
     inputRef.current?.focus();
   }
 
+  const weekLabel = viewMode === "week1" ? "Week 1" : viewMode === "week2" ? "Week 2" : "The Big Shop";
+
   return (
     <AppShell>
+      {/* Big Shop confirm */}
+      {showBigShopConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-foreground/50 backdrop-blur-sm" onClick={() => setShowBigShopConfirm(false)} />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl border border-border bg-background p-6 shadow-xl">
+            <h2 className="font-serif text-xl mb-2">The Big Shop 🛒</h2>
+            <p className="text-sm text-muted-foreground mb-5">
+              This combines both weeks into one list — brilliant if you're doing one big shop for the fortnight. Ingredients are deduplicated so you won't see duplicates. Check quantities before you go though — some things might need doubling up.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowBigShopConfirm(false)} className="flex-1 rounded-lg border border-border py-2.5 text-sm text-muted-foreground hover:bg-accent">Cancel</button>
+              <button onClick={() => { switchView("bigshop"); setShowBigShopConfirm(false); }} className="flex-1 rounded-lg bg-secondary py-2.5 text-sm font-medium text-secondary-foreground hover:bg-secondary/90">Let's do it</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm clear */}
       {showClearConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-foreground/50 backdrop-blur-sm" onClick={() => setShowClearConfirm(false)} />
           <div className="relative z-10 w-full max-w-sm rounded-2xl border border-border bg-background p-6 shadow-xl">
-            <h2 className="font-serif text-xl mb-2">Clear your shopping list?</h2>
+            <h2 className="font-serif text-xl mb-2">Clear {weekLabel}?</h2>
             <p className="text-sm text-muted-foreground mb-5">
-              This will remove bowl extras, anything you've added manually and reset your "I have" list. Ingredients from your meal plan stay until you clear your planner.
+              {viewMode === "week1"
+                ? "This will remove your Week 1 bowl extras, manual items and reset your I have list. Your Week 2 list is safe."
+                : "This will remove your Week 2 bowl extras, manual items and reset your I have list. Your Week 1 list is safe."}
             </p>
             <div className="flex gap-3">
               <button onClick={() => setShowClearConfirm(false)} className="flex-1 rounded-lg border border-border py-2.5 text-sm text-muted-foreground hover:bg-accent">Cancel</button>
@@ -202,6 +267,7 @@ function ShoppingPage() {
         </div>
       )}
 
+      {/* Confirm reset */}
       {showResetConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-foreground/50 backdrop-blur-sm" onClick={() => setShowResetConfirm(false)} />
@@ -219,11 +285,11 @@ function ShoppingPage() {
       )}
 
       <section className="mx-auto max-w-4xl px-4 py-8">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-wrap items-end justify-between gap-4 mb-4">
           <div>
             <h1 className="font-serif text-3xl">Shopping list</h1>
           </div>
-          {hasContent && (
+          {hasContent && viewMode !== "bigshop" && (
             <div className="flex items-center gap-2">
               {(had.length > 0 || hadExtrasItems.length > 0) && (
                 <Button variant="ghost" size="sm" onClick={() => setShowResetConfirm(true)}>
@@ -231,36 +297,84 @@ function ShoppingPage() {
                 </Button>
               )}
               <Button variant="ghost" size="sm" onClick={() => setShowClearConfirm(true)} className="text-muted-foreground hover:text-destructive">
-                <Trash2 className="h-4 w-4" /> Clear list
+                <Trash2 className="h-4 w-4" /> Clear
               </Button>
               <Button variant="outline" size="sm" onClick={() => window.print()}>
                 <Printer className="h-4 w-4" /> Print
               </Button>
             </div>
           )}
+          {viewMode === "bigshop" && (
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
+              <Printer className="h-4 w-4" /> Print
+            </Button>
+          )}
         </div>
 
-        {entries.length > 0 && (
-          <p className="mt-2 text-xs text-muted-foreground border border-border rounded-lg px-3 py-2">
-            Ingredients from your meal plan clear automatically when you remove recipes from your planner.
-          </p>
-        )}
+        {/* Week toggle */}
+        <div className="flex flex-wrap items-center gap-2 mb-6">
+          <button
+            onClick={() => switchView("week1")}
+            className={cn(
+              "rounded-full px-4 py-1.5 text-sm font-medium transition-all",
+              viewMode === "week1"
+                ? "bg-secondary text-secondary-foreground"
+                : "border border-border text-muted-foreground hover:border-secondary hover:text-secondary"
+            )}
+          >
+            Week 1
+          </button>
+          <button
+            onClick={() => switchView("week2")}
+            className={cn(
+              "rounded-full px-4 py-1.5 text-sm font-medium transition-all",
+              viewMode === "week2"
+                ? "bg-secondary text-secondary-foreground"
+                : "border border-border text-muted-foreground hover:border-secondary hover:text-secondary"
+            )}
+          >
+            Week 2
+          </button>
+          {bothWeeksHaveContent && (
+            <button
+              onClick={() => viewMode !== "bigshop" ? setShowBigShopConfirm(true) : switchView("week1")}
+              className={cn(
+                "rounded-full px-4 py-1.5 text-sm font-medium transition-all inline-flex items-center gap-1.5",
+                viewMode === "bigshop"
+                  ? "bg-secondary text-secondary-foreground"
+                  : "border border-border text-muted-foreground hover:border-secondary hover:text-secondary"
+              )}
+            >
+              <ShoppingCart className="h-3.5 w-3.5" />
+              {viewMode === "bigshop" ? "The Big Shop ✓" : "The Big Shop"}
+            </button>
+          )}
+          {viewMode === "bigshop" && (
+            <p className="text-xs text-muted-foreground w-full mt-1">
+              Both weeks combined into one list. Ingredients are deduplicated — check quantities before you shop.
+            </p>
+          )}
+        </div>
 
         {!hasContent ? (
-          <div className="mt-12 rounded-2xl border bg-card p-12 text-center">
+          <div className="mt-8 rounded-2xl border bg-card p-12 text-center">
             <ShoppingBasket className="mx-auto h-8 w-8 text-muted-foreground" />
-            <p className="mt-3 font-serif text-lg">Your list is empty</p>
+            <p className="mt-3 font-serif text-lg">
+              {viewMode === "week2" ? "Week 2 is empty" : "Your list is empty"}
+            </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Add recipes to your planner or build a bowl to get started.
+              {viewMode === "week2"
+                ? "Head to the planner, switch to Week 2 and start building your next week."
+                : "Add recipes to your planner or build a bowl to get started."}
             </p>
             <div className="mt-4 flex justify-center gap-3">
-              <Link to="/planner" className="text-sm text-secondary underline underline-offset-2">Plan your week</Link>
+              <Link to="/planner" className="text-sm text-secondary underline underline-offset-2">Go to planner</Link>
               <span className="text-muted-foreground">·</span>
               <Link to="/build/glow-bowl" className="text-sm text-secondary underline underline-offset-2">Build a Glow Bowl</Link>
             </div>
           </div>
         ) : (
-          <div className="mt-6 space-y-4">
+          <div className="space-y-4">
 
             {/* Recipe items */}
             {grouped.map(([cat, items]) => (
@@ -273,15 +387,15 @@ function ShoppingPage() {
                       item={item}
                       checked={!!bought[item.key]}
                       onCheck={() => setBought((b) => ({ ...b, [item.key]: !b[item.key] }))}
-                      onHave={() => toggleHave(item.key)}
+                      onHave={viewMode === "bigshop" ? undefined : () => toggleHave(item.key)}
                     />
                   ))}
                 </ul>
               </div>
             ))}
 
-            {/* Custom bowls from planner */}
-            {bowlEntries.map((bowl) => {
+            {/* Custom bowls */}
+            {activeBowls.map((bowl) => {
               const filteredIngredients = bowl.ingredients.filter(i => !isExcluded(i.item));
               if (filteredIngredients.length === 0) return null;
               return (
@@ -308,11 +422,13 @@ function ShoppingPage() {
             })}
 
             {/* Bowl extras */}
-            {(filteredExtras.length > 0 || hadExtrasItems.length > 0) && (
+            {filteredExtras.length > 0 && (
               <div className="rounded-2xl border border-secondary/30 bg-card p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-serif text-lg">Bowl extras</h2>
-                  <button onClick={clearExtras} className="text-xs text-muted-foreground hover:text-foreground">Clear all</button>
+                  {viewMode !== "bigshop" && (
+                    <button onClick={clearExtras} className="text-xs text-muted-foreground hover:text-foreground">Clear all</button>
+                  )}
                 </div>
                 {Object.entries(extrasByCategory).map(([cat, items]) => (
                   <div key={cat} className="mb-3">
@@ -326,8 +442,8 @@ function ShoppingPage() {
                             <GranolaRow
                               checked={!!boughtExtras[e.item]}
                               onCheck={() => setBoughtExtras(b => ({ ...b, [e.item]: !b[e.item] }))}
-                              onHave={() => setHadExtras(h => ({ ...h, [e.item]: true }))}
-                              onRemove={() => removeExtra(e.item)}
+                              onHave={viewMode === "bigshop" ? undefined : () => setHadExtras(h => ({ ...h, [e.item]: true }))}
+                              onRemove={viewMode === "bigshop" ? undefined : () => removeExtra(e.item)}
                             />
                           ) : (
                             <li className="flex items-center gap-3 py-2.5">
@@ -340,15 +456,19 @@ function ShoppingPage() {
                               <span className={cn("flex-1 text-sm", boughtExtras[e.item] && "text-muted-foreground line-through")}>
                                 {e.item}
                               </span>
-                              <button
-                                onClick={() => setHadExtras(h => ({ ...h, [e.item]: true }))}
-                                className="no-print inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-secondary hover:text-secondary"
-                              >
-                                <Check className="h-3 w-3" /> I have
-                              </button>
-                              <button onClick={() => removeExtra(e.item)} className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted" aria-label="Remove">
-                                <X className="h-3.5 w-3.5" />
-                              </button>
+                              {viewMode !== "bigshop" && (
+                                <>
+                                  <button
+                                    onClick={() => setHadExtras(h => ({ ...h, [e.item]: true }))}
+                                    className="no-print inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-secondary hover:text-secondary"
+                                  >
+                                    <Check className="h-3 w-3" /> I have
+                                  </button>
+                                  <button onClick={() => removeExtra(e.item)} className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted" aria-label="Remove">
+                                    <X className="h-3.5 w-3.5" />
+                                  </button>
+                                </>
+                              )}
                             </li>
                           )}
                         </li>
@@ -360,7 +480,7 @@ function ShoppingPage() {
             )}
 
             {/* Already in cupboard */}
-            {(had.length > 0 || hadExtrasItems.length > 0) && (
+            {(had.length > 0 || hadExtrasItems.length > 0) && viewMode !== "bigshop" && (
               <details className="rounded-2xl border bg-muted/30 p-5">
                 <summary className="cursor-pointer font-serif text-base">
                   Already in my cupboard ({had.length + hadExtrasItems.length})
@@ -390,51 +510,53 @@ function ShoppingPage() {
               </details>
             )}
 
-            {/* Manual add */}
-            <div className="rounded-2xl border bg-card p-5">
-              <h2 className="font-serif text-lg mb-4">Add anything else</h2>
-              <form onSubmit={handleAddManual} className="flex gap-2 mb-4">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={manualInput}
-                  onChange={(e) => setManualInput(e.target.value)}
-                  placeholder="e.g. coffee, washing up liquid, milk…"
-                  className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-secondary"
-                />
-                <button
-                  type="submit"
-                  disabled={!manualInput.trim()}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground disabled:opacity-40 hover:bg-secondary/90"
-                >
-                  <Plus className="h-4 w-4" /> Add
-                </button>
-              </form>
-              {manualItems.length > 0 ? (
-                <ul className="divide-y divide-border/60">
-                  {manualItems.map((item) => (
-                    <li key={item.addedAt} className="flex items-center gap-3 py-2.5">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 accent-secondary"
-                        checked={item.checked}
-                        onChange={() => toggleItem(item.addedAt)}
-                      />
-                      <span className={cn("flex-1 text-sm", item.checked && "text-muted-foreground line-through")}>
-                        {item.text}
-                      </span>
-                      <button onClick={() => removeItem(item.addedAt)} className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted">
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Add coffee, toiletries or anything else you need this week.
-                </p>
-              )}
-            </div>
+            {/* Manual add — not in Big Shop mode */}
+            {viewMode !== "bigshop" && (
+              <div className="rounded-2xl border bg-card p-5">
+                <h2 className="font-serif text-lg mb-4">Add anything else</h2>
+                <form onSubmit={handleAddManual} className="flex gap-2 mb-4">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={manualInput}
+                    onChange={(e) => setManualInput(e.target.value)}
+                    placeholder="e.g. coffee, washing up liquid, milk…"
+                    className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-secondary"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!manualInput.trim()}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground disabled:opacity-40 hover:bg-secondary/90"
+                  >
+                    <Plus className="h-4 w-4" /> Add
+                  </button>
+                </form>
+                {manualItems.length > 0 ? (
+                  <ul className="divide-y divide-border/60">
+                    {manualItems.map((item) => (
+                      <li key={item.addedAt} className="flex items-center gap-3 py-2.5">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 accent-secondary"
+                          checked={item.checked}
+                          onChange={() => toggleItem(item.addedAt)}
+                        />
+                        <span className={cn("flex-1 text-sm", item.checked && "text-muted-foreground line-through")}>
+                          {item.text}
+                        </span>
+                        <button onClick={() => removeItem(item.addedAt)} className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted">
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Add coffee, toiletries or anything else you need this week.
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         )}
       </section>
@@ -445,8 +567,8 @@ function ShoppingPage() {
 function GranolaRow({ checked, onCheck, onHave, onRemove }: {
   checked: boolean;
   onCheck: () => void;
-  onHave: () => void;
-  onRemove: () => void;
+  onHave?: () => void;
+  onRemove?: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   return (
@@ -459,12 +581,16 @@ function GranolaRow({ checked, onCheck, onHave, onRemove }: {
         <button onClick={() => setExpanded(v => !v)} className="text-[11px] text-secondary underline underline-offset-2 shrink-0">
           {expanded ? "Hide" : "Ingredients"}
         </button>
-        <button onClick={onHave} className="no-print inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-secondary hover:text-secondary">
-          <Check className="h-3 w-3" /> I have
-        </button>
-        <button onClick={onRemove} className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted" aria-label="Remove">
-          <X className="h-3.5 w-3.5" />
-        </button>
+        {onHave && (
+          <button onClick={onHave} className="no-print inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-secondary hover:text-secondary">
+            <Check className="h-3 w-3" /> I have
+          </button>
+        )}
+        {onRemove && (
+          <button onClick={onRemove} className="grid h-6 w-6 place-items-center rounded-full text-muted-foreground hover:bg-muted" aria-label="Remove">
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
       {expanded && (
         <div className="mt-2 ml-7 rounded-xl border border-border bg-muted/30 p-3">
@@ -487,7 +613,7 @@ function ShoppingRow({ item, checked, onCheck, onHave }: {
   item: ShoppingItem;
   checked: boolean;
   onCheck: () => void;
-  onHave: () => void;
+  onHave?: () => void;
 }) {
   return (
     <li className="flex items-start gap-3 py-2.5">
@@ -502,12 +628,14 @@ function ShoppingRow({ item, checked, onCheck, onHave }: {
           {item.fromRecipes.join(", ")}
         </p>
       </div>
-      <button
-        onClick={onHave}
-        className="no-print inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-secondary hover:text-secondary"
-      >
-        <Check className="h-3 w-3" /> I have
-      </button>
+      {onHave && (
+        <button
+          onClick={onHave}
+          className="no-print inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:border-secondary hover:text-secondary"
+        >
+          <Check className="h-3 w-3" /> I have
+        </button>
+      )}
     </li>
   );
 }
