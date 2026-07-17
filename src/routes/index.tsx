@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Search, Filter, Salad, BookOpen, Soup } from "lucide-react";
 import { listRecipes } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
@@ -42,8 +42,14 @@ const EXCLUDED_MEAL_TYPES = new Set(["bone broth"]);
 function Cookbook() {
   const { data: recipes } = useSuspenseQuery(recipesQuery);
   const [search, setSearch] = useState("");
-  const [meal, setMeal] = useState<string>("all");
+  const [meal, setMeal] = useState<string>(() => {
+    return localStorage.getItem("ck.lastFilter") ?? "all";
+  });
   const [maxTime, setMaxTime] = useState<number>(0);
+
+  useEffect(() => {
+    localStorage.setItem("ck.lastFilter", meal);
+  }, [meal]);
 
   const visibleRecipes = useMemo(
     () => recipes.filter(r => !EXCLUDED_MEAL_TYPES.has(r.meal_type)),
@@ -126,14 +132,14 @@ function Cookbook() {
               className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/90 transition-colors"
             >
               <Salad className="h-4 w-4" />
-              Glow Bowl
+              Glow Bowl Builder
             </Link>
             <Link
               to="/build/yoghurt-bowl"
               className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/90 transition-colors"
             >
               <span>🥣</span>
-              Yoghurt Bowl
+              Yoghurt Bowl Builder
             </Link>
             <Link
               to="/bone-broth"
