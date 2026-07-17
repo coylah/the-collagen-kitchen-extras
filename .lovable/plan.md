@@ -1,13 +1,32 @@
-## Context
+The project is currently not connected to a GitHub repository. `git remote -v` shows only Lovable internal storage (`git.private.lovable-gcp.code.storage` and `s3://lovable-repositories`), which explains why your GitHub commits are not appearing in Lovable and vice versa.
 
-`public.has_role(uuid, app_role)` is `SECURITY DEFINER` by design — it's the standard Supabase pattern for role checks inside RLS policies without recursing back into `user_roles`. The `recipes` table's admin INSERT/UPDATE/DELETE policies call it via `has_role(auth.uid(), 'admin')`, so the `authenticated` role MUST have `EXECUTE` or those policies fail (that's the exact "permission denied" bug we just fixed).
+Plan
+----
 
-The function body only checks `user_id = _user_id` for a row in `user_roles`. A signed-in user calling it directly can only learn their own role, which they can already read via the `user_roles` SELECT policy. No privilege escalation.
+1. **Verify the GitHub repository you want to use**
+   - Confirm the repo URL/owner on GitHub where you have been pushing changes.
+   - If the repo does not exist yet, create it in GitHub first (empty repo is fine).
 
-## Fix
+2. **Connect the project to GitHub via the Lovable UI**
+   - Open the project in the Lovable editor.
+   - Click **Plus (+)** in the bottom-left chat input area.
+   - Choose **GitHub → Connect project**.
+   - Authorize the Lovable GitHub App if asked.
+   - Select the GitHub account/organization and the repository from step 1.
+   - This step requires your authorization — it cannot be done through code.
 
-Mark the finding `SUPA_authenticated_security_definer_function_executable` as ignored with that explanation, and update the security memory so future scans don't re-flag the canonical `has_role` pattern.
+3. **Handle the initial sync direction**
+   - If the GitHub repo has newer code you want in Lovable, Lovable should pull it after connection.
+   - If the Lovable project has newer code, it will push to GitHub.
+   - If both sides have different histories, I will resolve the merge conflict manually after connection.
 
-## Out of scope
+4. **Verify the sync**
+   - Check that `git remote -v` shows the GitHub URL as an additional remote.
+   - Confirm a recent change from GitHub appears in the Lovable code editor or preview.
 
-No SQL, code, or policy changes.
+Notes
+-----
+
+- This is a configuration change, not a code change. No files in `src/` will be modified unless a merge conflict needs resolving.
+- Once connected, sync is automatic in both directions — you will not need to manually push or pull each time.
+- If you already connected GitHub previously and it somehow disconnected, the same reconnect flow applies. Disconnecting and reconnecting does not affect your Lovable Cloud database or data.
