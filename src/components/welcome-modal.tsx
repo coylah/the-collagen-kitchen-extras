@@ -76,7 +76,7 @@ export default function WelcomeModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-white z-50 flex flex-col overflow-hidden">
       {/* Top bar: dots + close */}
-      <div className="flex items-center justify-between px-5 pt-4 pb-2 shrink-0">
+      <div className="flex items-center justify-between px-5 pt-3 pb-1 shrink-0">
         <div className="w-6" />
         <div className="flex gap-1.5">
           {slides.map((_, i) => (
@@ -98,11 +98,12 @@ export default function WelcomeModal({ onClose }: { onClose: () => void }) {
         </button>
       </div>
 
-      {/* Media block — photo (always fills edge-to-edge, no letterboxing) or icon.
-          Fixed via clamp so it scales sensibly on any device height. */}
+      {/* Media block — photos get real height since they're the visual centerpiece.
+          Icons get a small, tight block since there's nothing to fill that space with,
+          freeing up room below so content-heavy slides (3, 5) never need to scroll. */}
       <div
         className="shrink-0 relative overflow-hidden bg-white flex items-center justify-center"
-        style={{ height: "clamp(280px, 46vh, 440px)" }}
+        style={{ height: slide.image ? "clamp(280px, 46vh, 440px)" : "clamp(90px, 14vh, 140px)" }}
       >
         {slide.image ? (
           <>
@@ -118,10 +119,10 @@ export default function WelcomeModal({ onClose }: { onClose: () => void }) {
           </>
         ) : Icon ? (
           <div
-            className="w-16 h-16 rounded-full flex items-center justify-center"
+            className="w-14 h-14 rounded-full flex items-center justify-center"
             style={{ backgroundColor: BRAND_RED_TINT }}
           >
-            <Icon size={28} color={BRAND_RED} strokeWidth={1.5} />
+            <Icon size={24} color={BRAND_RED} strokeWidth={1.5} />
           </div>
         ) : null}
       </div>
@@ -219,7 +220,7 @@ export default function WelcomeModal({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Fixed footer */}
-      <div className="px-6 pb-6 pt-2 space-y-1.5 shrink-0">
+      <div className="px-6 pb-5 pt-1.5 space-y-1.5 shrink-0">
         {step > 0 && (
           <button
             onClick={back}
