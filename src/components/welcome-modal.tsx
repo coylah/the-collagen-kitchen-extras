@@ -98,29 +98,36 @@ export default function WelcomeModal({ onClose }: { onClose: () => void }) {
         </button>
       </div>
 
-      {/* Media block — small, fixed, same on every slide */}
+      {/* Media block — dominant, matches the mockup's proportions, same on every slide */}
       <div
-        className="shrink-0 overflow-hidden bg-white flex items-center justify-center"
-        style={{ height: "clamp(140px, 26vh, 240px)" }}
+        className="shrink-0 relative overflow-hidden bg-white flex items-center justify-center"
+        style={{ height: "clamp(320px, 54vh, 480px)" }}
       >
         {slide.image ? (
-          <img
-            src={slide.image}
-            className="w-full h-full object-cover"
-            style={{ objectPosition: slide.isHero ? "center 20%" : "center" }}
-          />
+          <>
+            <img
+              src={slide.image}
+              className="w-full h-full object-cover"
+              style={{ objectPosition: slide.isHero ? "center 15%" : "center" }}
+            />
+            {/* Soft fade so the photo blends into the white content below, not a hard crop line */}
+            <div
+              className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
+              style={{ background: "linear-gradient(to bottom, transparent, white)" }}
+            />
+          </>
         ) : Icon ? (
           <div
-            className="w-14 h-14 rounded-full flex items-center justify-center"
+            className="w-16 h-16 rounded-full flex items-center justify-center"
             style={{ backgroundColor: BRAND_RED_TINT }}
           >
-            <Icon size={24} color={BRAND_RED} strokeWidth={1.5} />
+            <Icon size={28} color={BRAND_RED} strokeWidth={1.5} />
           </div>
         ) : null}
       </div>
 
       {/* Content — sits right under the media block, natural height, no forced centering */}
-      <div className="shrink-0 px-6 pt-5 text-center overflow-y-auto">
+      <div className="shrink-0 px-6 pt-4 text-center overflow-y-auto">
         {slide.signature && (
           <p className="font-serif italic text-base mb-0.5" style={{ color: BRAND_RED }}>
             {slide.signature}
