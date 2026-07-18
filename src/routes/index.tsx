@@ -123,10 +123,10 @@ function Cookbook() {
 
   return (
     <AppShell>
-      <div className="pb-20">
+      <div className="pb-16">
         {/* Hero */}
         <section className="border-b border-border bg-white">
-          <div className="relative overflow-hidden" style={{ height: "clamp(200px, 30vh, 300px)" }}>
+          <div className="relative overflow-hidden" style={{ height: "clamp(160px, 22vh, 230px)" }}>
             {/* Hero photo: Sticky Harissa Chicken with Mint Yoghurt & Pomegranate Salad */}
             <img
               src="/images/hero-harissa-chicken.jpg"
@@ -134,7 +134,7 @@ function Cookbook() {
               style={{ objectPosition: "center 40%" }}
             />
             <div
-              className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+              className="absolute bottom-0 left-0 right-0 h-14 pointer-events-none"
               style={{ background: "linear-gradient(to bottom, transparent, white)" }}
             />
             <p className="font-script text-lg text-white absolute top-3 left-4 drop-shadow">
@@ -142,49 +142,49 @@ function Cookbook() {
             </p>
           </div>
 
-          <div className="mx-auto max-w-6xl px-5 pt-2 pb-4 text-center">
-            <h1 className="font-serif text-3xl font-light leading-tight text-foreground mb-1.5">
+          <div className="mx-auto max-w-6xl px-5 pt-1.5 pb-3 text-center">
+            <h1 className="font-serif text-2xl font-light leading-tight text-foreground mb-1">
               The Collagen Kitchen
             </h1>
-            <div className="w-7 h-px bg-secondary mx-auto mb-2" />
-            <p className="text-xs text-muted-foreground leading-snug mb-3 font-light max-w-xs mx-auto">
+            <div className="w-7 h-px bg-secondary mx-auto mb-1.5" />
+            <p className="text-xs text-muted-foreground leading-snug mb-2.5 font-light max-w-xs mx-auto">
               Real food. Real results. Built from the inside out.
             </p>
 
-            {/* All four buttons share one clean, consistent style */}
-            <div className="space-y-1.5 max-w-sm mx-auto">
-              <Link
-                to="/"
-                onClick={() => { setMeal(null); setSearch(""); setSearchOpen(false); }}
-                className="flex items-center gap-2.5 rounded-full border border-secondary bg-white px-4 py-2.5 text-sm font-medium text-secondary hover:bg-secondary/5 transition-colors"
-              >
-                <BookOpen className="h-4 w-4 shrink-0" />
-                Browse recipes
-              </Link>
+            {/* First 4 as a 2x2 grid, search spans both columns below */}
+            <div className="grid grid-cols-2 gap-1.5 max-w-sm mx-auto">
               <Link
                 to="/build/glow-bowl"
-                className="flex items-center gap-2.5 rounded-full border border-secondary bg-white px-4 py-2.5 text-sm font-medium text-secondary hover:bg-secondary/5 transition-colors"
+                className="flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-2 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
               >
-                <Salad className="h-4 w-4 shrink-0" />
-                Glow Bowl Builder
+                <Salad className="h-3.5 w-3.5 shrink-0" />
+                Glow Bowl
               </Link>
               <Link
                 to="/build/yoghurt-bowl"
-                className="flex items-center gap-2.5 rounded-full border border-secondary bg-white px-4 py-2.5 text-sm font-medium text-secondary hover:bg-secondary/5 transition-colors"
+                className="flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-2 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
               >
                 <span className="shrink-0">🥣</span>
-                Yoghurt Bowl Builder
+                Yoghurt Bowl
               </Link>
               <Link
                 to="/bone-broth"
-                className="flex items-center gap-2.5 rounded-full border border-secondary bg-white px-4 py-2.5 text-sm font-medium text-secondary hover:bg-secondary/5 transition-colors"
+                className="flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-2 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
               >
-                <Soup className="h-4 w-4 shrink-0" />
-                Bone Broth Recipes
+                <Soup className="h-3.5 w-3.5 shrink-0" />
+                Bone Broth
+              </Link>
+              <Link
+                to="/"
+                onClick={() => { setMeal(null); setSearch(""); setSearchOpen(false); }}
+                className="flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-2 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
+              >
+                <BookOpen className="h-3.5 w-3.5 shrink-0" />
+                Browse
               </Link>
 
               {searchOpen ? (
-                <div className="relative">
+                <div className="relative col-span-2">
                   <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary" />
                   <Input
                     autoFocus
@@ -204,9 +204,9 @@ function Cookbook() {
               ) : (
                 <button
                   onClick={() => setSearchOpen(true)}
-                  className="flex items-center gap-2.5 rounded-full border border-secondary bg-white px-4 py-2.5 text-sm font-medium text-secondary hover:bg-secondary/5 transition-colors w-full"
+                  className="col-span-2 flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-4 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
                 >
-                  <Search className="h-4 w-4 shrink-0" />
+                  <Search className="h-3.5 w-3.5 shrink-0" />
                   Search recipes
                 </button>
               )}
@@ -264,7 +264,7 @@ function Cookbook() {
             </section>
           </>
         ) : (
-          <div className="mx-auto max-w-6xl px-4 py-10 text-center text-sm text-muted-foreground">
+          <div className="mx-auto max-w-6xl px-4 py-4 text-center text-sm text-muted-foreground">
             Pick a meal below, or search above, to browse recipes.
           </div>
         )}
