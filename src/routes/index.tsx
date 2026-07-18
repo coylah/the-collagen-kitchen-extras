@@ -181,7 +181,7 @@ function Cookbook() {
                 className="flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-2 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
               >
                 <BookOpen className="h-3.5 w-3.5 shrink-0" />
-                Browse
+                Browse Recipes
               </Link>
 
               {searchOpen ? (
