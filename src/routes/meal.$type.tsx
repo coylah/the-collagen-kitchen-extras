@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { ArrowLeft, Heart, Search } from "lucide-react";
 import { listRecipes } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
-import { RecipeCard } from "@/components/recipe-card";
+import { RecipeRow } from "@/components/recipe-row";
 import { Input } from "@/components/ui/input";
 
 const recipesQuery = queryOptions({
@@ -98,15 +98,15 @@ function MealTypePage() {
         </div>
       </div>
 
-      <section className="mx-auto max-w-6xl px-4 py-6">
+      <section className="mx-auto max-w-6xl px-5 py-2">
         {filtered.length === 0 ? (
           <p className="py-16 text-center text-muted-foreground">
             No {type} recipes match that search yet.
           </p>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div>
             {filtered.map((r) => (
-              <RecipeCard key={r.id} recipe={r} />
+              <RecipeRow key={r.id} recipe={r} />
             ))}
           </div>
         )}
