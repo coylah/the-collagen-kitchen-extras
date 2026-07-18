@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Heart, Clock, ChevronRight } from "lucide-react";
 import type { Recipe } from "@/lib/recipe-types";
 import { useFavourites } from "@/lib/user-state";
-import { slugifyName } from "@/lib/slugify";
+import { recipeImageSrc } from "@/lib/slugify";
 import { RecipePlaceholder } from "@/components/recipe-card";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +12,7 @@ export function RecipeRow({ recipe }: { recipe: Recipe }) {
   const fav = isFav(recipe.slug);
   const total = recipe.prep_min + recipe.cook_min;
   const [imgFailed, setImgFailed] = useState(false);
-  const photoSrc = recipe.image_url || `/images/recipes/${slugifyName(recipe.name)}.jpg`;
+  const photoSrc = recipe.image_url || recipeImageSrc(recipe.name);
 
   return (
     <Link
