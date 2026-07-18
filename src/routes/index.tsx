@@ -102,10 +102,16 @@ function Cookbook() {
   }
 
   return (
-    <AppShell>
-      {/* Hero */}
-      <section className="border-b border-border bg-white">
-        <div className="relative overflow-hidden" style={{ height: "clamp(160px, 22vh, 230px)" }}>
+    <AppShell hideFooter>
+      {/* Hero — sized to fill the viewport between the header and the bottom
+          ribbon so the resting state never scrolls on a phone screen. The
+          leftover slack (if any) is absorbed by justify-center rather than
+          pooling as dead space at the bottom. */}
+      <section
+        className="flex flex-col justify-center border-b border-border bg-white"
+        style={{ minHeight: "calc(100dvh - 164px)" }}
+      >
+        <div className="relative overflow-hidden shrink-0" style={{ height: "clamp(90px, 14vh, 130px)" }}>
           {/* Hero photo: Sticky Harissa Chicken with Mint Yoghurt & Pomegranate Salad */}
           <img
             src="/images/hero-harissa-chicken.jpg"
@@ -113,7 +119,7 @@ function Cookbook() {
             style={{ objectPosition: "center 40%" }}
           />
           <div
-            className="absolute bottom-0 left-0 right-0 h-14 pointer-events-none"
+            className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none"
             style={{ background: "linear-gradient(to bottom, transparent, white)" }}
           />
           <p className="font-script text-lg text-white absolute top-3 left-4 drop-shadow">
@@ -121,69 +127,62 @@ function Cookbook() {
           </p>
         </div>
 
-        <div className="mx-auto max-w-6xl px-5 pt-1.5 pb-3 text-center">
-          <h1 className="font-serif text-2xl font-light leading-tight text-foreground mb-1">
+        <div className="mx-auto max-w-6xl px-5 pt-1 pb-2.5 text-center">
+          <h1 className="font-serif text-xl font-light leading-tight text-foreground mb-0.5">
             The Collagen Kitchen
           </h1>
-          <div className="w-7 h-px bg-secondary mx-auto mb-1.5" />
-          <p className="text-xs text-muted-foreground leading-snug mb-2.5 font-light max-w-xs mx-auto">
+          <div className="w-7 h-px bg-secondary mx-auto mb-1" />
+          <p className="text-[11px] text-muted-foreground leading-snug mb-2.5 font-light max-w-xs mx-auto">
             Real food. Real results. Built from the inside out.
           </p>
 
-          {/* First 4 meal types as a 2x2 grid, Dessert + search span both columns below */}
-          <div className="grid grid-cols-2 gap-1.5 max-w-sm mx-auto">
-            {HERO_MEAL_TYPES.slice(0, 4).map(({ key, label, icon: MealIcon }) => (
+          {/* 3x2 tile grid: 5 meal types + search, filled/shaded for a more
+              premium feel than a plain outlined pill */}
+          <div className="grid grid-cols-3 gap-2 max-w-sm mx-auto">
+            {HERO_MEAL_TYPES.map(({ key, label, icon: MealIcon }) => (
               <Link
                 key={key}
                 to="/meal/$type"
                 params={{ type: key }}
-                className="flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-2 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
+                className="group flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-secondary/15 bg-gradient-to-b from-secondary/[0.06] to-secondary/[0.02] px-1.5 py-3 shadow-sm transition-all hover:border-secondary/30 hover:shadow-md active:scale-[0.97]"
               >
-                <MealIcon className="h-3.5 w-3.5 shrink-0" />
-                {label}
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-white shadow-sm transition-transform group-hover:scale-105">
+                  <MealIcon className="h-4 w-4" strokeWidth={2} />
+                </span>
+                <span className="text-[11.5px] font-medium leading-none text-foreground/85">{label}</span>
               </Link>
             ))}
 
-            {HERO_MEAL_TYPES.slice(4).map(({ key, label, icon: MealIcon }) => (
-              <Link
-                key={key}
-                to="/meal/$type"
-                params={{ type: key }}
-                className="col-span-2 flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-2 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
-              >
-                <MealIcon className="h-3.5 w-3.5 shrink-0" />
-                {label}
-              </Link>
-            ))}
-
-            {searchOpen ? (
-              <div className="relative col-span-2">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary" />
-                <Input
-                  autoFocus
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onBlur={() => { if (!search.trim()) setSearchOpen(false); }}
-                  placeholder="Search recipes or ingredients…"
-                  className="pl-10 pr-9 w-full rounded-full border-secondary"
-                />
-                <button
-                  onClick={() => { setSearch(""); setSearchOpen(false); }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-lg"
-                >
-                  ×
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="col-span-2 flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-4 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
-              >
-                <Search className="h-3.5 w-3.5 shrink-0" />
-                Search recipes
-              </button>
-            )}
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="group flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-secondary/15 bg-gradient-to-b from-secondary/[0.06] to-secondary/[0.02] px-1.5 py-3 shadow-sm transition-all hover:border-secondary/30 hover:shadow-md active:scale-[0.97]"
+            >
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-white shadow-sm transition-transform group-hover:scale-105">
+                <Search className="h-4 w-4" strokeWidth={2} />
+              </span>
+              <span className="text-[11.5px] font-medium leading-none text-foreground/85">Search</span>
+            </button>
           </div>
+
+          {searchOpen && (
+            <div className="relative mt-2.5 max-w-sm mx-auto">
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary" />
+              <Input
+                autoFocus
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onBlur={() => { if (!search.trim()) setSearchOpen(false); }}
+                placeholder="Search recipes or ingredients…"
+                className="pl-10 pr-9 w-full rounded-full border-secondary"
+              />
+              <button
+                onClick={() => { setSearch(""); setSearchOpen(false); }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-lg"
+              >
+                ×
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
