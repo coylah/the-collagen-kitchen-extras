@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { Search, Filter, BookOpen, Coffee, Sun, Moon, Apple, Cookie } from "lucide-react";
@@ -53,11 +53,14 @@ function Cookbook() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [maxTime, setMaxTime] = useState<number>(0);
 
-  // The bottom ribbon's Search tile links to "/#search" from any page —
-  // open the search box automatically when we land here that way.
+  // The bottom ribbon's Search tile links to "/#search" from any page. We
+  // watch the router's own location state (not window.location directly) so
+  // this fires every time the hash becomes "search" — including when we're
+  // already on Home and the page never remounts.
+  const searchHash = useRouterState({ select: (s) => s.location.hash });
   useEffect(() => {
-    if (window.location.hash === "#search") setSearchOpen(true);
-  }, []);
+    if (searchHash === "search") setSearchOpen(true);
+  }, [searchHash]);
 
   const visibleRecipes = useMemo(
     () => recipes.filter(r => !EXCLUDED_MEAL_TYPES.has(r.meal_type)),
@@ -108,10 +111,16 @@ function Cookbook() {
   }
 
   return (
-    <AppShell>
-      {/* Hero */}
-      <section className="bg-white">
-        <div className="relative overflow-hidden" style={{ height: "clamp(190px, 27vh, 270px)" }}>
+    <AppShell fitViewport>
+      {/* Hero — flex column filling the space AppShell gives it. The photo is
+          the only flexible element (min/max bounded); title, tagline and
+          pills always render at their natural size so they're guaranteed
+          visible, never pushed off-screen. */}
+      <section className="flex flex-col min-h-0 flex-1 bg-white">
+        <div
+          className="relative overflow-hidden shrink"
+          style={{ flex: "1 1 auto", minHeight: "90px", maxHeight: "260px" }}
+        >
           {/* Hero photo: Sticky Harissa Chicken with Mint Yoghurt & Pomegranate Salad */}
           <img
             src="/images/hero-harissa-chicken.jpg"
@@ -124,7 +133,7 @@ function Cookbook() {
           />
         </div>
 
-        <div className="mx-auto max-w-6xl px-5 pt-1.5 pb-1.5 text-center">
+        <div className="mx-auto max-w-6xl px-5 pt-1.5 pb-1.5 text-center shrink-0">
           <h1 className="font-serif text-2xl font-light leading-tight text-foreground mb-1">
             The Collagen Kitchen
           </h1>
