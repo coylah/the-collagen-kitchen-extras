@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Heart, Clock } from "lucide-react";
 import type { Recipe } from "@/lib/recipe-types";
 import { useFavourites } from "@/lib/user-state";
+import { slugifyName } from "@/lib/slugify";
 import { cn } from "@/lib/utils";
 
 function SmoothieIllo({ size = 32 }: { size?: number }) {
@@ -108,6 +110,9 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
   const { isFav, toggle } = useFavourites();
   const fav = isFav(recipe.slug);
   const total = recipe.prep_min + recipe.cook_min;
+  const [imgFailed, setImgFailed] = useState(false);
+  const photoSrc = recipe.image_url || `/images/recipes/${slugifyName(recipe.name)}.jpg`;
+  const showPhoto = !imgFailed;
 
   return (
     <Link
@@ -115,34 +120,45 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
       params={{ slug: recipe.slug }}
       className="group block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-secondary/30"
     >
-      <div className="flex min-h-[200px] flex-col justify-between p-5">
+      {/* Photo — falls back silently to the illustration stamp if the file isn't there yet */}
+      <div className="relative h-40 w-full overflow-hidden bg-muted/30">
+        {showPhoto ? (
+          <img
+            src={photoSrc}
+            alt={recipe.name}
+            className="h-full w-full object-cover"
+            onError={() => setImgFailed(true)}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <StampIllustration mealType={recipe.meal_type} />
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggle(recipe.slug);
+          }}
+          className={cn(
+            "absolute top-2.5 right-2.5 grid h-8 w-8 place-items-center rounded-full border backdrop-blur transition-all",
+            fav
+              ? "border-secondary bg-white/90 text-secondary"
+              : "border-white/60 bg-white/70 text-foreground/40 hover:text-secondary/60"
+          )}
+          aria-label={fav ? "Remove from saved" : "Save recipe"}
+        >
+          <Heart className={cn("h-4 w-4 transition-all", fav && "fill-secondary")} />
+        </button>
+        <span className="absolute top-2.5 left-2.5 inline-block shrink-0 rounded-full border border-secondary/30 bg-white/90 backdrop-blur px-2.5 py-0.5 text-[9px] font-medium uppercase tracking-widest text-secondary">
+          {recipe.meal_type}
+        </span>
+      </div>
 
-        {/* Top row — meal type pill + heart */}
-        <div className="flex items-start justify-between gap-2">
-          <span className="inline-block shrink-0 rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-0.5 text-[9px] font-medium uppercase tracking-widest text-secondary">
-            {recipe.meal_type}
-          </span>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              toggle(recipe.slug);
-            }}
-            className={cn(
-              "grid h-8 w-8 shrink-0 place-items-center rounded-full border transition-all",
-              fav
-                ? "border-secondary bg-secondary/10 text-secondary"
-                : "border-border bg-background text-foreground/20 hover:border-secondary/40 hover:text-secondary/60"
-            )}
-            aria-label={fav ? "Remove from saved" : "Save recipe"}
-          >
-            <Heart className={cn("h-4 w-4 transition-all", fav && "fill-secondary")} />
-          </button>
-        </div>
-
+      <div className="flex flex-col justify-between p-5">
         {/* Name + tease */}
-        <div className="mt-4 flex-1">
+        <div>
           <h3 className="font-serif text-lg leading-tight text-foreground group-hover:text-secondary transition-colors">
             {recipe.name}
           </h3>
@@ -153,16 +169,10 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
           )}
         </div>
 
-        {/* Footer — meta left, stamp right, properly separated */}
-        <div className="mt-4 flex items-center justify-between gap-2 border-t border-border/60 pt-4">
-          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground min-w-0">
-            <Clock className="h-3 w-3 shrink-0" />
-            <span className="truncate">{total} min · Serves {recipe.servings}</span>
-          </div>
-          {/* Stamp — shrink-0 so it never gets pushed by text */}
-          <div className="shrink-0 opacity-40 group-hover:opacity-70 transition-opacity">
-            <StampIllustration mealType={recipe.meal_type} />
-          </div>
+        {/* Footer — just the meta now, stamp moved to the photo fallback */}
+        <div className="mt-4 flex items-center gap-1.5 text-[11px] text-muted-foreground border-t border-border/60 pt-4">
+          <Clock className="h-3 w-3 shrink-0" />
+          <span className="truncate">{total} min · Serves {recipe.servings}</span>
         </div>
       </div>
     </Link>
