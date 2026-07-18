@@ -184,53 +184,67 @@ function RecipePage() {
       <article className="mx-auto max-w-2xl px-4 py-3">
         <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
 
-          {/* Top bar — back + favourite */}
-          <div className="no-print flex items-center justify-between px-5 pt-4">
-            <button
-              onClick={() => window.history.back()}
-              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="h-4 w-4" /> Back
-            </button>
-            <button
-              onClick={() => toggle(recipe.slug)}
-              aria-label={fav ? "Remove from saved" : "Save recipe"}
-              className={cn(
-                "grid h-9 w-9 place-items-center rounded-full transition-colors",
-                fav ? "text-secondary" : "text-foreground/30 hover:text-secondary/60"
-              )}
-            >
-              <Heart className={cn("h-5 w-5", fav && "fill-secondary")} />
-            </button>
-          </div>
+          {/* Photo + title merged — photo fills top, fades to white, title sits in the fade zone */}
+          <div className="relative h-72 sm:h-80 w-full overflow-hidden bg-muted/30">
+            {!imgFailed ? (
+              <img
+                src={photoSrc}
+                alt={recipe.name}
+                className="absolute inset-0 h-full w-full object-cover"
+                onError={() => setImgFailed(true)}
+              />
+            ) : null}
+            <div
+              className="absolute inset-x-0 bottom-0 h-2/3 pointer-events-none"
+              style={{ background: "linear-gradient(to bottom, transparent, white 65%)" }}
+            />
 
-          {/* Title block */}
-          <div className="px-5 pt-1">
-            <p className="text-[9px] uppercase tracking-[0.22em] text-secondary mb-1.5 inline-block rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-0.5">
-              {recipe.meal_type}
-            </p>
-            <h1 className="font-serif text-2xl sm:text-3xl font-light leading-tight text-foreground">
-              {recipe.name}
-            </h1>
-            <div className="mt-2 h-px w-7 bg-secondary" />
-
-            <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                </svg>
-                {total} min
-                {recipe.prep_min > 0 && ` (${recipe.prep_min} prep`}
-                {recipe.cook_min > 0 && ` · ${recipe.cook_min} cook)`}
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <User className="h-3 w-3" />
-                Serves {servings}
-              </span>
+            {/* Back + favourite — floating over the photo */}
+            <div className="no-print absolute top-3 left-3 right-3 flex items-center justify-between">
+              <button
+                onClick={() => window.history.back()}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-black/25 backdrop-blur px-3 py-1.5 rounded-full"
+              >
+                <ArrowLeft className="h-4 w-4" /> Back
+              </button>
+              <button
+                onClick={() => toggle(recipe.slug)}
+                aria-label={fav ? "Remove from saved" : "Save recipe"}
+                className="grid h-8 w-8 place-items-center rounded-full bg-black/25 backdrop-blur text-white"
+              >
+                <Heart className={cn("h-4 w-4", fav && "fill-white")} />
+              </button>
             </div>
 
-            {/* Phase badges */}
-            <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+            {/* Title, bottom-anchored within the fade zone */}
+            <div className="absolute bottom-0 left-0 right-0 px-5 pb-3">
+              <p className="text-[9px] uppercase tracking-[0.22em] text-secondary mb-1.5 inline-block rounded-full border border-secondary/30 bg-white/90 backdrop-blur px-2.5 py-0.5">
+                {recipe.meal_type}
+              </p>
+              <h1 className="font-serif text-2xl sm:text-3xl font-light leading-tight text-foreground">
+                {recipe.name}
+              </h1>
+              <div className="mt-2 h-px w-7 bg-secondary" />
+              <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  {total} min
+                  {recipe.prep_min > 0 && ` (${recipe.prep_min} prep`}
+                  {recipe.cook_min > 0 && ` · ${recipe.cook_min} cook)`}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <User className="h-3 w-3" />
+                  Serves {servings}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Phase badges + action buttons — clean white area below the photo */}
+          <div className="px-5 pt-3">
+            <div className="flex flex-wrap items-center gap-1.5">
               {ALL_PHASES.map(phase => (
                 <span
                   key={phase}
@@ -246,7 +260,6 @@ function RecipePage() {
               ))}
             </div>
 
-            {/* Action buttons */}
             <div className="no-print mt-3 grid grid-cols-3 gap-2">
               <button
                 onClick={() => toggle(recipe.slug)}
@@ -294,18 +307,6 @@ function RecipePage() {
                 Scroll down to pick your fillings — each one is mapped to the collagen matrix and adds straight to your shopping list.
               </p>
             )}
-          </div>
-
-          {/* Photo — falls back to nothing (just background) if not uploaded yet */}
-          <div className="no-print mt-3 h-28 sm:h-40 w-full overflow-hidden bg-muted/30">
-            {!imgFailed ? (
-              <img
-                src={photoSrc}
-                alt={recipe.name}
-                className="h-full w-full object-cover"
-                onError={() => setImgFailed(true)}
-              />
-            ) : null}
           </div>
 
           {/* Tabs */}
