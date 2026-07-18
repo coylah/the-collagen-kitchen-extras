@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, BookOpen, CalendarDays, ShoppingBasket, HelpCircle, FlaskConical } from "lucide-react";
+import { Heart, Home, CalendarDays, ShoppingBasket, HelpCircle, FlaskConical } from "lucide-react";
 import type { ReactNode } from "react";
 import WelcomeModal from "@/components/welcome-modal";
 import { useLocalStorage } from "@/hooks/use-local-storage";
@@ -48,7 +48,7 @@ function Header() {
         </Link>
       </div>
       <nav className="grid grid-cols-6 border-t border-border">
-        <NavLink to="/" icon={<BookOpen className="h-4 w-4" />} label="Recipes" />
+        <NavLink to="/" icon={<Home className="h-4 w-4" />} label="Home" />
         <NavLink to="/planner" icon={<CalendarDays className="h-4 w-4" />} label="Planner" />
         <NavLink to="/shopping" icon={<ShoppingBasket className="h-4 w-4" />} label="Shopping" />
         <NavLink to="/favourites" icon={<Heart className="h-4 w-4" />} label="Saved" />
