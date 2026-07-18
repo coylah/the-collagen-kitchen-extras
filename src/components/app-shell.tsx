@@ -76,7 +76,7 @@ function Footer() {
   }
 
   return (
-    <footer className="no-print mt-2 border-t border-border py-5 text-center">
+    <footer className="no-print border-t border-border pt-3 pb-5 text-center">
       <div className="flex items-center justify-center gap-4 max-w-sm mx-auto text-left">
         <img
           src="/images/coylah.jpg"
