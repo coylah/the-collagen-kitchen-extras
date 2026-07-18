@@ -181,11 +181,11 @@ function RecipePage() {
 
   return (
     <AppShell>
-      <article className="mx-auto max-w-2xl px-4 py-6">
+      <article className="mx-auto max-w-2xl px-4 py-3">
         <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
 
           {/* Top bar — back + favourite */}
-          <div className="no-print flex items-center justify-between px-6 pt-6">
+          <div className="no-print flex items-center justify-between px-5 pt-4">
             <button
               onClick={() => window.history.back()}
               className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -205,16 +205,16 @@ function RecipePage() {
           </div>
 
           {/* Title block */}
-          <div className="px-6 sm:px-8 pt-2">
-            <p className="text-[9px] uppercase tracking-[0.22em] text-secondary mb-2 inline-block rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-0.5">
+          <div className="px-5 pt-1">
+            <p className="text-[9px] uppercase tracking-[0.22em] text-secondary mb-1.5 inline-block rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-0.5">
               {recipe.meal_type}
             </p>
-            <h1 className="font-serif text-3xl sm:text-4xl font-light leading-tight text-foreground">
+            <h1 className="font-serif text-2xl sm:text-3xl font-light leading-tight text-foreground">
               {recipe.name}
             </h1>
-            <div className="mt-3 h-px w-7 bg-secondary" />
+            <div className="mt-2 h-px w-7 bg-secondary" />
 
-            <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+            <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
@@ -230,7 +230,7 @@ function RecipePage() {
             </div>
 
             {/* Phase badges */}
-            <div className="mt-4 flex flex-wrap items-center gap-2">
+            <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
               {ALL_PHASES.map(phase => (
                 <span
                   key={phase}
@@ -247,17 +247,17 @@ function RecipePage() {
             </div>
 
             {/* Action buttons */}
-            <div className="no-print mt-5 grid grid-cols-3 gap-2">
+            <div className="no-print mt-3 grid grid-cols-3 gap-2">
               <button
                 onClick={() => toggle(recipe.slug)}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 rounded-xl border py-3 text-xs font-medium transition-colors",
+                  "flex flex-col items-center justify-center gap-0.5 rounded-xl border py-2 text-[11px] font-medium transition-colors",
                   fav
                     ? "border-secondary bg-secondary/10 text-secondary"
                     : "border-secondary/40 text-secondary hover:border-secondary hover:bg-secondary/5"
                 )}
               >
-                <Bookmark className={cn("h-4 w-4", fav && "fill-secondary")} />
+                <Bookmark className={cn("h-3.5 w-3.5", fav && "fill-secondary")} />
                 {fav ? "Saved" : "Save"}
               </button>
 
@@ -265,9 +265,9 @@ function RecipePage() {
                 <Link
                   to="/planner"
                   onClick={() => localStorage.setItem("ck.pendingPlanRecipe", JSON.stringify({ slug: recipe.slug, servings }))}
-                  className="flex flex-col items-center justify-center gap-1 rounded-xl border border-secondary/40 py-3 text-xs font-medium text-secondary text-center leading-tight hover:border-secondary hover:bg-secondary/5 transition-colors"
+                  className="flex flex-col items-center justify-center gap-0.5 rounded-xl border border-secondary/40 py-2 text-[11px] font-medium text-secondary text-center leading-tight hover:border-secondary hover:bg-secondary/5 transition-colors"
                 >
-                  <CalendarPlus className="h-4 w-4" />
+                  <CalendarPlus className="h-3.5 w-3.5" />
                   Add to meal plan
                 </Link>
               ) : (
@@ -276,28 +276,28 @@ function RecipePage() {
 
               <button
                 onClick={() => window.print()}
-                className="flex flex-col items-center justify-center gap-1 rounded-xl border border-secondary/40 py-3 text-xs font-medium text-secondary hover:border-secondary hover:bg-secondary/5 transition-colors"
+                className="flex flex-col items-center justify-center gap-0.5 rounded-xl border border-secondary/40 py-2 text-[11px] font-medium text-secondary hover:border-secondary hover:bg-secondary/5 transition-colors"
               >
-                <Printer className="h-4 w-4" />
+                <Printer className="h-3.5 w-3.5" />
                 Print
               </button>
             </div>
 
             {hasOatsBuilder && (
-              <p className="mt-5 text-xs text-muted-foreground border-l-2 border-secondary/40 pl-3">
+              <p className="mt-3 text-xs text-muted-foreground border-l-2 border-secondary/40 pl-3">
                 This is the base recipe — scroll down to build your own version with toppings and flavour combos.
               </p>
             )}
 
             {hasOmeletteBuilder && (
-              <p className="mt-5 text-xs text-muted-foreground border-l-2 border-secondary/40 pl-3">
+              <p className="mt-3 text-xs text-muted-foreground border-l-2 border-secondary/40 pl-3">
                 Scroll down to pick your fillings — each one is mapped to the collagen matrix and adds straight to your shopping list.
               </p>
             )}
           </div>
 
           {/* Photo — falls back to nothing (just background) if not uploaded yet */}
-          <div className="no-print mt-6 h-56 sm:h-72 w-full overflow-hidden bg-muted/30">
+          <div className="no-print mt-3 h-28 sm:h-40 w-full overflow-hidden bg-muted/30">
             {!imgFailed ? (
               <img
                 src={photoSrc}
@@ -328,7 +328,7 @@ function RecipePage() {
           </div>
 
           {/* Ingredients */}
-          <section className={cn("px-6 sm:px-8 py-8", activeTab === "ingredients" ? "block" : "hidden print:block")}>
+          <section className={cn("px-5 py-5", activeTab === "ingredients" ? "block" : "hidden print:block")}>
             <div className="mb-5 flex items-center justify-between">
               <h2 className="font-serif text-xl font-light">Ingredients</h2>
               <div className="no-print flex items-center gap-1.5">
@@ -374,7 +374,7 @@ function RecipePage() {
           </section>
 
           {/* Method */}
-          <section className={cn("px-6 sm:px-8 py-8 border-t border-border", activeTab === "method" ? "block" : "hidden print:block")}>
+          <section className={cn("px-5 py-5 border-t border-border", activeTab === "method" ? "block" : "hidden print:block")}>
             <h2 className="mb-5 font-serif text-xl font-light">Method</h2>
             <ol className="space-y-4">
               {recipe.method.map((step, i) => (
@@ -414,7 +414,7 @@ function RecipePage() {
 
           {/* Coylah's Tips */}
           {recipe.notes && (
-            <div className={cn("border-t border-border bg-[#fef2f4] px-6 sm:px-8 py-8", activeTab === "tips" ? "block" : "hidden print:block")}>
+            <div className={cn("border-t border-border bg-[#fef2f4] px-5 py-5", activeTab === "tips" ? "block" : "hidden print:block")}>
               <p className="mb-2 flex items-center gap-2 text-[9px] uppercase tracking-[0.22em] text-secondary font-medium">
                 <Lightbulb className="h-3 w-3" />
                 Coylah's tips
@@ -427,7 +427,7 @@ function RecipePage() {
 
           {/* Glow Factor */}
           {recipe.collagen_tip && !glowFactorIsDuplicate && (
-            <div className={cn("border-t border-border bg-[#fef2f4] px-6 sm:px-8 py-8", activeTab === "glow" ? "block" : "hidden print:block")}>
+            <div className={cn("border-t border-border bg-[#fef2f4] px-5 py-5", activeTab === "glow" ? "block" : "hidden print:block")}>
               <p className="mb-3 text-[9px] uppercase tracking-[0.22em] text-secondary font-medium">
                 ✦ The glow factor
               </p>
