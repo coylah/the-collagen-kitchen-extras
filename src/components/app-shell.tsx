@@ -5,7 +5,7 @@ import WelcomeModal from "@/components/welcome-modal";
 import { MealRibbon } from "@/components/meal-ribbon";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, fitViewport = false }: { children: ReactNode; fitViewport?: boolean }) {
   const [hasWelcomed, setHasWelcomed, hasWelcomedLoaded] = useLocalStorage("ck.welcomed", false);
   const [showWelcome, setShowWelcome, showWelcomeLoaded] = useLocalStorage("ck.showWelcome", true);
 
@@ -15,7 +15,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isOpen = hasWelcomedLoaded && showWelcomeLoaded && !hasWelcomed && showWelcome;
 
   return (
-    <div className="min-h-screen">
+    <div className={fitViewport ? "h-dvh overflow-hidden flex flex-col" : "min-h-screen"}>
       {isOpen && (
         <WelcomeModal
           onClose={() => {
@@ -25,8 +25,13 @@ export function AppShell({ children }: { children: ReactNode }) {
         />
       )}
       <Header />
-      {/* pb-16 keeps every page's content clear of the fixed bottom ribbon below */}
-      <main className="pb-16">{children}</main>
+      {/* fitViewport pages (Home) get a flexed main so their content shrinks
+          to fit between the header and footer instead of overflowing the
+          screen. Everything else keeps the normal scrolling layout, with
+          pb-16 to clear the fixed bottom ribbon. */}
+      <main className={fitViewport ? "flex-1 min-h-0 flex flex-col overflow-hidden" : "pb-16"}>
+        {children}
+      </main>
       <Footer />
       <MealRibbon />
     </div>
@@ -41,7 +46,7 @@ function Header() {
   }
 
   return (
-    <header className="no-print sticky top-0 z-40 border-b border-border bg-white/98 backdrop-blur shadow-sm">
+    <header className="no-print shrink-0 sticky top-0 z-40 border-b border-border bg-white/98 backdrop-blur shadow-sm">
       <div className="mx-auto max-w-6xl px-4 py-2">
         <Link to="/" className="flex flex-col leading-none">
           <span className="font-script text-base text-secondary -mb-1">Love Coylah</span>
@@ -76,7 +81,7 @@ function Footer() {
   }
 
   return (
-    <footer className="no-print border-t border-border pt-3 pb-5 text-center">
+    <footer className="no-print shrink-0 border-t border-border pt-3 pb-20 text-center">
       <div className="flex items-center justify-center gap-4 max-w-sm mx-auto text-left">
         <img
           src="/images/coylah.jpg"
