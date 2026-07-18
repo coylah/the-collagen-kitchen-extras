@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Heart, Clock } from "lucide-react";
 import type { Recipe } from "@/lib/recipe-types";
 import { useFavourites } from "@/lib/user-state";
-import { slugifyName } from "@/lib/slugify";
+import { slugifyName, recipeImageSrc } from "@/lib/slugify";
 import { cn } from "@/lib/utils";
 
 function SmoothieIllo({ size = 32 }: { size?: number }) {
@@ -111,7 +111,7 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
   const fav = isFav(recipe.slug);
   const total = recipe.prep_min + recipe.cook_min;
   const [imgFailed, setImgFailed] = useState(false);
-  const photoSrc = recipe.image_url || `/images/recipes/${slugifyName(recipe.name)}.jpg`;
+  const photoSrc = recipe.image_url || recipeImageSrc(recipe.name);
   const showPhoto = !imgFailed;
 
   return (
