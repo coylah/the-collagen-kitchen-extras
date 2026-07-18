@@ -5,7 +5,7 @@ import WelcomeModal from "@/components/welcome-modal";
 import { MealRibbon } from "@/components/meal-ribbon";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 
-export function AppShell({ children, hideFooter = false }: { children: ReactNode; hideFooter?: boolean }) {
+export function AppShell({ children }: { children: ReactNode }) {
   const [hasWelcomed, setHasWelcomed, hasWelcomedLoaded] = useLocalStorage("ck.welcomed", false);
   const [showWelcome, setShowWelcome, showWelcomeLoaded] = useLocalStorage("ck.showWelcome", true);
 
@@ -27,7 +27,7 @@ export function AppShell({ children, hideFooter = false }: { children: ReactNode
       <Header />
       {/* pb-16 keeps every page's content clear of the fixed bottom ribbon below */}
       <main className="pb-16">{children}</main>
-      {!hideFooter && <Footer />}
+      <Footer />
       <MealRibbon />
     </div>
   );
