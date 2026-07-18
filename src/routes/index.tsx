@@ -116,42 +116,60 @@ function Cookbook() {
   return (
     <AppShell>
       {/* Hero */}
-      <section className="border-b border-border">
-        <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-px w-6 bg-secondary" />
-            <p className="text-[9px] uppercase tracking-[0.32em] text-secondary">Your skin-food cookbook</p>
-            <div className="h-px w-6 bg-secondary" />
-          </div>
-          <p className="font-script text-2xl text-secondary -mb-1">Love Coylah</p>
-          <h1 className="font-serif text-4xl sm:text-6xl font-light leading-[1.0] text-foreground mb-4">
-            The Collagen<br/>Kitchen
-          </h1>
-          <div className="w-8 h-px bg-secondary mb-4" />
-          <p className="max-w-lg text-sm text-muted-foreground leading-relaxed mb-6 font-light">
-            Every recipe in here feeds your collagen, your skin barrier and your glow. Real food, real results — built from the inside out.
+      <section className="border-b border-border bg-white">
+        <div className="relative overflow-hidden" style={{ height: "clamp(200px, 30vh, 300px)" }}>
+          {/* Hero photo: Sticky Harissa Chicken with Mint Yoghurt & Pomegranate Salad */}
+          <img
+            src="/images/hero-harissa-chicken.jpg"
+            className="w-full h-full object-cover"
+            style={{ objectPosition: "center 40%" }}
+          />
+          <div
+            className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+            style={{ background: "linear-gradient(to bottom, transparent, white)" }}
+          />
+          <p className="font-script text-lg text-white absolute top-3 left-4 drop-shadow">
+            Love Coylah
           </p>
-          <div className="flex flex-wrap gap-3">
+        </div>
+
+        <div className="mx-auto max-w-6xl px-5 pt-2 pb-4 text-center">
+          <h1 className="font-serif text-3xl font-light leading-tight text-foreground mb-1.5">
+            The Collagen Kitchen
+          </h1>
+          <div className="w-7 h-px bg-secondary mx-auto mb-2" />
+          <p className="text-xs text-muted-foreground leading-snug mb-3 font-light max-w-xs mx-auto">
+            Real food. Real results. Built from the inside out.
+          </p>
+
+          <div className="space-y-1.5 max-w-sm mx-auto">
+            <Link
+              to="/"
+              className="flex items-center gap-2.5 rounded-full bg-secondary px-4 py-2.5 text-sm font-medium text-secondary-foreground hover:bg-secondary/90 transition-colors"
+            >
+              <BookOpen className="h-4 w-4 shrink-0" />
+              Browse recipes
+            </Link>
             <Link
               to="/build/glow-bowl"
-              className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/90 transition-colors"
+              className="flex items-center gap-2.5 rounded-full bg-secondary/10 px-4 py-2.5 text-sm font-medium text-secondary hover:bg-secondary/15 transition-colors"
             >
-              <Salad className="h-4 w-4" />
+              <Salad className="h-4 w-4 shrink-0" />
               Glow Bowl Builder
             </Link>
             <Link
               to="/build/yoghurt-bowl"
-              className="inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/90 transition-colors"
+              className="flex items-center gap-2.5 rounded-full bg-secondary/10 px-4 py-2.5 text-sm font-medium text-secondary hover:bg-secondary/15 transition-colors"
             >
-              <span>🥣</span>
+              <span className="shrink-0">🥣</span>
               Yoghurt Bowl Builder
             </Link>
             <Link
               to="/bone-broth"
-              className="inline-flex items-center gap-2 rounded-full border border-secondary px-4 py-2 text-sm font-medium text-secondary hover:bg-secondary/5 transition-colors"
+              className="flex items-center gap-2.5 rounded-full border border-secondary px-4 py-2.5 text-sm font-medium text-secondary hover:bg-secondary/5 transition-colors"
             >
-              <Soup className="h-4 w-4" />
-              Bone Broth
+              <Soup className="h-4 w-4 shrink-0" />
+              Bone Broth Recipes
             </Link>
           </div>
         </div>
