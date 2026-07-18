@@ -111,8 +111,12 @@ export default function WelcomeModal({ onClose }: { onClose: () => void }) {
         /* Slide 1 is a single flat image (photo + note + icons all baked
            together) rather than live text — see /public/images for source.
            It scrolls internally if taller than the available space, same
-           as the generic content block does for other slides. */
-        <div className="flex-1 min-h-0 overflow-y-auto bg-white">
+           as the generic content block does for other slides. Scrollbar is
+           hidden so it doesn't reserve layout width and make the image sit
+           narrower than the full-width header/footer above and below it. */
+        <div
+          className="flex-1 min-h-0 overflow-y-auto bg-white [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        >
           <img src={slide.image} className="w-full h-auto block" />
         </div>
       ) : (
