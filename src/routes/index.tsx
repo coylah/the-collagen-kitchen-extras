@@ -102,16 +102,10 @@ function Cookbook() {
   }
 
   return (
-    <AppShell hideFooter>
-      {/* Hero — sized to fill the viewport between the header and the bottom
-          ribbon so the resting state never scrolls on a phone screen. The
-          leftover slack (if any) is absorbed by justify-center rather than
-          pooling as dead space at the bottom. */}
-      <section
-        className="flex flex-col justify-center border-b border-border bg-white"
-        style={{ minHeight: "calc(100dvh - 164px)" }}
-      >
-        <div className="relative overflow-hidden shrink-0" style={{ height: "clamp(90px, 14vh, 130px)" }}>
+    <AppShell>
+      {/* Hero */}
+      <section className="border-b border-border bg-white">
+        <div className="relative overflow-hidden" style={{ height: "clamp(160px, 22vh, 230px)" }}>
           {/* Hero photo: Sticky Harissa Chicken with Mint Yoghurt & Pomegranate Salad */}
           <img
             src="/images/hero-harissa-chicken.jpg"
@@ -119,7 +113,7 @@ function Cookbook() {
             style={{ objectPosition: "center 40%" }}
           />
           <div
-            className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none"
+            className="absolute bottom-0 left-0 right-0 h-14 pointer-events-none"
             style={{ background: "linear-gradient(to bottom, transparent, white)" }}
           />
           <p className="font-script text-lg text-white absolute top-3 left-4 drop-shadow">
@@ -127,40 +121,35 @@ function Cookbook() {
           </p>
         </div>
 
-        <div className="mx-auto max-w-6xl px-5 pt-1 pb-2.5 text-center">
-          <h1 className="font-serif text-xl font-light leading-tight text-foreground mb-0.5">
+        <div className="mx-auto max-w-6xl px-5 pt-1.5 pb-3 text-center">
+          <h1 className="font-serif text-2xl font-light leading-tight text-foreground mb-1">
             The Collagen Kitchen
           </h1>
-          <div className="w-7 h-px bg-secondary mx-auto mb-1" />
-          <p className="text-[11px] text-muted-foreground leading-snug mb-2.5 font-light max-w-xs mx-auto">
+          <div className="w-7 h-px bg-secondary mx-auto mb-1.5" />
+          <p className="text-xs text-muted-foreground leading-snug mb-2.5 font-light max-w-xs mx-auto">
             Real food. Real results. Built from the inside out.
           </p>
 
-          {/* 3x2 tile grid: 5 meal types + search, filled/shaded for a more
-              premium feel than a plain outlined pill */}
+          {/* 3x2 grid of 6 pill buttons — 5 meal types + search, styled to match
+              the meal-type badge used on recipe rows/detail pages (tinted fill,
+              secondary border, uppercase small caps) for a consistent look */}
           <div className="grid grid-cols-3 gap-2 max-w-sm mx-auto">
-            {HERO_MEAL_TYPES.map(({ key, label, icon: MealIcon }) => (
+            {HERO_MEAL_TYPES.map(({ key, label }) => (
               <Link
                 key={key}
                 to="/meal/$type"
                 params={{ type: key }}
-                className="group flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-secondary/15 bg-gradient-to-b from-secondary/[0.06] to-secondary/[0.02] px-1.5 py-3 shadow-sm transition-all hover:border-secondary/30 hover:shadow-md active:scale-[0.97]"
+                className="flex items-center justify-center rounded-full border border-secondary/30 bg-secondary/10 px-2 py-2 text-[11px] font-medium uppercase tracking-widest text-secondary transition-colors hover:bg-secondary/15"
               >
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-white shadow-sm transition-transform group-hover:scale-105">
-                  <MealIcon className="h-4 w-4" strokeWidth={2} />
-                </span>
-                <span className="text-[11.5px] font-medium leading-none text-foreground/85">{label}</span>
+                {label}
               </Link>
             ))}
 
             <button
               onClick={() => setSearchOpen(true)}
-              className="group flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-secondary/15 bg-gradient-to-b from-secondary/[0.06] to-secondary/[0.02] px-1.5 py-3 shadow-sm transition-all hover:border-secondary/30 hover:shadow-md active:scale-[0.97]"
+              className="flex items-center justify-center rounded-full border border-secondary/30 bg-secondary/10 px-2 py-2 text-[11px] font-medium uppercase tracking-widest text-secondary transition-colors hover:bg-secondary/15"
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-white shadow-sm transition-transform group-hover:scale-105">
-                <Search className="h-4 w-4" strokeWidth={2} />
-              </span>
-              <span className="text-[11.5px] font-medium leading-none text-foreground/85">Search</span>
+              Search
             </button>
           </div>
 
