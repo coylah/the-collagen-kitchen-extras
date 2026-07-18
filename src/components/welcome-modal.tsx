@@ -14,14 +14,23 @@ import {
 const BRAND_RED = "#9c1a35";
 const BRAND_RED_TINT = "#9c1a351a";
 
-const slides = [
+type Slide = {
+  title?: string;
+  signature?: string;
+  description?: string;
+  image?: string;
+  icon?: typeof BookOpen;
+  cta: string;
+  isBakedNote?: boolean;
+  isFinal?: boolean;
+  listItems?: { icon: typeof BookOpen; title: string; description: string }[];
+};
+
+const slides: Slide[] = [
   {
-    title: "Welcome to\nThe Collagen Kitchen",
-    signature: "Love Coylah",
-    description: "Real food. Real glow.\nBuilt around your skin.",
-    image: "/images/coylah.jpg",
-    cta: "Start",
-    isHero: true,
+    image: "/images/onboarding-1-welcome-note.jpg",
+    cta: "Let's Get Started",
+    isBakedNote: true,
   },
   {
     title: "Food that\nfuels your skin",
@@ -98,45 +107,55 @@ export default function WelcomeModal({ onClose }: { onClose: () => void }) {
         </button>
       </div>
 
-      {/* Media block — photos get real height since they're the visual centerpiece.
-          Icons get a small, tight block since there's nothing to fill that space with,
-          freeing up room below so content-heavy slides (3, 5) never need to scroll. */}
-      <div
-        className="shrink-0 relative overflow-hidden bg-white flex items-center justify-center"
-        style={{ height: slide.image ? "clamp(280px, 46vh, 440px)" : "clamp(90px, 14vh, 140px)" }}
-      >
-        {slide.image ? (
-          <>
-            <img
-              src={slide.image}
-              className="w-full h-full object-cover"
-              style={{ objectPosition: slide.isHero ? "center 15%" : "center" }}
-            />
-            <div
-              className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none"
-              style={{ background: "linear-gradient(to bottom, transparent, white)" }}
-            />
-          </>
-        ) : Icon ? (
+      {slide.isBakedNote ? (
+        /* Slide 1 is a single flat image (photo + note + icons all baked
+           together) rather than live text — see /public/images for source.
+           It scrolls internally if taller than the available space, same
+           as the generic content block does for other slides. */
+        <div className="flex-1 min-h-0 overflow-y-auto bg-white">
+          <img src={slide.image} className="w-full h-auto block" />
+        </div>
+      ) : (
+        <>
+          {/* Media block — photos get real height since they're the visual centerpiece.
+              Icons get a small, tight block since there's nothing to fill that space with,
+              freeing up room below so content-heavy slides (3, 5) never need to scroll. */}
           <div
-            className="w-14 h-14 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: BRAND_RED_TINT }}
+            className="shrink-0 relative overflow-hidden bg-white flex items-center justify-center"
+            style={{ height: slide.image ? "clamp(280px, 46vh, 440px)" : "clamp(90px, 14vh, 140px)" }}
           >
-            <Icon size={24} color={BRAND_RED} strokeWidth={1.5} />
+            {slide.image ? (
+              <>
+                <img
+                  src={slide.image}
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: "center" }}
+                />
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none"
+                  style={{ background: "linear-gradient(to bottom, transparent, white)" }}
+                />
+              </>
+            ) : Icon ? (
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: BRAND_RED_TINT }}
+              >
+                <Icon size={24} color={BRAND_RED} strokeWidth={1.5} />
+              </div>
+            ) : null}
           </div>
-        ) : null}
-      </div>
 
-      {/* Content — live text, reflows correctly on every screen size.
-          flex-1 + overflow-y-auto means if a slide's content is taller than
-          the available space, IT scrolls internally — the footer buttons
-          below stay pinned and visible regardless. */}
-      <div className="flex-1 min-h-0 px-6 pt-3 text-center overflow-y-auto">
-        {slide.signature && (
-          <p className="font-serif italic text-base mb-0.5" style={{ color: BRAND_RED }}>
-            {slide.signature}
-          </p>
-        )}
+          {/* Content — live text, reflows correctly on every screen size.
+              flex-1 + overflow-y-auto means if a slide's content is taller than
+              the available space, IT scrolls internally — the footer buttons
+              below stay pinned and visible regardless. */}
+          <div className="flex-1 min-h-0 px-6 pt-3 text-center overflow-y-auto">
+            {slide.signature && (
+              <p className="font-serif italic text-base mb-0.5" style={{ color: BRAND_RED }}>
+                {slide.signature}
+              </p>
+            )}
 
         <h2 className="text-xl font-serif leading-tight whitespace-pre-line mb-2">
           {slide.title}
@@ -216,8 +235,10 @@ export default function WelcomeModal({ onClose }: { onClose: () => void }) {
               </div>
             </div>
           </div>
-        )}
-      </div>
+          )}
+          </div>
+        </>
+      )}
 
       {/* Fixed footer */}
       <div className="px-6 pb-5 pt-1.5 space-y-1.5 shrink-0">
