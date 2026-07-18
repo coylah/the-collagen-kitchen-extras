@@ -8,12 +8,18 @@ import {
   Plus,
   CalendarPlus,
   Lightbulb,
+  Leaf,
+  List,
+  Sparkles,
+  Bookmark,
+  Printer,
+  User,
 } from "lucide-react";
 import { getRecipeBySlug } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
-import { Button } from "@/components/ui/button";
 import { useFavourites, useMealPlan } from "@/lib/user-state";
 import { scaleRecipe } from "@/lib/recipe-math";
+import { recipeImageSrc } from "@/lib/slugify";
 import { cn } from "@/lib/utils";
 import { BuildYourBeautyOats } from "@/components/build-your-beauty-oats";
 import { OmeletteAdditions } from "@/components/omelette-additions";
@@ -113,6 +119,8 @@ export const Route = createFileRoute("/recipes/$slug")({
   ),
 });
 
+type TabKey = "ingredients" | "method" | "tips" | "glow";
+
 function RecipePage() {
   const recipe = Route.useLoaderData() as import("@/lib/recipe-types").Recipe;
   const { isFav, toggle } = useFavourites();
@@ -120,13 +128,18 @@ function RecipePage() {
   const [servings, setServings] = useState(recipe.servings);
   const [checkedIng, setCheckedIng] = useState<Record<number, boolean>>({});
   const [checkedStep, setCheckedStep] = useState<Record<number, boolean>>({});
+  const [activeTab, setActiveTab] = useState<TabKey>("ingredients");
+  const [imgFailed, setImgFailed] = useState(false);
 
   const canPlan = !NO_PLAN_TYPES.has(recipe.meal_type);
+  const fav = isFav(recipe.slug);
 
   useEffect(() => {
     setCheckedIng({});
     setCheckedStep({});
     setServings(recipe.servings);
+    setActiveTab("ingredients");
+    setImgFailed(false);
   }, [recipe.slug, recipe.servings]);
 
   const scaledIngredients = useMemo(
@@ -155,33 +168,53 @@ function RecipePage() {
       recipe.name.toLowerCase().slice(0, 20),
     );
 
+  const photoSrc = recipe.image_url || recipeImageSrc(recipe.name);
+
+  const tabs: { key: TabKey; label: string; icon: typeof Leaf }[] = [
+    { key: "ingredients", label: "Ingredients", icon: Leaf },
+    { key: "method", label: "Method", icon: List },
+    ...(recipe.notes ? [{ key: "tips" as TabKey, label: "Coylah's tips", icon: Lightbulb }] : []),
+    ...(recipe.collagen_tip && !glowFactorIsDuplicate
+      ? [{ key: "glow" as TabKey, label: "Glow factor", icon: Sparkles }]
+      : []),
+  ];
+
   return (
     <AppShell>
-      <article className="mx-auto max-w-4xl px-4 py-8">
-        <button
-          onClick={() => window.history.back()}
-          className="no-print mb-6 inline-flex items-center gap-1.5 text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-3 w-3" /> Back
-        </button>
-
+      <article className="mx-auto max-w-2xl px-4 py-6">
         <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
 
-          {/* Header */}
-          <div className="relative bg-white px-8 py-10 sm:px-12 border-b border-border">
-            <div className="absolute right-8 top-8 opacity-30 no-print">
-              <RecipeStamp mealType={recipe.meal_type} />
-            </div>
+          {/* Top bar — back + favourite */}
+          <div className="no-print flex items-center justify-between px-6 pt-6">
+            <button
+              onClick={() => window.history.back()}
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" /> Back
+            </button>
+            <button
+              onClick={() => toggle(recipe.slug)}
+              aria-label={fav ? "Remove from saved" : "Save recipe"}
+              className={cn(
+                "grid h-9 w-9 place-items-center rounded-full transition-colors",
+                fav ? "text-secondary" : "text-foreground/30 hover:text-secondary/60"
+              )}
+            >
+              <Heart className={cn("h-5 w-5", fav && "fill-secondary")} />
+            </button>
+          </div>
 
-            <p className="text-[9px] uppercase tracking-[0.22em] text-secondary mb-2">
+          {/* Title block */}
+          <div className="px-6 sm:px-8 pt-2">
+            <p className="text-[9px] uppercase tracking-[0.22em] text-secondary mb-2 inline-block rounded-full border border-secondary/30 bg-secondary/10 px-2.5 py-0.5">
               {recipe.meal_type}
             </p>
-            <h1 className="font-serif text-4xl font-light leading-tight text-foreground sm:text-5xl">
+            <h1 className="font-serif text-3xl sm:text-4xl font-light leading-tight text-foreground">
               {recipe.name}
             </h1>
-            <div className="mt-4 h-px w-7 bg-secondary" />
+            <div className="mt-3 h-px w-7 bg-secondary" />
 
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+            <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
@@ -190,7 +223,10 @@ function RecipePage() {
                 {recipe.prep_min > 0 && ` (${recipe.prep_min} prep`}
                 {recipe.cook_min > 0 && ` · ${recipe.cook_min} cook)`}
               </span>
-              <span>· Serves {servings}</span>
+              <span className="inline-flex items-center gap-1.5">
+                <User className="h-3 w-3" />
+                Serves {servings}
+              </span>
             </div>
 
             {/* Phase badges */}
@@ -210,34 +246,41 @@ function RecipePage() {
               ))}
             </div>
 
-            <div className="no-print mt-5 flex flex-wrap gap-2">
-              <Button
-                size="sm"
-                variant={isFav(recipe.slug) ? "default" : "outline"}
+            {/* Action buttons */}
+            <div className="no-print mt-5 grid grid-cols-3 gap-2">
+              <button
                 onClick={() => toggle(recipe.slug)}
-                className={isFav(recipe.slug) ? "bg-secondary text-secondary-foreground hover:bg-secondary/90" : "border-secondary/40 hover:border-secondary hover:text-secondary"}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1 rounded-xl border py-3 text-xs font-medium transition-colors",
+                  fav
+                    ? "border-secondary bg-secondary/10 text-secondary"
+                    : "border-secondary/40 text-secondary hover:border-secondary hover:bg-secondary/5"
+                )}
               >
-                <Heart className={cn("h-3.5 w-3.5", isFav(recipe.slug) && "fill-secondary-foreground")} />
-                {isFav(recipe.slug) ? "Saved" : "Save recipe"}
-              </Button>
+                <Bookmark className={cn("h-4 w-4", fav && "fill-secondary")} />
+                {fav ? "Saved" : "Save"}
+              </button>
 
-              {canPlan && (
-                <Link to="/planner">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-secondary/40 hover:border-secondary hover:text-secondary"
-                    onClick={() => localStorage.setItem("ck.pendingPlanRecipe", JSON.stringify({ slug: recipe.slug, servings }))}
-                  >
-                    <CalendarPlus className="h-3.5 w-3.5" />
-                    Add to meal plan
-                  </Button>
+              {canPlan ? (
+                <Link
+                  to="/planner"
+                  onClick={() => localStorage.setItem("ck.pendingPlanRecipe", JSON.stringify({ slug: recipe.slug, servings }))}
+                  className="flex flex-col items-center justify-center gap-1 rounded-xl border border-secondary/40 py-3 text-xs font-medium text-secondary text-center leading-tight hover:border-secondary hover:bg-secondary/5 transition-colors"
+                >
+                  <CalendarPlus className="h-4 w-4" />
+                  Add to meal plan
                 </Link>
+              ) : (
+                <div />
               )}
 
-              <Button size="sm" variant="ghost" onClick={() => window.print()} className="hover:text-secondary">
+              <button
+                onClick={() => window.print()}
+                className="flex flex-col items-center justify-center gap-1 rounded-xl border border-secondary/40 py-3 text-xs font-medium text-secondary hover:border-secondary hover:bg-secondary/5 transition-colors"
+              >
+                <Printer className="h-4 w-4" />
                 Print
-              </Button>
+              </button>
             </div>
 
             {hasOatsBuilder && (
@@ -253,9 +296,125 @@ function RecipePage() {
             )}
           </div>
 
+          {/* Photo — falls back to nothing (just background) if not uploaded yet */}
+          <div className="no-print mt-6 h-56 sm:h-72 w-full overflow-hidden bg-muted/30">
+            {!imgFailed ? (
+              <img
+                src={photoSrc}
+                alt={recipe.name}
+                className="h-full w-full object-cover"
+                onError={() => setImgFailed(true)}
+              />
+            ) : null}
+          </div>
+
+          {/* Tabs */}
+          <div className="no-print flex border-t border-b border-border">
+            {tabs.map(({ key, label, icon: Icon }) => (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                className={cn(
+                  "flex-1 flex flex-col items-center gap-1 py-3 text-[11px] transition-colors",
+                  activeTab === key
+                    ? "bg-secondary/10 text-secondary font-medium"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Ingredients */}
+          <section className={cn("px-6 sm:px-8 py-8", activeTab === "ingredients" ? "block" : "hidden print:block")}>
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="font-serif text-xl font-light">Ingredients</h2>
+              <div className="no-print flex items-center gap-1.5">
+                <button
+                  onClick={() => setServings(s => Math.max(1, s - 1))}
+                  className="grid h-6 w-6 place-items-center rounded-full border border-border text-muted-foreground hover:border-secondary hover:text-secondary"
+                >
+                  <Minus className="h-3 w-3" />
+                </button>
+                <span className="min-w-[4.5rem] text-center text-xs text-muted-foreground">
+                  Serves {servings}
+                </span>
+                <button
+                  onClick={() => setServings(s => s + 1)}
+                  className="grid h-6 w-6 place-items-center rounded-full border border-border text-muted-foreground hover:border-secondary hover:text-secondary"
+                >
+                  <Plus className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+            <ul className="space-y-1">
+              {scaledIngredients.map((ing, i) => (
+                <li key={i}>
+                  <label className="flex cursor-pointer items-start gap-3 rounded-lg px-1 py-2 hover:bg-muted/40">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 h-3.5 w-3.5 accent-secondary"
+                      checked={!!checkedIng[i]}
+                      onChange={() => setCheckedIng(c => ({ ...c, [i]: !c[i] }))}
+                    />
+                    <span className={cn(
+                      "text-sm font-light leading-relaxed",
+                      checkedIng[i] && "text-muted-foreground line-through"
+                    )}>
+                      {ing.qty && <span className="text-muted-foreground">{ing.qty} </span>}
+                      {ing.unit && <span className="text-muted-foreground">{ing.unit} </span>}
+                      {ing.item}
+                    </span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {/* Method */}
+          <section className={cn("px-6 sm:px-8 py-8 border-t border-border", activeTab === "method" ? "block" : "hidden print:block")}>
+            <h2 className="mb-5 font-serif text-xl font-light">Method</h2>
+            <ol className="space-y-4">
+              {recipe.method.map((step, i) => (
+                <li key={i}>
+                  <label className="flex cursor-pointer items-start gap-3 rounded-lg px-1 py-1 hover:bg-muted/40">
+                    <span
+                      className={cn(
+                        "mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border text-[10px] cursor-pointer",
+                        checkedStep[i]
+                          ? "border-secondary bg-secondary text-secondary-foreground"
+                          : "border-border text-muted-foreground",
+                      )}
+                      onClick={e => {
+                        e.preventDefault();
+                        setCheckedStep(c => ({ ...c, [i]: !c[i] }));
+                      }}
+                    >
+                      {i + 1}
+                    </span>
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={!!checkedStep[i]}
+                      onChange={() => setCheckedStep(c => ({ ...c, [i]: !c[i] }))}
+                    />
+                    <span className={cn(
+                      "text-sm font-light leading-relaxed",
+                      checkedStep[i] && "text-muted-foreground line-through"
+                    )}>
+                      {step}
+                    </span>
+                  </label>
+                </li>
+              ))}
+            </ol>
+          </section>
+
           {/* Coylah's Tips */}
           {recipe.notes && (
-            <div className="border-b border-border bg-[#fef2f4] px-8 py-6 sm:px-12">
+            <div className={cn("border-t border-border bg-[#fef2f4] px-6 sm:px-8 py-8", activeTab === "tips" ? "block" : "hidden print:block")}>
               <p className="mb-2 flex items-center gap-2 text-[9px] uppercase tracking-[0.22em] text-secondary font-medium">
                 <Lightbulb className="h-3 w-3" />
                 Coylah's tips
@@ -266,95 +425,9 @@ function RecipePage() {
             </div>
           )}
 
-          {/* Ingredients + Method */}
-          <div className="grid gap-0 lg:grid-cols-[1fr_1.4fr]">
-            <section className="border-b border-border px-8 py-8 lg:border-b-0 lg:border-r lg:px-10">
-              <div className="mb-5 flex items-center justify-between">
-                <h2 className="font-serif text-xl font-light">Ingredients</h2>
-                <div className="no-print flex items-center gap-1.5">
-                  <button
-                    onClick={() => setServings(s => Math.max(1, s - 1))}
-                    className="grid h-6 w-6 place-items-center rounded-full border border-border text-muted-foreground hover:border-secondary hover:text-secondary"
-                  >
-                    <Minus className="h-3 w-3" />
-                  </button>
-                  <span className="min-w-[4.5rem] text-center text-xs text-muted-foreground">
-                    Serves {servings}
-                  </span>
-                  <button
-                    onClick={() => setServings(s => s + 1)}
-                    className="grid h-6 w-6 place-items-center rounded-full border border-border text-muted-foreground hover:border-secondary hover:text-secondary"
-                  >
-                    <Plus className="h-3 w-3" />
-                  </button>
-                </div>
-              </div>
-              <ul className="space-y-1">
-                {scaledIngredients.map((ing, i) => (
-                  <li key={i}>
-                    <label className="flex cursor-pointer items-start gap-3 rounded-lg px-1 py-2 hover:bg-muted/40">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-3.5 w-3.5 accent-secondary"
-                        checked={!!checkedIng[i]}
-                        onChange={() => setCheckedIng(c => ({ ...c, [i]: !c[i] }))}
-                      />
-                      <span className={cn(
-                        "text-sm font-light leading-relaxed",
-                        checkedIng[i] && "text-muted-foreground line-through"
-                      )}>
-                        {ing.qty && <span className="text-muted-foreground">{ing.qty} </span>}
-                        {ing.unit && <span className="text-muted-foreground">{ing.unit} </span>}
-                        {ing.item}
-                      </span>
-                    </label>
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <section className="px-8 py-8 lg:px-10">
-              <h2 className="mb-5 font-serif text-xl font-light">Method</h2>
-              <ol className="space-y-4">
-                {recipe.method.map((step, i) => (
-                  <li key={i}>
-                    <label className="flex cursor-pointer items-start gap-3 rounded-lg px-1 py-1 hover:bg-muted/40">
-                      <span
-                        className={cn(
-                          "mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border text-[10px] cursor-pointer",
-                          checkedStep[i]
-                            ? "border-secondary bg-secondary text-secondary-foreground"
-                            : "border-border text-muted-foreground",
-                        )}
-                        onClick={e => {
-                          e.preventDefault();
-                          setCheckedStep(c => ({ ...c, [i]: !c[i] }));
-                        }}
-                      >
-                        {i + 1}
-                      </span>
-                      <input
-                        type="checkbox"
-                        className="sr-only"
-                        checked={!!checkedStep[i]}
-                        onChange={() => setCheckedStep(c => ({ ...c, [i]: !c[i] }))}
-                      />
-                      <span className={cn(
-                        "text-sm font-light leading-relaxed",
-                        checkedStep[i] && "text-muted-foreground line-through"
-                      )}>
-                        {step}
-                      </span>
-                    </label>
-                  </li>
-                ))}
-              </ol>
-            </section>
-          </div>
-
           {/* Glow Factor */}
           {recipe.collagen_tip && !glowFactorIsDuplicate && (
-            <div className="border-t border-border bg-[#fef2f4] px-8 py-8 sm:px-12">
+            <div className={cn("border-t border-border bg-[#fef2f4] px-6 sm:px-8 py-8", activeTab === "glow" ? "block" : "hidden print:block")}>
               <p className="mb-3 text-[9px] uppercase tracking-[0.22em] text-secondary font-medium">
                 ✦ The glow factor
               </p>
@@ -374,62 +447,5 @@ function RecipePage() {
         {hasOmeletteBuilder && <OmeletteAdditions />}
       </article>
     </AppShell>
-  );
-}
-
-function RecipeStamp({ mealType }: { mealType: string }) {
-  const t = mealType.toLowerCase();
-  if (t === "smoothie") return (
-    <svg width="48" height="56" viewBox="0 0 64 76" fill="none" aria-hidden="true">
-      <path d="M16 14 L20 60 Q20 64 32 64 Q44 64 44 60 L48 14 Z" stroke="#1C1917" strokeWidth="0.7" fill="none" strokeLinejoin="round"/>
-      <path d="M16 14 L48 14" stroke="#1C1917" strokeWidth="0.7" strokeLinecap="round"/>
-      <path d="M18 26 L46 26" stroke="#EDE5DC" strokeWidth="0.6" strokeLinecap="round"/>
-      <path d="M32 14 L43 5" stroke="#1C1917" strokeWidth="0.65" strokeLinecap="round"/>
-      <circle cx="43.5" cy="4.5" r="1.8" fill="#C9485B"/>
-      <path d="M18 64 L18 70 Q18 72 32 72 Q46 72 46 70 L46 64" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
-    </svg>
-  );
-  if (t === "breakfast") return (
-    <svg width="48" height="56" viewBox="0 0 64 76" fill="none" aria-hidden="true">
-      <path d="M8 36 Q8 60 32 60 Q56 60 56 36" stroke="#1C1917" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
-      <path d="M8 36 L56 36" stroke="#1C1917" strokeWidth="0.7" strokeLinecap="round"/>
-      <path d="M20 36 Q20 50 32 50 Q44 50 44 36" stroke="#EDE5DC" strokeWidth="0.6" fill="none"/>
-      <path d="M24 36 Q22 28 26 24 Q30 21 32 26 Q34 21 38 24 Q42 28 40 36" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-      <circle cx="32" cy="25" r="1.8" fill="#C9485B"/>
-      <path d="M16 60 L16 68 Q16 70 32 70 Q48 70 48 68 L48 60" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
-    </svg>
-  );
-  if (t === "lunch") return (
-    <svg width="48" height="56" viewBox="0 0 64 76" fill="none" aria-hidden="true">
-      <path d="M8 40 Q8 64 32 64 Q56 64 56 40" stroke="#1C1917" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
-      <path d="M8 40 L56 40" stroke="#1C1917" strokeWidth="0.7" strokeLinecap="round"/>
-      <path d="M14 40 Q12 30 20 26 Q26 23 28 30" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
-      <path d="M28 30 Q30 24 36 26 Q42 28 40 36" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
-      <path d="M40 36 Q46 28 52 34 Q55 38 54 40" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
-      <circle cx="32" cy="29" r="1.8" fill="#C9485B"/>
-      <path d="M16 64 L16 72 Q16 74 32 74 Q48 74 48 72 L48 64" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
-    </svg>
-  );
-  if (t === "snack") return (
-    <svg width="48" height="56" viewBox="0 0 64 76" fill="none" aria-hidden="true">
-      <ellipse cx="32" cy="60" rx="22" ry="5" stroke="#1C1917" strokeWidth="0.7" fill="none"/>
-      <circle cx="24" cy="50" r="6" stroke="#1C1917" strokeWidth="0.65" fill="none"/>
-      <circle cx="40" cy="52" r="5" stroke="#1C1917" strokeWidth="0.65" fill="none"/>
-      <circle cx="32" cy="46" r="4" stroke="#1C1917" strokeWidth="0.65" fill="none"/>
-      <circle cx="32" cy="46" r="1.5" fill="#C9485B" opacity="0.5"/>
-    </svg>
-  );
-  return (
-    <svg width="48" height="56" viewBox="0 0 72 76" fill="none" aria-hidden="true">
-      <ellipse cx="38" cy="54" rx="24" ry="8" stroke="#1C1917" strokeWidth="0.7" fill="none"/>
-      <ellipse cx="38" cy="52" rx="18" ry="5.5" stroke="#EDE5DC" strokeWidth="0.6" fill="none"/>
-      <path d="M14 54 L6 46" stroke="#1C1917" strokeWidth="0.7" strokeLinecap="round"/>
-      <path d="M14 50 Q14 38 38 36 Q62 38 62 50" stroke="#1C1917" strokeWidth="0.65" fill="none" strokeLinecap="round"/>
-      <path d="M24 46 Q30 40 38 42 Q46 44 52 40" stroke="#1C1917" strokeWidth="0.6" fill="none" strokeLinecap="round"/>
-      <circle cx="38" cy="38" r="1.8" fill="#C9485B"/>
-      <path d="M30 30 Q30 24 32 22" stroke="#1C1917" strokeWidth="0.55" fill="none" strokeLinecap="round"/>
-      <path d="M38 28 Q38 22 38 18" stroke="#1C1917" strokeWidth="0.55" fill="none" strokeLinecap="round"/>
-      <path d="M46 30 Q46 24 44 22" stroke="#1C1917" strokeWidth="0.55" fill="none" strokeLinecap="round"/>
-    </svg>
   );
 }
