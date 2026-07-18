@@ -14,6 +14,7 @@ import {
   Bookmark,
   Printer,
   User,
+  X,
 } from "lucide-react";
 import { getRecipeBySlug } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
@@ -130,6 +131,7 @@ function RecipePage() {
   const [checkedStep, setCheckedStep] = useState<Record<number, boolean>>({});
   const [activeTab, setActiveTab] = useState<TabKey>("ingredients");
   const [imgFailed, setImgFailed] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const canPlan = !NO_PLAN_TYPES.has(recipe.meal_type);
   const fav = isFav(recipe.slug);
@@ -140,7 +142,17 @@ function RecipePage() {
     setServings(recipe.servings);
     setActiveTab("ingredients");
     setImgFailed(false);
+    setLightboxOpen(false);
   }, [recipe.slug, recipe.servings]);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightboxOpen]);
 
   const scaledIngredients = useMemo(
     () => scaleRecipe(recipe, servings),
@@ -190,7 +202,8 @@ function RecipePage() {
               <img
                 src={photoSrc}
                 alt={recipe.name}
-                className="absolute inset-0 h-full w-full object-cover"
+                onClick={() => setLightboxOpen(true)}
+                className="absolute inset-0 h-full w-full object-cover cursor-pointer"
                 onError={() => setImgFailed(true)}
               />
             ) : null}
@@ -447,6 +460,28 @@ function RecipePage() {
         {hasOatsBuilder && <BuildYourBeautyOats />}
         {hasOmeletteBuilder && <OmeletteAdditions />}
       </article>
+
+      {/* Fullscreen photo lightbox */}
+      {lightboxOpen && !imgFailed && (
+        <div
+          className="no-print fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxOpen(false)}
+        >
+          <button
+            onClick={() => setLightboxOpen(false)}
+            aria-label="Close"
+            className="absolute top-4 right-4 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img
+            src={photoSrc}
+            alt={recipe.name}
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-full max-w-full object-contain rounded-lg"
+          />
+        </div>
+      )}
     </AppShell>
   );
 }
