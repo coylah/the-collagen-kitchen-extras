@@ -39,29 +39,28 @@ function Header() {
 
   return (
     <header className="no-print sticky top-0 z-40 border-b border-border bg-white/98 backdrop-blur shadow-sm">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-2">
-        <Link to="/" className="flex flex-col leading-none shrink-0">
+      <div className="mx-auto max-w-6xl px-4 py-2">
+        <Link to="/" className="flex flex-col leading-none">
           <span className="font-script text-base text-secondary -mb-1">Love Coylah</span>
           <span className="font-serif text-lg font-light tracking-tight text-foreground">
             The Collagen Kitchen
           </span>
         </Link>
-        <nav className="flex items-center gap-0.5 flex-1 justify-end sm:justify-between">
-          <NavLink to="/" icon={<BookOpen className="h-4 w-4" />} label="Recipes" />
-          <NavLink to="/planner" icon={<CalendarDays className="h-4 w-4" />} label="Planner" />
-          <NavLink to="/shopping" icon={<ShoppingBasket className="h-4 w-4" />} label="Shopping" />
-          <NavLink to="/favourites" icon={<Heart className="h-4 w-4" />} label="Saved" />
-          <NavLink to="/why-this-works" icon={<FlaskConical className="h-4 w-4" />} label="Science" />
-          <button
-            onClick={openFaq}
-            className="inline-flex flex-col items-center gap-0.5 rounded-md px-1.5 py-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground shrink-0"
-            title="FAQs"
-          >
-            <HelpCircle className="h-4 w-4" />
-            <span className="hidden sm:inline text-[8px] uppercase tracking-wide">FAQs</span>
-          </button>
-        </nav>
       </div>
+      <nav className="grid grid-cols-6 border-t border-border">
+        <NavLink to="/" icon={<BookOpen className="h-4 w-4" />} label="Recipes" />
+        <NavLink to="/planner" icon={<CalendarDays className="h-4 w-4" />} label="Planner" />
+        <NavLink to="/shopping" icon={<ShoppingBasket className="h-4 w-4" />} label="Shopping" />
+        <NavLink to="/favourites" icon={<Heart className="h-4 w-4" />} label="Saved" />
+        <NavLink to="/why-this-works" icon={<FlaskConical className="h-4 w-4" />} label="Science" />
+        <button
+          onClick={openFaq}
+          className="flex flex-col items-center gap-0.5 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        >
+          <HelpCircle className="h-4 w-4" />
+          <span className="text-[8px] uppercase tracking-wide">FAQs</span>
+        </button>
+      </nav>
     </header>
   );
 }
@@ -102,15 +101,14 @@ function NavLink({ to, icon, label }: { to: string; icon: ReactNode; label: stri
     <Link
       to={to}
       activeOptions={{ exact: to === "/" }}
-      className="inline-flex flex-col items-center gap-0.5 rounded-md px-1.5 py-1 text-foreground/50 transition-colors hover:bg-accent hover:text-foreground shrink-0"
+      className="flex flex-col items-center gap-0.5 py-1.5 text-foreground/50 transition-colors hover:bg-accent hover:text-foreground"
       activeProps={{
         className:
-          "inline-flex flex-col items-center gap-0.5 rounded-md px-1.5 py-1 bg-secondary/10 text-secondary border border-secondary/20 shrink-0",
+          "flex flex-col items-center gap-0.5 py-1.5 bg-secondary/10 text-secondary",
       }}
-      title={label}
     >
       {icon}
-      <span className="hidden sm:inline text-[8px] uppercase tracking-wide">{label}</span>
+      <span className="text-[8px] uppercase tracking-wide">{label}</span>
     </Link>
   );
 }
