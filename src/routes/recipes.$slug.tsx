@@ -243,7 +243,7 @@ function RecipePage() {
           </div>
 
           {/* Phase badges + action buttons — clean white area below the photo */}
-          <div className="px-5 pt-3">
+          <div className="px-5 pt-3 pb-1">
             <div className="flex flex-wrap items-center gap-1.5">
               {ALL_PHASES.map(phase => (
                 <span
@@ -310,7 +310,7 @@ function RecipePage() {
           </div>
 
           {/* Tabs */}
-          <div className="no-print flex border-t border-b border-border">
+          <div className="no-print flex border-t border-b border-border mt-4">
             {tabs.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
