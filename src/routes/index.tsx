@@ -7,6 +7,7 @@ import {
   Salad,
   BookOpen,
   Soup,
+  Milk,
   Coffee,
   Sun,
   Moon,
@@ -164,7 +165,7 @@ function Cookbook() {
                 to="/build/yoghurt-bowl"
                 className="flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-2 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
               >
-                <span className="shrink-0">🥣</span>
+                <Milk className="h-3.5 w-3.5 shrink-0" />
                 Yoghurt Bowl
               </Link>
               <Link
@@ -263,11 +264,7 @@ function Cookbook() {
               )}
             </section>
           </>
-        ) : (
-          <div className="mx-auto max-w-6xl px-4 py-4 text-center text-sm text-muted-foreground">
-            Pick a meal below, or search above, to browse recipes.
-          </div>
-        )}
+        ) : null}
       </div>
 
       {/* Fixed bottom ribbon — always visible, replaces free-scroll browsing */}
