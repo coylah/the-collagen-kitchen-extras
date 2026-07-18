@@ -14,7 +14,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const isOpen = hasWelcomedLoaded && showWelcomeLoaded && !hasWelcomed && showWelcome;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen">
       {isOpen && (
         <WelcomeModal
           onClose={() => {
@@ -24,7 +24,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         />
       )}
       <Header />
-      <main className="flex-1">{children}</main>
+      <main>{children}</main>
       <Footer />
     </div>
   );
@@ -82,7 +82,7 @@ function Footer() {
           style={{ objectPosition: "center 15%", transform: "scaleX(-1)" }}
         />
         <div>
-          <p className="font-script text-2xl text-secondary">Love Coylah</p>
+          <p className="font-script text-2xl text-secondary leading-relaxed">Love Coylah</p>
           <p className="mt-1 font-serif text-xs tracking-[0.2em] uppercase text-muted-foreground">
             Age Slow · Reclaim Your Glow
           </p>
