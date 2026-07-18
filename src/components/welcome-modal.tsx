@@ -126,8 +126,11 @@ export default function WelcomeModal({ onClose }: { onClose: () => void }) {
         ) : null}
       </div>
 
-      {/* Content — live text, reflows correctly on every screen size */}
-      <div className="shrink-0 px-6 pt-3 text-center overflow-y-auto">
+      {/* Content — live text, reflows correctly on every screen size.
+          flex-1 + overflow-y-auto means if a slide's content is taller than
+          the available space, IT scrolls internally — the footer buttons
+          below stay pinned and visible regardless. */}
+      <div className="flex-1 min-h-0 px-6 pt-3 text-center overflow-y-auto">
         {slide.signature && (
           <p className="font-serif italic text-base mb-0.5" style={{ color: BRAND_RED }}>
             {slide.signature}
@@ -214,9 +217,6 @@ export default function WelcomeModal({ onClose }: { onClose: () => void }) {
           </div>
         )}
       </div>
-
-      {/* Spacer — absorbs leftover height so the footer stays pinned to the bottom */}
-      <div className="flex-1 min-h-4" />
 
       {/* Fixed footer */}
       <div className="px-6 pb-6 pt-2 space-y-1.5 shrink-0">
