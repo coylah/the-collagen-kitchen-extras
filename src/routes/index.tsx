@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, Filter, BookOpen, Coffee, Sun, Moon, Apple, Cookie } from "lucide-react";
 import { listRecipes } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
@@ -53,6 +53,12 @@ function Cookbook() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [maxTime, setMaxTime] = useState<number>(0);
 
+  // The bottom ribbon's Search tile links to "/#search" from any page —
+  // open the search box automatically when we land here that way.
+  useEffect(() => {
+    if (window.location.hash === "#search") setSearchOpen(true);
+  }, []);
+
   const visibleRecipes = useMemo(
     () => recipes.filter(r => !EXCLUDED_MEAL_TYPES.has(r.meal_type)),
     [recipes]
@@ -104,8 +110,8 @@ function Cookbook() {
   return (
     <AppShell>
       {/* Hero */}
-      <section className="border-b border-border bg-white">
-        <div className="relative overflow-hidden" style={{ height: "clamp(160px, 22vh, 230px)" }}>
+      <section className="bg-white">
+        <div className="relative overflow-hidden" style={{ height: "clamp(190px, 27vh, 270px)" }}>
           {/* Hero photo: Sticky Harissa Chicken with Mint Yoghurt & Pomegranate Salad */}
           <img
             src="/images/hero-harissa-chicken.jpg"
@@ -116,12 +122,9 @@ function Cookbook() {
             className="absolute bottom-0 left-0 right-0 h-14 pointer-events-none"
             style={{ background: "linear-gradient(to bottom, transparent, white)" }}
           />
-          <p className="font-script text-lg text-white absolute top-3 left-4 drop-shadow">
-            Love Coylah
-          </p>
         </div>
 
-        <div className="mx-auto max-w-6xl px-5 pt-1.5 pb-3 text-center">
+        <div className="mx-auto max-w-6xl px-5 pt-1.5 pb-1.5 text-center">
           <h1 className="font-serif text-2xl font-light leading-tight text-foreground mb-1">
             The Collagen Kitchen
           </h1>
@@ -130,27 +133,19 @@ function Cookbook() {
             Real food. Real results. Built from the inside out.
           </p>
 
-          {/* 3x2 grid of 6 pill buttons — 5 meal types + search, styled to match
-              the meal-type badge used on recipe rows/detail pages (tinted fill,
-              secondary border, uppercase small caps) for a consistent look */}
-          <div className="grid grid-cols-3 gap-2 max-w-sm mx-auto">
+          {/* 5 meal-type pills, centred — search now lives in the bottom
+              ribbon instead of taking a 6th tile here */}
+          <div className="flex flex-wrap justify-center gap-2 max-w-sm mx-auto">
             {HERO_MEAL_TYPES.map(({ key, label }) => (
               <Link
                 key={key}
                 to="/meal/$type"
                 params={{ type: key }}
-                className="flex items-center justify-center rounded-full border border-secondary/30 bg-secondary/10 px-2 py-2 text-[11px] font-medium uppercase tracking-widest text-secondary transition-colors hover:bg-secondary/15"
+                className="basis-[30%] flex-none flex items-center justify-center rounded-full border border-secondary/30 bg-secondary/10 px-2 py-2.5 text-[11px] font-semibold uppercase tracking-widest text-secondary shadow-sm transition-all hover:bg-secondary/15 hover:shadow-md active:scale-[0.97]"
               >
                 {label}
               </Link>
             ))}
-
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="flex items-center justify-center rounded-full border border-secondary/30 bg-secondary/10 px-2 py-2 text-[11px] font-medium uppercase tracking-widest text-secondary transition-colors hover:bg-secondary/15"
-            >
-              Search
-            </button>
           </div>
 
           {searchOpen && (
