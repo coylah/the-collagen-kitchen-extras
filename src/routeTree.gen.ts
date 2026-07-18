@@ -18,6 +18,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RecipesSlugRouteImport } from './routes/recipes.$slug'
+import { Route as MealTypeRouteImport } from './routes/meal.$type'
 import { Route as BuildYoghurtBowlRouteImport } from './routes/build.yoghurt-bowl'
 import { Route as BuildGlowBowlRouteImport } from './routes/build.glow-bowl'
 import { Route as AuthenticatedAdminImportRouteImport } from './routes/_authenticated/admin.import'
@@ -66,6 +67,11 @@ const RecipesSlugRoute = RecipesSlugRouteImport.update({
   path: '/recipes/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MealTypeRoute = MealTypeRouteImport.update({
+  id: '/meal/$type',
+  path: '/meal/$type',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BuildYoghurtBowlRoute = BuildYoghurtBowlRouteImport.update({
   id: '/build/yoghurt-bowl',
   path: '/build/yoghurt-bowl',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/why-this-works': typeof WhyThisWorksRoute
   '/build/glow-bowl': typeof BuildGlowBowlRoute
   '/build/yoghurt-bowl': typeof BuildYoghurtBowlRoute
+  '/meal/$type': typeof MealTypeRoute
   '/recipes/$slug': typeof RecipesSlugRoute
   '/admin/import': typeof AuthenticatedAdminImportRoute
 }
@@ -106,6 +113,7 @@ export interface FileRoutesByTo {
   '/why-this-works': typeof WhyThisWorksRoute
   '/build/glow-bowl': typeof BuildGlowBowlRoute
   '/build/yoghurt-bowl': typeof BuildYoghurtBowlRoute
+  '/meal/$type': typeof MealTypeRoute
   '/recipes/$slug': typeof RecipesSlugRoute
   '/admin/import': typeof AuthenticatedAdminImportRoute
 }
@@ -121,6 +129,7 @@ export interface FileRoutesById {
   '/why-this-works': typeof WhyThisWorksRoute
   '/build/glow-bowl': typeof BuildGlowBowlRoute
   '/build/yoghurt-bowl': typeof BuildYoghurtBowlRoute
+  '/meal/$type': typeof MealTypeRoute
   '/recipes/$slug': typeof RecipesSlugRoute
   '/_authenticated/admin/import': typeof AuthenticatedAdminImportRoute
 }
@@ -136,6 +145,7 @@ export interface FileRouteTypes {
     | '/why-this-works'
     | '/build/glow-bowl'
     | '/build/yoghurt-bowl'
+    | '/meal/$type'
     | '/recipes/$slug'
     | '/admin/import'
   fileRoutesByTo: FileRoutesByTo
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/why-this-works'
     | '/build/glow-bowl'
     | '/build/yoghurt-bowl'
+    | '/meal/$type'
     | '/recipes/$slug'
     | '/admin/import'
   id:
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/why-this-works'
     | '/build/glow-bowl'
     | '/build/yoghurt-bowl'
+    | '/meal/$type'
     | '/recipes/$slug'
     | '/_authenticated/admin/import'
   fileRoutesById: FileRoutesById
@@ -178,6 +190,7 @@ export interface RootRouteChildren {
   WhyThisWorksRoute: typeof WhyThisWorksRoute
   BuildGlowBowlRoute: typeof BuildGlowBowlRoute
   BuildYoghurtBowlRoute: typeof BuildYoghurtBowlRoute
+  MealTypeRoute: typeof MealTypeRoute
   RecipesSlugRoute: typeof RecipesSlugRoute
 }
 
@@ -246,6 +259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecipesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/meal/$type': {
+      id: '/meal/$type'
+      path: '/meal/$type'
+      fullPath: '/meal/$type'
+      preLoaderRoute: typeof MealTypeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/build/yoghurt-bowl': {
       id: '/build/yoghurt-bowl'
       path: '/build/yoghurt-bowl'
@@ -292,6 +312,7 @@ const rootRouteChildren: RootRouteChildren = {
   WhyThisWorksRoute: WhyThisWorksRoute,
   BuildGlowBowlRoute: BuildGlowBowlRoute,
   BuildYoghurtBowlRoute: BuildYoghurtBowlRoute,
+  MealTypeRoute: MealTypeRoute,
   RecipesSlugRoute: RecipesSlugRoute,
 }
 export const routeTree = rootRouteImport
