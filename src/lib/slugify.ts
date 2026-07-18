@@ -13,12 +13,12 @@ export function slugifyName(name: string): string {
 }
 
 /**
- * Matches the real naming convention used for uploaded recipe photos:
- * the exact recipe title, lowercased, spaces/punctuation kept as-is.
- * e.g. "Fig & Walnut Honey Bowl" -> "fig & walnut honey bowl.jpg"
- * Files live directly in public/images/ (not a subfolder).
+ * Matches recipe photos by their hyphenated slug filename, e.g.
+ * "Fig & Walnut Honey Bowl" -> "fig-and-walnut-honey-bowl.jpg"
+ * Files live directly in public/images/. Use rename-images.sh to normalize
+ * uploaded files (which may have spaces/&/punctuation) into this format -
+ * special characters in filenames were confirmed to break asset serving.
  */
 export function recipeImageSrc(name: string): string {
-  const filename = `${name.toLowerCase()}.jpg`;
-  return `/images/${encodeURIComponent(filename)}`;
+  return `/images/${slugifyName(name)}.jpg`;
 }
