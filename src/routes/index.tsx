@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Search, Filter, Salad, BookOpen, Soup, Milk } from "lucide-react";
+import { Search, Filter, BookOpen, Coffee, Sun, Moon, Apple, Cookie } from "lucide-react";
 import { listRecipes } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
 import { RecipeCard } from "@/components/recipe-card";
@@ -38,6 +38,14 @@ export const Route = createFileRoute("/")(({
 
 const MEAL_ORDER = ["breakfast", "lunch", "dinner", "snack", "dessert", "smoothie"];
 const EXCLUDED_MEAL_TYPES = new Set(["bone broth"]);
+
+const HERO_MEAL_TYPES: { key: string; label: string; icon: typeof Coffee }[] = [
+  { key: "breakfast", label: "Breakfast", icon: Coffee },
+  { key: "lunch", label: "Lunch", icon: Sun },
+  { key: "dinner", label: "Dinner", icon: Moon },
+  { key: "snack", label: "Snack", icon: Apple },
+  { key: "dessert", label: "Dessert", icon: Cookie },
+];
 
 function Cookbook() {
   const { data: recipes } = useSuspenseQuery(recipesQuery);
@@ -122,37 +130,31 @@ function Cookbook() {
             Real food. Real results. Built from the inside out.
           </p>
 
-          {/* First 4 as a 2x2 grid, search spans both columns below */}
+          {/* First 4 meal types as a 2x2 grid, Dessert + search span both columns below */}
           <div className="grid grid-cols-2 gap-1.5 max-w-sm mx-auto">
-            <Link
-              to="/build/glow-bowl"
-              className="flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-2 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
-            >
-              <Salad className="h-3.5 w-3.5 shrink-0" />
-              Glow Bowl
-            </Link>
-            <Link
-              to="/build/yoghurt-bowl"
-              className="flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-2 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
-            >
-              <Milk className="h-3.5 w-3.5 shrink-0" />
-              Yoghurt Bowl
-            </Link>
-            <Link
-              to="/bone-broth"
-              className="flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-2 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
-            >
-              <Soup className="h-3.5 w-3.5 shrink-0" />
-              Bone Broth
-            </Link>
-            <Link
-              to="/"
-              onClick={() => { setSearch(""); setSearchOpen(false); }}
-              className="flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-2 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
-            >
-              <BookOpen className="h-3.5 w-3.5 shrink-0" />
-              Browse Recipes
-            </Link>
+            {HERO_MEAL_TYPES.slice(0, 4).map(({ key, label, icon: MealIcon }) => (
+              <Link
+                key={key}
+                to="/meal/$type"
+                params={{ type: key }}
+                className="flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-2 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
+              >
+                <MealIcon className="h-3.5 w-3.5 shrink-0" />
+                {label}
+              </Link>
+            ))}
+
+            {HERO_MEAL_TYPES.slice(4).map(({ key, label, icon: MealIcon }) => (
+              <Link
+                key={key}
+                to="/meal/$type"
+                params={{ type: key }}
+                className="col-span-2 flex items-center justify-center gap-1.5 rounded-full border border-secondary bg-white px-2 py-2.5 text-[13px] font-medium text-secondary hover:bg-secondary/5 transition-colors"
+              >
+                <MealIcon className="h-3.5 w-3.5 shrink-0" />
+                {label}
+              </Link>
+            ))}
 
             {searchOpen ? (
               <div className="relative col-span-2">
