@@ -28,7 +28,7 @@ type Slide = {
 
 const slides: Slide[] = [
   {
-    image: "/images/onboarding-1-welcome-note.jpg",
+    image: "/images/onboarding-1-welcome-note.png",
     cta: "Let's Get Started",
     isBakedNote: true,
   },
