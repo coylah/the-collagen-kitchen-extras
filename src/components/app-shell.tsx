@@ -74,11 +74,21 @@ function Footer() {
 
   return (
     <footer className="no-print mt-2 border-t border-border py-5 text-center">
-      <p className="font-script text-2xl text-secondary">Love Coylah</p>
-      <p className="mt-1 font-serif text-xs tracking-[0.2em] uppercase text-muted-foreground">
-        Age Slow · Reclaim Your Glow
-      </p>
-      <p className="mt-2 text-[11px] text-muted-foreground/60 max-w-md mx-auto">
+      <div className="flex items-center justify-center gap-4 max-w-sm mx-auto text-left">
+        <img
+          src="/images/coylah.jpg"
+          alt="Coylah"
+          className="w-16 h-16 rounded-full object-cover shrink-0"
+          style={{ objectPosition: "center 15%", transform: "scaleX(-1)" }}
+        />
+        <div>
+          <p className="font-script text-2xl text-secondary">Love Coylah</p>
+          <p className="mt-1 font-serif text-xs tracking-[0.2em] uppercase text-muted-foreground">
+            Age Slow · Reclaim Your Glow
+          </p>
+        </div>
+      </div>
+      <p className="mt-3 text-[11px] text-muted-foreground/60 max-w-md mx-auto">
         The Collagen Kitchen · Skin-food recipes from the inside out.
       </p>
       <p className="mt-1.5 text-[10px] text-muted-foreground/40 max-w-md mx-auto px-4">
