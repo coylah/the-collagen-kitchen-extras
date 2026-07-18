@@ -99,11 +99,15 @@ export default function WelcomeModal({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Media block — small, fixed, same on every slide */}
-      <div className="h-[130px] shrink-0 overflow-hidden bg-white flex items-center justify-center">
+      <div
+        className="shrink-0 overflow-hidden bg-white flex items-center justify-center"
+        style={{ height: "clamp(140px, 26vh, 240px)" }}
+      >
         {slide.image ? (
           <img
             src={slide.image}
-            className={`w-full h-full object-cover ${slide.isHero ? "object-top" : ""}`}
+            className="w-full h-full object-cover"
+            style={{ objectPosition: slide.isHero ? "center 20%" : "center" }}
           />
         ) : Icon ? (
           <div
@@ -115,8 +119,8 @@ export default function WelcomeModal({ onClose }: { onClose: () => void }) {
         ) : null}
       </div>
 
-      {/* Content — fills remaining space, vertically centered, no scroll needed */}
-      <div className="flex-1 min-h-0 flex flex-col justify-center px-6 text-center overflow-y-auto">
+      {/* Content — sits right under the media block, natural height, no forced centering */}
+      <div className="shrink-0 px-6 pt-5 text-center overflow-y-auto">
         {slide.signature && (
           <p className="font-serif italic text-base mb-0.5" style={{ color: BRAND_RED }}>
             {slide.signature}
@@ -203,6 +207,9 @@ export default function WelcomeModal({ onClose }: { onClose: () => void }) {
           </div>
         )}
       </div>
+
+      {/* Spacer — absorbs any leftover height so the footer stays pinned to the bottom */}
+      <div className="flex-1 min-h-4" />
 
       {/* Fixed footer */}
       <div className="px-6 pb-6 pt-2 space-y-1.5 shrink-0">
