@@ -124,7 +124,7 @@ function Cookbook() {
 
   return (
     <AppShell>
-      <div className="pb-16">
+      <div>
         {/* Hero */}
         <section className="border-b border-border bg-white">
           <div className="relative overflow-hidden" style={{ height: "clamp(160px, 22vh, 230px)" }}>
@@ -237,7 +237,7 @@ function Cookbook() {
               </div>
             </div>
 
-            <section className="mx-auto max-w-6xl px-4 py-8">
+            <section className="mx-auto max-w-6xl px-4 py-8 pb-20">
               {filtered.length === 0 ? (
                 <p className="py-16 text-center text-muted-foreground">
                   No recipes match those filters yet.
