@@ -105,6 +105,11 @@
 @layer base {
   * { border-color: var(--color-border); }
   html { font-family: var(--font-sans); }
+  /* Hides Lovable's "Edit with Lovable" badge on the published site. The
+     official route is Project Settings → Publishing → Hide Lovable badge
+     (paid plans), but this works regardless of plan and stays in effect
+     even if Lovable's toggle isn't available. */
+  #lovable-badge { display: none !important; }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
