@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Heart, Home, CalendarDays, ShoppingBasket, HelpCircle, FlaskConical } from "lucide-react";
 import type { ReactNode } from "react";
 import WelcomeModal from "@/components/welcome-modal";
+import { MealRibbon } from "@/components/meal-ribbon";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -24,8 +25,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         />
       )}
       <Header />
-      <main>{children}</main>
+      {/* pb-16 keeps every page's content clear of the fixed bottom ribbon below */}
+      <main className="pb-16">{children}</main>
       <Footer />
+      <MealRibbon />
     </div>
   );
 }
