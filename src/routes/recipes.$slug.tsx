@@ -77,6 +77,81 @@ function detectPhases(ingredients: { item: string }[]): string[] {
 const NO_PLAN_TYPES = new Set<string>();
 const ALL_PHASES = ["Build", "Activate", "Support", "Protect"];
 
+// Foods per phase — ordered by realistic portion amount
+const PHASE_FOODS: Record<string, { label: string; amount: string }[]> = {
+  Build: [
+    { label: "Tuna (1 tin)", amount: "43g protein" },
+    { label: "Turkey (150g)", amount: "43g protein" },
+    { label: "Chicken (150g)", amount: "40g protein" },
+    { label: "Beef (150g)", amount: "39g protein" },
+    { label: "Salmon (1 fillet)", amount: "38g protein" },
+    { label: "Sardines (1 tin)", amount: "24g protein" },
+    { label: "Prawns (100g)", amount: "24g protein" },
+    { label: "Halloumi (80g)", amount: "17g protein" },
+    { label: "Eggs (2)", amount: "16g protein" },
+    { label: "Skyr (150g)", amount: "16g protein" },
+    { label: "Cottage cheese (150g)", amount: "21g protein" },
+    { label: "Greek yoghurt (150g)", amount: "15g protein" },
+    { label: "Bone broth", amount: "Direct collagen amino acids" },
+  ],
+  Activate: [
+    { label: "Blackcurrants (1 cup)", amount: "272mg vitamin C" },
+    { label: "Yellow pepper (½)", amount: "147mg vitamin C" },
+    { label: "Guava (1)", amount: "125mg vitamin C" },
+    { label: "Red pepper (½)", amount: "102mg vitamin C" },
+    { label: "Broccoli (1 head)", amount: "89mg vitamin C" },
+    { label: "Strawberries (1 cup)", amount: "89mg vitamin C" },
+    { label: "Papaya (1 cup)", amount: "87mg vitamin C" },
+    { label: "Pineapple (1 cup)", amount: "79mg vitamin C" },
+    { label: "Brussels sprouts (6)", amount: "77mg vitamin C" },
+    { label: "Kiwi (1)", amount: "70mg vitamin C" },
+    { label: "Orange (1)", amount: "69mg vitamin C" },
+    { label: "Lentils (1 cup cooked)", amount: "6.6mg iron" },
+    { label: "Spinach cooked (1 cup)", amount: "6.5mg iron" },
+    { label: "Beef (150g)", amount: "4.2mg iron" },
+    { label: "Chickpeas (½ tin)", amount: "3.5mg iron" },
+    { label: "Sardines (1 tin)", amount: "2.8mg iron" },
+    { label: "Eggs (2)", amount: "2.2mg iron" },
+  ],
+  Support: [
+    { label: "Oysters (6)", amount: "14-81mg zinc" },
+    { label: "Beef (150g)", amount: "6-12mg zinc" },
+    { label: "Sesame seeds / tahini (1 tbsp)", amount: "Copper, zinc, iron" },
+    { label: "Cashews (small handful)", amount: "Copper, zinc" },
+    { label: "Mussels (100g)", amount: "6-7mg manganese" },
+    { label: "Oats (1 cup)", amount: "Silica, manganese, zinc" },
+    { label: "Dark chocolate 70%+ (2 squares)", amount: "Copper, zinc" },
+    { label: "Walnuts (small handful)", amount: "Copper, manganese" },
+    { label: "Hazelnuts (small handful)", amount: "Copper, manganese" },
+    { label: "Brown rice (1 cup cooked)", amount: "Silica, manganese" },
+    { label: "Lentils (1 cup cooked)", amount: "Iron, zinc, manganese" },
+    { label: "Hemp seeds (2 tbsp)", amount: "Zinc, iron" },
+  ],
+  Protect: [
+    { label: "Mackerel (1 fillet)", amount: "3.3-6.5g omega-3" },
+    { label: "Salmon (1 fillet)", amount: "2.3-3.8g omega-3" },
+    { label: "Sardines (1 tin)", amount: "1.3-1.9g omega-3" },
+    { label: "Sweet potato (1 medium)", amount: "Vitamin A, silica" },
+    { label: "Carrots (1 large)", amount: "835mcg vitamin A" },
+    { label: "Butternut squash (1 cup)", amount: "798mcg vitamin A" },
+    { label: "Avocado (½)", amount: "Vitamin E, healthy fats" },
+    { label: "Spinach (1 handful)", amount: "Vitamin A, vitamin C" },
+    { label: "Pomegranate seeds (3 tbsp)", amount: "118mg ellagic acid" },
+    { label: "Berries (1 cup)", amount: "Antioxidants, vitamin C" },
+    { label: "Walnuts (small handful)", amount: "Omega-3, vitamin E" },
+    { label: "Sunflower seeds (2 tbsp)", amount: "7mg vitamin E" },
+    { label: "Cooked tomatoes (½ tin)", amount: "32mg lycopene" },
+    { label: "Dark chocolate 70%+ (2 squares)", amount: "Antioxidants, copper" },
+  ],
+};
+
+const PHASE_DESCRIPTIONS: Record<string, string> = {
+  Build: "Protein — glycine, proline and lysine. The raw material your body uses to make collagen.",
+  Activate: "Vitamin C and iron — trigger the enzymes that turn protein into stable collagen fibres.",
+  Support: "Zinc, copper, manganese and silica — activate and stabilise the building process.",
+  Protect: "Vitamin A, omega-3, antioxidants and blood sugar stability — defend the collagen you've already built.",
+};
+
 const recipeQuery = (slug: string) =>
   queryOptions({
     queryKey: ["recipe", slug],
@@ -132,6 +207,7 @@ function RecipePage() {
   const [activeTab, setActiveTab] = useState<TabKey>("ingredients");
   const [imgFailed, setImgFailed] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [selectedPhase, setSelectedPhase] = useState<string | null>(null);
 
   const canPlan = !NO_PLAN_TYPES.has(recipe.meal_type);
   const fav = isFav(recipe.slug);
@@ -143,6 +219,7 @@ function RecipePage() {
     setActiveTab("ingredients");
     setImgFailed(false);
     setLightboxOpen(false);
+    setSelectedPhase(null);
   }, [recipe.slug, recipe.servings]);
 
   useEffect(() => {
@@ -193,10 +270,45 @@ function RecipePage() {
 
   return (
     <AppShell>
+      {/* Phase food list popup */}
+      {selectedPhase && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
+          <div className="absolute inset-0 bg-foreground/50 backdrop-blur-sm" onClick={() => setSelectedPhase(null)} />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl border border-border bg-background shadow-xl max-h-[80vh] overflow-y-auto">
+            <div className="sticky top-0 bg-background px-5 pt-5 pb-3 border-b border-border">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <span className="inline-flex items-center rounded-full bg-secondary/10 text-secondary border border-secondary/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider mb-2">
+                    {selectedPhase}
+                  </span>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {PHASE_DESCRIPTIONS[selectedPhase]}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSelectedPhase(null)}
+                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-muted"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            <ul className="px-5 py-4 space-y-3">
+              {PHASE_FOODS[selectedPhase]?.map((food) => (
+                <li key={food.label} className="flex items-center justify-between gap-3">
+                  <span className="text-sm text-foreground">{food.label}</span>
+                  <span className="text-[11px] text-muted-foreground shrink-0">{food.amount}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       <article className="mx-auto max-w-2xl px-4 py-3">
         <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
 
-          {/* Photo + title merged — photo fills top, fades to white, title sits in the fade zone */}
+          {/* Photo + title */}
           <div className="relative h-72 sm:h-80 w-full overflow-hidden bg-muted/30">
             {!imgFailed ? (
               <img
@@ -212,7 +324,6 @@ function RecipePage() {
               style={{ background: "linear-gradient(to bottom, transparent, white 65%)" }}
             />
 
-            {/* Back + favourite — floating over the photo */}
             <div className="no-print absolute top-3 left-3 right-3 flex items-center justify-between">
               <button
                 onClick={() => window.history.back()}
@@ -229,7 +340,6 @@ function RecipePage() {
               </button>
             </div>
 
-            {/* Title, bottom-anchored within the fade zone */}
             <div className="absolute bottom-0 left-0 right-0 px-5 pb-3">
               <p className="text-[9px] uppercase tracking-[0.22em] text-secondary mb-1.5 inline-block rounded-full border border-secondary/30 bg-white/90 backdrop-blur px-2.5 py-0.5">
                 {recipe.meal_type}
@@ -255,7 +365,7 @@ function RecipePage() {
             </div>
           </div>
 
-          {/* Phase badges + action buttons — clean white area below the photo */}
+          {/* Phase badges + action buttons */}
           <div className="px-5 pt-3 pb-1">
             <div className="flex flex-wrap items-center gap-1.5">
               {ALL_PHASES.map(phase => (
@@ -449,9 +559,22 @@ function RecipePage() {
                 {recipe.collagen_tip}
               </p>
               {missingPhases.length > 0 && (
-                <p className="mt-4 text-xs text-muted-foreground border-t border-border/40 pt-4">
-                  This recipe covers <span className="text-secondary font-medium">{phases.join(" · ")}</span>. For a complete collagen week, make sure your other meals are covering <span className="font-medium text-foreground/60">{missingPhases.join(" · ")}</span> too.
-                </p>
+                <div className="mt-4 border-t border-border/40 pt-4">
+                  <p className="text-xs text-muted-foreground mb-2">
+                    This recipe covers <span className="text-secondary font-medium">{phases.join(" · ")}</span>. Not covered:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {missingPhases.map(phase => (
+                      <button
+                        key={phase}
+                        onClick={() => setSelectedPhase(phase)}
+                        className="inline-flex items-center gap-1 rounded-full border border-border bg-white px-3 py-1 text-[11px] font-medium text-muted-foreground hover:border-secondary hover:text-secondary transition-colors"
+                      >
+                        <span className="text-secondary">+</span> {phase} — see key foods
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           )}
