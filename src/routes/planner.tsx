@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { Trash2, X, ShoppingBasket } from "lucide-react";
+import { Trash2, X, ShoppingBasket, ChevronDown, ChevronRight } from "lucide-react";
 import { listRecipes } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,17 @@ type PendingEntry =
   | { type: "recipe"; slug: string; servings: number; name: string }
   | { type: "bowl"; bowlName: string; bowlIngredients: { item: string; category: string }[] };
 
+function getHiddenSlots(week: Week): Set<Slot> {
+  try {
+    const stored = localStorage.getItem(`ck.hiddenSlots.${week}`);
+    return stored ? new Set(JSON.parse(stored)) : new Set();
+  } catch { return new Set(); }
+}
+
+function saveHiddenSlots(week: Week, slots: Set<Slot>) {
+  localStorage.setItem(`ck.hiddenSlots.${week}`, JSON.stringify(Array.from(slots)));
+}
+
 function PlannerPage() {
   const { data: recipes } = useSuspenseQuery(recipesQuery);
   const bySlug = new Map(recipes.map((r) => [r.slug, r]));
@@ -50,6 +61,8 @@ function PlannerPage() {
   });
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [pending, setPending] = useState<PendingEntry | null>(null);
+  const [hiddenSlots, setHiddenSlots] = useState<Set<Slot>>(() => getHiddenSlots("1"));
+  const [collapseConfirm, setCollapseConfirm] = useState<Slot | null>(null);
 
   const week1 = useMealPlan("1");
   const week2 = useMealPlan("2");
@@ -64,6 +77,7 @@ function PlannerPage() {
 
   useEffect(() => {
     localStorage.setItem("ck.activeWeek", activeWeek);
+    setHiddenSlots(getHiddenSlots(activeWeek));
   }, [activeWeek]);
 
   useEffect(() => {
@@ -113,11 +127,43 @@ function PlannerPage() {
     setPending(null);
   }
 
+  function slotMealCount(slot: Slot): number {
+    return DAYS.filter(day => !!plan[planKey(day, slot)]).length;
+  }
+
+  function toggleSlot(slot: Slot) {
+    if (hiddenSlots.has(slot)) {
+      const next = new Set(hiddenSlots);
+      next.delete(slot);
+      setHiddenSlots(next);
+      saveHiddenSlots(activeWeek, next);
+    } else {
+      const count = slotMealCount(slot);
+      if (count > 0) {
+        setCollapseConfirm(slot);
+      } else {
+        const next = new Set(hiddenSlots);
+        next.add(slot);
+        setHiddenSlots(next);
+        saveHiddenSlots(activeWeek, next);
+      }
+    }
+  }
+
+  function confirmCollapse(slot: Slot) {
+    const next = new Set(hiddenSlots);
+    next.add(slot);
+    setHiddenSlots(next);
+    saveHiddenSlots(activeWeek, next);
+    setCollapseConfirm(null);
+  }
+
+  const visibleSlots = SLOTS.filter(s => !hiddenSlots.has(s));
   const pendingName = pending?.type === "bowl" ? pending.bowlName : pending?.type === "recipe" ? pending.name : null;
 
   return (
     <AppShell>
-      {/* Confirm clear */}
+      {/* Confirm clear week */}
       {showClearConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-foreground/50 backdrop-blur-sm" onClick={() => setShowClearConfirm(false)} />
@@ -131,6 +177,23 @@ function PlannerPage() {
             <div className="flex gap-3">
               <button onClick={() => setShowClearConfirm(false)} className="flex-1 rounded-lg border border-border py-2.5 text-sm text-muted-foreground hover:bg-accent">Cancel</button>
               <button onClick={handleClearWeek} className="flex-1 rounded-lg bg-destructive py-2.5 text-sm font-medium text-destructive-foreground hover:bg-destructive/90">Yes, clear Week {activeWeek}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm collapse filled slot */}
+      {collapseConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-foreground/50 backdrop-blur-sm" onClick={() => setCollapseConfirm(null)} />
+          <div className="relative z-10 w-full max-w-sm rounded-2xl border border-border bg-background p-6 shadow-xl">
+            <h2 className="font-serif text-xl mb-2 capitalize">Hide {collapseConfirm}?</h2>
+            <p className="text-sm text-muted-foreground mb-5">
+              This slot has {slotMealCount(collapseConfirm)} meal{slotMealCount(collapseConfirm) === 1 ? "" : "s"} in it. They'll stay in your plan and shopping list — just hidden from view. Tap the slot name at the top any time to bring it back.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setCollapseConfirm(null)} className="flex-1 rounded-lg border border-border py-2.5 text-sm text-muted-foreground hover:bg-accent">Cancel</button>
+              <button onClick={() => confirmCollapse(collapseConfirm)} className="flex-1 rounded-lg bg-secondary py-2.5 text-sm font-medium text-secondary-foreground hover:bg-secondary/90">Hide it</button>
             </div>
           </div>
         </div>
@@ -162,7 +225,7 @@ function PlannerPage() {
           </div>
 
           {/* Week tabs */}
-          <div className="mt-4 flex items-center gap-2">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             <button
               onClick={() => setActiveWeek("1")}
               className={cn(
@@ -185,11 +248,39 @@ function PlannerPage() {
             >
               Week 2
             </button>
-            <p className="text-xs text-muted-foreground ml-1">
+            <p className="text-xs text-muted-foreground">
               {activeWeek === "1"
-                ? "Your current week. Build Week 2 ahead while you're still cooking through this one."
+                ? "Your current week. Build Week 2 while you're still cooking through this one."
                 : "Plan ahead. Week 1 is safe — nothing here touches it."}
             </p>
+          </div>
+
+          {/* Slot toggle pills */}
+          <div className="mt-3 flex flex-wrap gap-2">
+            {SLOTS.map(slot => {
+              const isHidden = hiddenSlots.has(slot);
+              const count = slotMealCount(slot);
+              return (
+                <button
+                  key={slot}
+                  onClick={() => toggleSlot(slot)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-medium capitalize transition-all",
+                    isHidden
+                      ? "border-border text-muted-foreground hover:border-secondary hover:text-secondary"
+                      : "border-secondary/40 bg-secondary/5 text-secondary"
+                  )}
+                >
+                  {isHidden ? <ChevronRight className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                  {slot}
+                  {isHidden && count > 0 && (
+                    <span className="ml-0.5 rounded-full bg-secondary text-secondary-foreground px-1.5 py-0.5 text-[9px]">
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -209,185 +300,217 @@ function PlannerPage() {
         </div>
       )}
 
-      {/* Mobile */}
+      {/* Mobile — days down the left, slots across */}
       <section className="lg:hidden mx-auto max-w-6xl px-4 py-4">
-        <div className="space-y-6">
-          {SLOTS.map((slot) => (
-            <div key={slot}>
-              <h2 className="font-serif text-lg capitalize mb-2 text-foreground">{slot}</h2>
-              <div className="grid grid-cols-7 gap-1">
-                {DAYS.map((day) => {
-                  const entry = plan[planKey(day, slot)];
-                  const isCustom = entry?.isCustomBowl;
-                  const r = entry && !isCustom ? bySlug.get(entry.slug) : null;
-                  const isFilled = !!entry && (isCustom || !!r);
-                  const isPending = !!pending;
-                  const slotRecipes = recipes.filter(rc => SLOT_MEAL_TYPES[slot]?.includes(rc.meal_type));
-
-                  return (
-                    <div
-                      key={day}
-                      className={cn(
-                        "rounded-lg border text-[10px] transition-all",
-                        isFilled ? "border-secondary/40 bg-[#fef2f4]" : "border-border bg-white",
-                        isPending && !isFilled && "border-secondary/40 bg-secondary/5 cursor-pointer"
-                      )}
-                      onClick={() => isPending && !isFilled ? addPendingToSlot(day, slot) : undefined}
-                    >
-                      <div className="px-1 pt-1 text-center text-muted-foreground font-medium">{day}</div>
-                      {isPending && !isFilled ? (
-                        <div className="p-1 text-center text-secondary text-[9px]">+ tap</div>
-                      ) : isCustom && entry ? (
-                        <div className="p-1 flex flex-col gap-1">
-                          <p className="line-clamp-2 text-[9px] leading-tight text-foreground">{entry.bowlName}</p>
-                          <button onClick={(e) => { e.stopPropagation(); set(day, slot, null); }} className="text-destructive text-[9px]">✕</button>
-                        </div>
-                      ) : r ? (
-                        <div className="p-1 flex flex-col gap-1">
-                          <Link to="/recipes/$slug" params={{ slug: r.slug }} className="line-clamp-2 text-[9px] leading-tight text-foreground hover:text-secondary">
-                            {r.name}
-                          </Link>
-                          <button onClick={(e) => { e.stopPropagation(); set(day, slot, null); }} className="text-destructive text-[9px]">✕</button>
-                        </div>
-                      ) : (
-                        <select
-                          className="w-full bg-transparent text-muted-foreground outline-none px-0.5 py-1 text-[9px] rounded-lg"
-                          value=""
-                          onChange={(e) => { if (e.target.value) set(day, slot, { slug: e.target.value, servings: 2 }); }}
-                        >
-                          <option value="">+</option>
-                          {slotRecipes.map((rc) => (
-                            <option key={rc.id} value={rc.slug}>{rc.name}</option>
-                          ))}
-                        </select>
-                      )}
-                    </div>
-                  );
-                })}
+        {/* Slot headers */}
+        {visibleSlots.length > 0 && (
+          <div
+            className="grid gap-1 mb-1"
+            style={{ gridTemplateColumns: `64px repeat(${visibleSlots.length}, 1fr)` }}
+          >
+            <div />
+            {visibleSlots.map(slot => (
+              <div key={slot} className="text-center text-[9px] font-semibold uppercase tracking-wider text-muted-foreground capitalize py-1">
+                {slot}
               </div>
+            ))}
+          </div>
+        )}
+
+        {/* Day rows */}
+        <div className="space-y-1">
+          {DAYS.map((day) => (
+            <div
+              key={day}
+              className="grid gap-1"
+              style={{ gridTemplateColumns: `64px repeat(${visibleSlots.length}, 1fr)` }}
+            >
+              {/* Day label */}
+              <div className="flex items-center justify-end pr-2 text-sm font-serif text-muted-foreground">
+                {day}
+              </div>
+
+              {/* Slot cells for this day */}
+              {visibleSlots.map((slot) => {
+                const entry = plan[planKey(day, slot)];
+                const isCustom = entry?.isCustomBowl;
+                const r = entry && !isCustom ? bySlug.get(entry.slug) : null;
+                const isFilled = !!entry && (isCustom || !!r);
+                const isPending = !!pending;
+                const slotRecipes = recipes.filter(rc => SLOT_MEAL_TYPES[slot]?.includes(rc.meal_type));
+
+                return (
+                  <div
+                    key={slot}
+                    className={cn(
+                      "rounded-lg border text-[10px] min-h-[64px] transition-all",
+                      isFilled ? "border-secondary/40 bg-[#fef2f4]" : "border-border bg-white",
+                      isPending && !isFilled && "border-secondary/40 bg-secondary/5 cursor-pointer"
+                    )}
+                    onClick={() => isPending && !isFilled ? addPendingToSlot(day, slot) : undefined}
+                  >
+                    {isPending && !isFilled ? (
+                      <div className="flex h-full min-h-[64px] items-center justify-center text-secondary text-[9px] font-medium">
+                        + tap
+                      </div>
+                    ) : isCustom && entry ? (
+                      <div className="p-1.5 flex flex-col justify-between h-full min-h-[64px]">
+                        <p className="line-clamp-2 text-[9px] leading-tight text-foreground">{entry.bowlName}</p>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); set(day, slot, null); }}
+                          className="text-destructive text-[9px] text-left mt-1"
+                        >✕</button>
+                      </div>
+                    ) : r ? (
+                      <div className="p-1.5 flex flex-col justify-between h-full min-h-[64px]">
+                        <Link
+                          to="/recipes/$slug"
+                          params={{ slug: r.slug }}
+                          className="line-clamp-3 text-[9px] leading-tight text-foreground hover:text-secondary"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {r.name}
+                        </Link>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); set(day, slot, null); }}
+                          className="text-destructive text-[9px] text-left mt-1"
+                        >✕</button>
+                      </div>
+                    ) : (
+                      <select
+                        className="w-full h-full bg-transparent text-muted-foreground outline-none px-1 py-1 text-[9px] rounded-lg min-h-[64px] cursor-pointer"
+                        value=""
+                        onChange={(e) => { if (e.target.value) set(day, slot, { slug: e.target.value, servings: 2 }); }}
+                      >
+                        <option value="">+</option>
+                        {slotRecipes.map((rc) => (
+                          <option key={rc.id} value={rc.slug}>{rc.name}</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           ))}
         </div>
+        {visibleSlots.length === 0 && (
+          <p className="text-center text-sm text-muted-foreground py-8">All slots hidden — tap a slot above to show it.</p>
+        )}
       </section>
 
-      {/* Desktop */}
+      {/* Desktop — slots as collapsible sections */}
       <section className="hidden lg:block mx-auto max-w-6xl px-4 py-6 sm:px-6">
         <div className="w-full overflow-x-auto">
-          <div className="min-w-[700px] grid grid-cols-[56px_repeat(5,1fr)] gap-1.5">
-            <div />
-            {SLOTS.map((s) => (
-              <div key={s} className="rounded-lg border px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-wider capitalize bg-white border-border text-muted-foreground">
-                {s}
-              </div>
-            ))}
-            {DAYS.map((d) => (
-              <DayRow
-                key={d}
-                day={d}
-                plan={plan}
-                bySlug={bySlug}
-                onSet={set}
-                recipes={recipes}
-                pending={pending}
-                onAddPending={addPendingToSlot}
-              />
-            ))}
+          <div className="min-w-[700px] space-y-2">
+            {/* Day headers */}
+            <div className="grid grid-cols-[160px_repeat(7,1fr)] gap-1.5">
+              <div />
+              {DAYS.map(d => (
+                <div key={d} className="text-center text-[10px] text-muted-foreground font-medium py-1">{d}</div>
+              ))}
+            </div>
+
+            {SLOTS.map((slot) => {
+              const isHidden = hiddenSlots.has(slot);
+              const count = slotMealCount(slot);
+              const slotRecipes = recipes.filter(rc => SLOT_MEAL_TYPES[slot]?.includes(rc.meal_type));
+
+              return (
+                <div key={slot}>
+                  {/* Slot header */}
+                  <div className="grid grid-cols-[160px_repeat(7,1fr)] gap-1.5 mb-1">
+                    <button
+                      onClick={() => toggleSlot(slot)}
+                      className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 bg-white hover:bg-muted/20 transition-colors text-left"
+                    >
+                      {isHidden
+                        ? <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      }
+                      <span className="text-[11px] font-semibold uppercase tracking-wider capitalize text-muted-foreground">{slot}</span>
+                      {isHidden && count > 0 && (
+                        <span className="inline-flex items-center rounded-full bg-secondary/10 border border-secondary/20 px-2 py-0.5 text-[9px] font-medium text-secondary ml-auto">
+                          {count} hidden
+                        </span>
+                      )}
+                    </button>
+                    {DAYS.map(d => <div key={d} />)}
+                  </div>
+
+                  {/* Day cells */}
+                  {!isHidden && (
+                    <div className="grid grid-cols-[160px_repeat(7,1fr)] gap-1.5">
+                      <div />
+                      {DAYS.map((d) => {
+                        const entry = plan[planKey(d, slot)];
+                        const isCustom = entry?.isCustomBowl;
+                        const r = entry && !isCustom ? bySlug.get(entry.slug) : null;
+                        const isFilled = !!entry && (isCustom || !!r);
+                        const isPending = !!pending;
+
+                        return (
+                          <div
+                            key={d}
+                            className={cn(
+                              "min-h-[80px] rounded-lg border text-xs transition-all duration-150 relative",
+                              isFilled ? "border-secondary/40 bg-[#fef2f4]" : "border-border bg-white hover:border-secondary/40",
+                              isPending && !isFilled && "border-secondary border-dashed bg-secondary/5 cursor-pointer"
+                            )}
+                            onClick={() => isPending && !isFilled ? addPendingToSlot(d, slot) : undefined}
+                          >
+                            {isPending && !isFilled ? (
+                              <div className="flex h-full min-h-[80px] items-center justify-center">
+                                <span className="text-secondary text-xs font-medium">+ Add here</span>
+                              </div>
+                            ) : isCustom && entry ? (
+                              <div className="flex h-full flex-col justify-between p-2 min-h-[80px]">
+                                <p className="line-clamp-3 font-serif text-sm leading-snug text-foreground">{entry.bowlName}</p>
+                                <div className="mt-1 flex items-center justify-between">
+                                  <span className="text-[9px] uppercase tracking-wide text-secondary">Custom bowl</span>
+                                  <button onClick={(e) => { e.stopPropagation(); set(d, slot, null); }} className="grid h-5 w-5 place-items-center rounded-full text-muted-foreground hover:text-destructive" aria-label="Remove">
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </div>
+                              </div>
+                            ) : r ? (
+                              <div className="flex h-full flex-col justify-between p-2 min-h-[80px]">
+                                <Link to="/recipes/$slug" params={{ slug: r.slug }} className="line-clamp-3 font-serif text-sm leading-snug text-foreground hover:text-secondary transition-colors" onClick={(e) => e.stopPropagation()}>
+                                  {r.name}
+                                </Link>
+                                <div className="mt-1 flex items-center justify-between">
+                                  <span className="text-[9px] uppercase tracking-wide text-secondary">{r.meal_type}</span>
+                                  <button onClick={(e) => { e.stopPropagation(); set(d, slot, null); }} className="grid h-5 w-5 place-items-center rounded-full text-muted-foreground hover:text-destructive transition-colors" aria-label="Remove">
+                                    <X className="h-3 w-3" />
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <select
+                                className="h-full w-full min-h-[80px] cursor-pointer bg-transparent text-muted-foreground outline-none px-2 py-2 text-xs rounded-lg"
+                                value=""
+                                onChange={(e) => { if (e.target.value) set(d, slot, { slug: e.target.value, servings: 2 }); }}
+                              >
+                                <option value="">+ add</option>
+                                {slotRecipes.map((rc) => (
+                                  <option key={rc.id} value={rc.slug}>{rc.name}</option>
+                                ))}
+                              </select>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
         <p className="mt-4 text-xs text-muted-foreground text-center">
-          Tap any slot to add a recipe · Tap × to remove
+          Tap any slot header to collapse · Tap × to remove a meal
         </p>
       </section>
     </AppShell>
-  );
-}
-
-function DayRow({ day, plan, bySlug, onSet, recipes, pending, onAddPending }: {
-  day: string;
-  plan: ReturnType<typeof useMealPlan>["plan"];
-  bySlug: Map<string, Recipe>;
-  onSet: ReturnType<typeof useMealPlan>["set"];
-  recipes: Recipe[];
-  pending: PendingEntry | null;
-  onAddPending: (day: string, slot: Slot) => void;
-}) {
-  const [confirmSlot, setConfirmSlot] = useState<string | null>(null);
-
-  return (
-    <>
-      <div className="flex items-center px-1 py-2 font-serif text-sm font-light text-muted-foreground">
-        {day}
-      </div>
-      {SLOTS.map((s) => {
-        const entry = plan[planKey(day, s)];
-        const isCustom = entry?.isCustomBowl;
-        const r = entry && !isCustom ? bySlug.get(entry.slug) : null;
-        const isFilled = !!entry && (isCustom || !!r);
-        const slotKey = `${day}-${s}`;
-        const isPending = !!pending;
-        const slotRecipes = recipes.filter(rc => SLOT_MEAL_TYPES[s]?.includes(rc.meal_type));
-
-        return (
-          <div
-            key={s}
-            className={cn(
-              "min-h-[80px] rounded-lg border text-xs transition-all duration-150 relative",
-              isFilled ? "border-secondary/40 bg-[#fef2f4]" : "border-border bg-white hover:border-secondary/40",
-              isPending && !isFilled && "border-secondary border-dashed bg-secondary/5 cursor-pointer"
-            )}
-            onClick={() => isPending && !isFilled ? onAddPending(day, s) : undefined}
-          >
-            {confirmSlot === slotKey && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-lg bg-background/95 p-2 text-center">
-                <p className="text-[11px] text-foreground font-medium">Remove?</p>
-                <div className="flex gap-1.5">
-                  <button onClick={(e) => { e.stopPropagation(); setConfirmSlot(null); }} className="rounded-md border border-border px-2 py-1 text-[10px] text-muted-foreground">Cancel</button>
-                  <button onClick={(e) => { e.stopPropagation(); onSet(day, s, null); setConfirmSlot(null); }} className="rounded-md bg-destructive px-2 py-1 text-[10px] font-medium text-destructive-foreground">Remove</button>
-                </div>
-              </div>
-            )}
-
-            {isPending && !isFilled ? (
-              <div className="flex h-full min-h-[80px] items-center justify-center">
-                <span className="text-secondary text-xs font-medium">+ Add here</span>
-              </div>
-            ) : isCustom && entry ? (
-              <div className="flex h-full flex-col justify-between p-2 min-h-[80px]">
-                <p className="line-clamp-3 font-serif text-sm leading-snug text-foreground">{entry.bowlName}</p>
-                <div className="mt-1 flex items-center justify-between">
-                  <span className="text-[9px] uppercase tracking-wide text-secondary">Custom bowl</span>
-                  <button onClick={(e) => { e.stopPropagation(); setConfirmSlot(slotKey); }} className="grid h-5 w-5 place-items-center rounded-full text-muted-foreground hover:text-destructive" aria-label="Remove">
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              </div>
-            ) : r ? (
-              <div className="flex h-full flex-col justify-between p-2 min-h-[80px]">
-                <Link to="/recipes/$slug" params={{ slug: r.slug }} className="line-clamp-3 font-serif text-sm leading-snug text-foreground hover:text-secondary transition-colors" onClick={(e) => e.stopPropagation()}>
-                  {r.name}
-                </Link>
-                <div className="mt-1 flex items-center justify-between">
-                  <span className="text-[9px] uppercase tracking-wide text-secondary">{r.meal_type}</span>
-                  <button onClick={(e) => { e.stopPropagation(); setConfirmSlot(slotKey); }} className="grid h-5 w-5 place-items-center rounded-full text-muted-foreground hover:text-destructive transition-colors" aria-label="Remove">
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <select
-                className="h-full w-full min-h-[80px] cursor-pointer bg-transparent text-muted-foreground outline-none px-2 py-2 text-xs rounded-lg"
-                value=""
-                onChange={(e) => { if (e.target.value) onSet(day, s, { slug: e.target.value, servings: 2 }); }}
-              >
-                <option value="">+ add</option>
-                {slotRecipes.map((rc) => (
-                  <option key={rc.id} value={rc.slug}>{rc.name}</option>
-                ))}
-              </select>
-            )}
-          </div>
-        );
-      })}
-    </>
   );
 }
