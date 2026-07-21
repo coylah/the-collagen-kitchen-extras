@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Heart, Home, CalendarDays, ShoppingBasket, HelpCircle, FlaskConical } from "lucide-react";
+import { Heart, Home, CalendarDays, ShoppingBasket, FlaskConical } from "lucide-react";
 import type { ReactNode } from "react";
 import WelcomeModal from "@/components/welcome-modal";
 import { MealRibbon } from "@/components/meal-ribbon";
@@ -26,10 +26,13 @@ export function AppShell({ children, fitViewport = false }: { children: ReactNod
       )}
       <Header />
       {/* fitViewport pages (Home) get a flexed main so their content shrinks
-          to fit between the header and footer instead of overflowing the
-          screen. Everything else keeps the normal scrolling layout, with
-          pb-16 to clear the fixed bottom ribbon. */}
-      <main className={fitViewport ? "flex-1 min-h-0 flex flex-col overflow-hidden" : "pb-16"}>
+          to fit between the header and footer in the resting state. overflow-y-auto
+          (rather than hidden) means if content DOES exceed the viewport — e.g.
+          search results, which can be arbitrarily long — it scrolls normally
+          instead of being silently clipped with no way to reach it. Everything
+          else keeps the normal scrolling layout, with pb-16 to clear the fixed
+          bottom ribbon. */}
+      <main className={fitViewport ? "flex-1 min-h-0 flex flex-col overflow-y-auto" : "pb-16"}>
         {children}
       </main>
       <Footer />
@@ -39,12 +42,6 @@ export function AppShell({ children, fitViewport = false }: { children: ReactNod
 }
 
 function Header() {
-  function openFaq() {
-    localStorage.setItem("ck.welcomed", "1");
-    localStorage.setItem("ck.openFaqDirect", "1");
-    window.location.reload();
-  }
-
   return (
     <header className="no-print shrink-0 sticky top-0 z-40 border-b border-border bg-white/98 backdrop-blur shadow-sm">
       <div className="mx-auto max-w-6xl px-4 py-2">
@@ -55,19 +52,12 @@ function Header() {
           </span>
         </Link>
       </div>
-      <nav className="grid grid-cols-6 border-t border-border">
+      <nav className="grid grid-cols-5 border-t border-border">
         <NavLink to="/" icon={<Home className="h-4 w-4" />} label="Home" />
         <NavLink to="/planner" icon={<CalendarDays className="h-4 w-4" />} label="Planner" />
         <NavLink to="/shopping" icon={<ShoppingBasket className="h-4 w-4" />} label="Shopping" />
         <NavLink to="/favourites" icon={<Heart className="h-4 w-4" />} label="Saved" />
         <NavLink to="/why-this-works" icon={<FlaskConical className="h-4 w-4" />} label="Science" />
-        <button
-          onClick={openFaq}
-          className="flex flex-col items-center gap-0.5 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-        >
-          <HelpCircle className="h-4 w-4" />
-          <span className="text-[8px] uppercase tracking-wide">FAQs</span>
-        </button>
       </nav>
     </header>
   );
