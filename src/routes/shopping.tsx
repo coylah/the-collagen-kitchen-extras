@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState, useRef } from "react";
-import { Printer, ShoppingBasket, RotateCcw, Check, X, Trash2, Plus, ShoppingCart } from "lucide-react";
+import { Printer, ShoppingBasket, RotateCcw, Check, X, Plus, ShoppingCart } from "lucide-react";
 import { listRecipes } from "@/lib/recipes.functions";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
@@ -87,7 +87,6 @@ function ShoppingPage() {
     return saved === "2" ? "week2" : "week1";
   });
   const [showBigShopConfirm, setShowBigShopConfirm] = useState(false);
-  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const week1Plan = useMealPlan("1");
@@ -102,7 +101,7 @@ function ShoppingPage() {
   const activeWeek: Week = viewMode === "week2" ? "2" : "1";
   const { isHad, toggle: toggleHave, reset } = viewMode === "week2" ? have2 : have1;
   const { extras, remove: removeExtra, clear: clearExtras } = viewMode === "week2" ? extras2 : extras1;
-  const { items: manualItems, addItem, toggleItem, removeItem, clearAll: clearManual } = viewMode === "week2" ? manual2 : manual1;
+  const { items: manualItems, addItem, toggleItem, removeItem } = viewMode === "week2" ? manual2 : manual1;
 
   const [bought, setBought] = useState<Record<string, boolean>>({});
   const [boughtExtras, setBoughtExtras] = useState<Record<string, boolean>>({});
@@ -208,17 +207,6 @@ function ShoppingPage() {
     ? week2HasContent
     : week1HasContent;
 
-  function clearAll() {
-    clearExtras();
-    reset();
-    clearManual();
-    setBought({});
-    setBoughtExtras({});
-    setHadExtras({});
-    setBoughtBowls({});
-    setShowClearConfirm(false);
-  }
-
   function handleAddManual(e: React.FormEvent) {
     e.preventDefault();
     if (!manualInput.trim()) return;
@@ -226,8 +214,6 @@ function ShoppingPage() {
     setManualInput("");
     inputRef.current?.focus();
   }
-
-  const weekLabel = viewMode === "week1" ? "Week 1" : viewMode === "week2" ? "Week 2" : "The Big Shop";
 
   return (
     <AppShell>
@@ -243,25 +229,6 @@ function ShoppingPage() {
             <div className="flex gap-3">
               <button onClick={() => setShowBigShopConfirm(false)} className="flex-1 rounded-lg border border-border py-2.5 text-sm text-muted-foreground hover:bg-accent">Cancel</button>
               <button onClick={() => { switchView("bigshop"); setShowBigShopConfirm(false); }} className="flex-1 rounded-lg bg-secondary py-2.5 text-sm font-medium text-secondary-foreground hover:bg-secondary/90">Let's do it</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Confirm clear */}
-      {showClearConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-foreground/50 backdrop-blur-sm" onClick={() => setShowClearConfirm(false)} />
-          <div className="relative z-10 w-full max-w-sm rounded-2xl border border-border bg-background p-6 shadow-xl">
-            <h2 className="font-serif text-xl mb-2">Clear {weekLabel}?</h2>
-            <p className="text-sm text-muted-foreground mb-5">
-              {viewMode === "week1"
-                ? "This will remove your Week 1 bowl extras, manual items and reset your I have list. Your Week 2 list is safe."
-                : "This will remove your Week 2 bowl extras, manual items and reset your I have list. Your Week 1 list is safe."}
-            </p>
-            <div className="flex gap-3">
-              <button onClick={() => setShowClearConfirm(false)} className="flex-1 rounded-lg border border-border py-2.5 text-sm text-muted-foreground hover:bg-accent">Cancel</button>
-              <button onClick={clearAll} className="flex-1 rounded-lg bg-destructive py-2.5 text-sm font-medium text-destructive-foreground hover:bg-destructive/90">Yes, clear</button>
             </div>
           </div>
         </div>
@@ -296,9 +263,6 @@ function ShoppingPage() {
                   <RotateCcw className="h-4 w-4" /> Reset "I have"
                 </Button>
               )}
-              <Button variant="ghost" size="sm" onClick={() => setShowClearConfirm(true)} className="text-muted-foreground hover:text-destructive">
-                <Trash2 className="h-4 w-4" /> Clear
-              </Button>
               <Button variant="outline" size="sm" onClick={() => window.print()}>
                 <Printer className="h-4 w-4" /> Print
               </Button>
