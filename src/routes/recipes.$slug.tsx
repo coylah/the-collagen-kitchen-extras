@@ -204,7 +204,7 @@ function RecipePage() {
   const [servings, setServings] = useState(recipe.servings);
   const [checkedIng, setCheckedIng] = useState<Record<number, boolean>>({});
   const [checkedStep, setCheckedStep] = useState<Record<number, boolean>>({});
-  const [activeTab, setActiveTab] = useState<TabKey>("ingredients");
+  const [activeTab, setActiveTab] = useState<TabKey>(recipe.notes ? "tips" : "ingredients");
   const [imgFailed, setImgFailed] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedPhase, setSelectedPhase] = useState<string | null>(null);
@@ -216,7 +216,7 @@ function RecipePage() {
     setCheckedIng({});
     setCheckedStep({});
     setServings(recipe.servings);
-    setActiveTab("ingredients");
+    setActiveTab(recipe.notes ? "tips" : "ingredients");
     setImgFailed(false);
     setLightboxOpen(false);
     setSelectedPhase(null);
