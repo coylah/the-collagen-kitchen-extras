@@ -146,7 +146,15 @@ function stripPrepWords(s: string): string {
 }
 
 function normItem(s: string): string {
-  const stripped = stripPrepWords(s).replace(/[^a-z0-9 ]/g, "").trim();
+  // Defensive: strip a leading quantity (e.g. "1/2 avocado", "2 lemons",
+  // "½ cucumber", "Juice of 1/2 lemon") so slashes/digits don't collapse
+  // into the item key ("1/2 avocado" -> "12 avocado").
+  const cleaned = s
+    .replace(/^\s*(juice|zest)\s+of\s+/i, "")
+    .replace(/^\s*\d+\s*\/\s*\d+\s+/, "")
+    .replace(/^\s*[½¼¾⅓⅔⅛⅜⅝⅞]\s*/, "")
+    .replace(/^\s*\d+(\.\d+)?\s+/, "");
+  const stripped = stripPrepWords(cleaned).replace(/[^a-z0-9 ]/g, "").trim();
   return ITEM_ALIASES[stripped] ?? stripped;
 }
 
