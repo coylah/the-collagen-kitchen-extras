@@ -83,7 +83,10 @@ export default function WelcomeModal({ onClose }: { onClose: () => void }) {
   const skip = () => onClose();
 
   return (
-    <div className="fixed inset-0 bg-white z-50 flex flex-col overflow-hidden">
+    <div
+      className="fixed inset-0 bg-white z-50 flex flex-col overflow-hidden"
+      style={{ width: "100vw", height: "100dvh", top: 0, left: 0, right: 0, bottom: 0 }}
+    >
       {/* Top bar: dots + close */}
       <div className="flex items-center justify-between px-5 pt-3 pb-1 shrink-0">
         <div className="w-6" />
