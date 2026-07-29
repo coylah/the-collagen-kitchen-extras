@@ -1,8 +1,11 @@
+// auth.tsx
+// Login page for The Collagen Kitchen.
+// Uses magic link (no password) — user enters email, receives a one-click login link.
+// Only users created via the Systeme.io purchase webhook can log in.
+
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { AppShell } from "@/components/app-shell";
 import { supabase } from "@/integrations/supabase/client";
-
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -10,98 +13,89 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    // If already logged in, go straight to the app
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/admin/import" });
+      if (data.user) navigate({ to: "/" });
     });
   }, [navigate]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const send = async () => {
+    if (!email.trim()) return;
     setLoading(true);
-    setMsg(null);
-    try {
-      if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (error) throw error;
-        if (data.session) {
-          navigate({ to: "/admin/import" });
-        } else {
-          // Not auto-confirmed — try signing in directly (auto-confirm may be on server-side)
-          const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
-          if (signInErr) {
-            setMsg("Account created. Check your email to confirm, then sign in.");
-            setMode("signin");
-          } else {
-            navigate({ to: "/admin/import" });
-          }
-        }
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        navigate({ to: "/admin/import" });
-      }
-    } catch (e: any) {
-      setMsg(e.message);
-    } finally {
-      setLoading(false);
+    setError("");
+    const { error: err } = await supabase.auth.signInWithOtp({
+      email: email.trim().toLowerCase(),
+      options: { emailRedirectTo: window.location.origin },
+    });
+    setLoading(false);
+    if (err) {
+      console.error("[Auth] Magic link error:", err.message);
+      setError("Something went wrong. Please try again or contact support.");
+      return;
     }
+    setSent(true);
+  };
+
+  if (sent) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center">
+        <p className="font-script text-3xl text-secondary mb-4">Love Coylah</p>
+        <h2 className="font-serif text-2xl font-light text-foreground mb-3">Check your email</h2>
+        <p className="text-sm text-muted-foreground max-w-xs leading-relaxed mb-2">
+          We've sent a login link to <strong>{email}</strong>
+        </p>
+        <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
+          Click the link in that email and you'll be straight into The Collagen Kitchen. No password needed.
+        </p>
+        <button
+          onClick={() => { setSent(false); setEmail(""); }}
+          className="mt-6 text-xs text-muted-foreground underline"
+        >
+          Use a different email
+        </button>
+      </div>
+    );
   }
 
-
   return (
-    <AppShell>
-      <div className="mx-auto max-w-md px-4 py-16">
-        <h1 className="font-serif text-3xl mb-6">
-          {mode === "signin" ? "Sign in" : "Create an account"}
-        </h1>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            type="email"
-            required
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none focus:border-secondary"
-          />
-          <input
-            type="password"
-            required
-            minLength={6}
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm outline-none focus:border-secondary"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-xl bg-secondary py-3 text-sm font-medium text-secondary-foreground disabled:opacity-40 hover:bg-secondary/90"
-          >
-            {loading ? "…" : mode === "signin" ? "Sign in" : "Sign up"}
-          </button>
-        </form>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-6">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-8">
+          <p className="font-script text-3xl text-secondary mb-1">Love Coylah</p>
+          <h1 className="font-serif text-xl font-light text-foreground mb-2">The Collagen Kitchen</h1>
+          <p className="text-xs text-muted-foreground">Enter your email to access your recipes</p>
+        </div>
 
+        <input
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && send()}
+          placeholder="your@email.com"
+          className="w-full rounded-xl border border-border px-4 py-3 text-sm outline-none focus:border-secondary mb-3"
+        />
+
+        {error && <p className="text-xs text-red-500 mb-3">{error}</p>}
 
         <button
-          onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setMsg(null); }}
-          className="mt-6 text-xs text-muted-foreground hover:text-foreground underline block mx-auto"
+          onClick={send}
+          disabled={loading || !email.trim()}
+          className="w-full rounded-full bg-secondary py-4 text-sm font-semibold text-white disabled:opacity-40 hover:bg-secondary/90"
         >
-          {mode === "signin" ? "No account? Sign up" : "Have an account? Sign in"}
+          {loading ? "Sending…" : "Send me a login link →"}
         </button>
 
-        {msg && <p className="mt-4 text-sm text-center">{msg}</p>}
+        <p className="text-xs text-muted-foreground text-center mt-5 leading-relaxed">
+          Access is for Collagen Kitchen subscribers only.{" "}
+          <a href="https://lovecoylah.com" className="text-secondary underline">Get access here.</a>
+        </p>
       </div>
-    </AppShell>
+    </div>
   );
 }
