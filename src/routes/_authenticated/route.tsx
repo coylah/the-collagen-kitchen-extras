@@ -1,3 +1,7 @@
+// _authenticated/route.tsx
+// All routes nested under _authenticated require a valid Supabase session.
+// If the user isn't logged in, they're redirected to /auth (the magic link login page).
+
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 
