@@ -12,7 +12,7 @@ const recipesQuery = queryOptions({
   queryFn: () => listRecipes(),
 });
 
-export const Route = createFileRoute("/favourites")({
+export const Route = createFileRoute("/_authenticated/favourites")({
   head: () => ({
     meta: [{ title: "Saved recipes — The Collagen Kitchen" }],
   }),

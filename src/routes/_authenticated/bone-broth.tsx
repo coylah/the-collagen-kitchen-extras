@@ -9,7 +9,7 @@ const recipesQuery = queryOptions({
   queryFn: () => listRecipes(),
 });
 
-export const Route = createFileRoute("/bone-broth")({
+export const Route = createFileRoute("/_authenticated/bone-broth")({
   head: () => ({
     meta: [
       { title: "Bone Broth — The Collagen Kitchen" },

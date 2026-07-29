@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useShoppingExtras } from "@/lib/user-state";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/build/glow-bowl")({
+export const Route = createFileRoute("/_authenticated/build/glow-bowl")({
   head: () => ({
     meta: [
       { title: "Build Your Glow Bowl — The Collagen Kitchen" },

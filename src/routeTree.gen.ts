@@ -9,45 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WhyThisWorksRouteImport } from './routes/why-this-works'
-import { Route as ShoppingRouteImport } from './routes/shopping'
-import { Route as PlannerRouteImport } from './routes/planner'
-import { Route as FavouritesRouteImport } from './routes/favourites'
-import { Route as BoneBrothRouteImport } from './routes/bone-broth'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as RecipesSlugRouteImport } from './routes/recipes.$slug'
-import { Route as MealTypeRouteImport } from './routes/meal.$type'
-import { Route as BuildYoghurtBowlRouteImport } from './routes/build.yoghurt-bowl'
-import { Route as BuildGlowBowlRouteImport } from './routes/build.glow-bowl'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedWhyThisWorksRouteImport } from './routes/_authenticated/why-this-works'
+import { Route as AuthenticatedShoppingRouteImport } from './routes/_authenticated/shopping'
+import { Route as AuthenticatedPlannerRouteImport } from './routes/_authenticated/planner'
+import { Route as AuthenticatedFavouritesRouteImport } from './routes/_authenticated/favourites'
+import { Route as AuthenticatedBoneBrothRouteImport } from './routes/_authenticated/bone-broth'
+import { Route as ApiWebhooksSystemeRouteImport } from './routes/api/webhooks/systeme'
+import { Route as AuthenticatedRecipesSlugRouteImport } from './routes/_authenticated/recipes.$slug'
+import { Route as AuthenticatedMealTypeRouteImport } from './routes/_authenticated/meal.$type'
+import { Route as AuthenticatedBuildYoghurtBowlRouteImport } from './routes/_authenticated/build.yoghurt-bowl'
+import { Route as AuthenticatedBuildGlowBowlRouteImport } from './routes/_authenticated/build.glow-bowl'
 import { Route as AuthenticatedAdminImportRouteImport } from './routes/_authenticated/admin.import'
 
-const WhyThisWorksRoute = WhyThisWorksRouteImport.update({
-  id: '/why-this-works',
-  path: '/why-this-works',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ShoppingRoute = ShoppingRouteImport.update({
-  id: '/shopping',
-  path: '/shopping',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlannerRoute = PlannerRouteImport.update({
-  id: '/planner',
-  path: '/planner',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FavouritesRoute = FavouritesRouteImport.update({
-  id: '/favourites',
-  path: '/favourites',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BoneBrothRoute = BoneBrothRouteImport.update({
-  id: '/bone-broth',
-  path: '/bone-broth',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -57,31 +33,65 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedWhyThisWorksRoute =
+  AuthenticatedWhyThisWorksRouteImport.update({
+    id: '/why-this-works',
+    path: '/why-this-works',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedShoppingRoute = AuthenticatedShoppingRouteImport.update({
+  id: '/shopping',
+  path: '/shopping',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlannerRoute = AuthenticatedPlannerRouteImport.update({
+  id: '/planner',
+  path: '/planner',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFavouritesRoute = AuthenticatedFavouritesRouteImport.update({
+  id: '/favourites',
+  path: '/favourites',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBoneBrothRoute = AuthenticatedBoneBrothRouteImport.update({
+  id: '/bone-broth',
+  path: '/bone-broth',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiWebhooksSystemeRoute = ApiWebhooksSystemeRouteImport.update({
+  id: '/api/webhooks/systeme',
+  path: '/api/webhooks/systeme',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RecipesSlugRoute = RecipesSlugRouteImport.update({
-  id: '/recipes/$slug',
-  path: '/recipes/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MealTypeRoute = MealTypeRouteImport.update({
+const AuthenticatedRecipesSlugRoute =
+  AuthenticatedRecipesSlugRouteImport.update({
+    id: '/recipes/$slug',
+    path: '/recipes/$slug',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMealTypeRoute = AuthenticatedMealTypeRouteImport.update({
   id: '/meal/$type',
   path: '/meal/$type',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const BuildYoghurtBowlRoute = BuildYoghurtBowlRouteImport.update({
-  id: '/build/yoghurt-bowl',
-  path: '/build/yoghurt-bowl',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BuildGlowBowlRoute = BuildGlowBowlRouteImport.update({
-  id: '/build/glow-bowl',
-  path: '/build/glow-bowl',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const AuthenticatedBuildYoghurtBowlRoute =
+  AuthenticatedBuildYoghurtBowlRouteImport.update({
+    id: '/build/yoghurt-bowl',
+    path: '/build/yoghurt-bowl',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedBuildGlowBowlRoute =
+  AuthenticatedBuildGlowBowlRouteImport.update({
+    id: '/build/glow-bowl',
+    path: '/build/glow-bowl',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminImportRoute =
   AuthenticatedAdminImportRouteImport.update({
     id: '/admin/import',
@@ -90,48 +100,51 @@ const AuthenticatedAdminImportRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
-  '/bone-broth': typeof BoneBrothRoute
-  '/favourites': typeof FavouritesRoute
-  '/planner': typeof PlannerRoute
-  '/shopping': typeof ShoppingRoute
-  '/why-this-works': typeof WhyThisWorksRoute
-  '/build/glow-bowl': typeof BuildGlowBowlRoute
-  '/build/yoghurt-bowl': typeof BuildYoghurtBowlRoute
-  '/meal/$type': typeof MealTypeRoute
-  '/recipes/$slug': typeof RecipesSlugRoute
+  '/bone-broth': typeof AuthenticatedBoneBrothRoute
+  '/favourites': typeof AuthenticatedFavouritesRoute
+  '/planner': typeof AuthenticatedPlannerRoute
+  '/shopping': typeof AuthenticatedShoppingRoute
+  '/why-this-works': typeof AuthenticatedWhyThisWorksRoute
   '/admin/import': typeof AuthenticatedAdminImportRoute
+  '/build/glow-bowl': typeof AuthenticatedBuildGlowBowlRoute
+  '/build/yoghurt-bowl': typeof AuthenticatedBuildYoghurtBowlRoute
+  '/meal/$type': typeof AuthenticatedMealTypeRoute
+  '/recipes/$slug': typeof AuthenticatedRecipesSlugRoute
+  '/api/webhooks/systeme': typeof ApiWebhooksSystemeRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/bone-broth': typeof BoneBrothRoute
-  '/favourites': typeof FavouritesRoute
-  '/planner': typeof PlannerRoute
-  '/shopping': typeof ShoppingRoute
-  '/why-this-works': typeof WhyThisWorksRoute
-  '/build/glow-bowl': typeof BuildGlowBowlRoute
-  '/build/yoghurt-bowl': typeof BuildYoghurtBowlRoute
-  '/meal/$type': typeof MealTypeRoute
-  '/recipes/$slug': typeof RecipesSlugRoute
+  '/bone-broth': typeof AuthenticatedBoneBrothRoute
+  '/favourites': typeof AuthenticatedFavouritesRoute
+  '/planner': typeof AuthenticatedPlannerRoute
+  '/shopping': typeof AuthenticatedShoppingRoute
+  '/why-this-works': typeof AuthenticatedWhyThisWorksRoute
+  '/': typeof AuthenticatedIndexRoute
   '/admin/import': typeof AuthenticatedAdminImportRoute
+  '/build/glow-bowl': typeof AuthenticatedBuildGlowBowlRoute
+  '/build/yoghurt-bowl': typeof AuthenticatedBuildYoghurtBowlRoute
+  '/meal/$type': typeof AuthenticatedMealTypeRoute
+  '/recipes/$slug': typeof AuthenticatedRecipesSlugRoute
+  '/api/webhooks/systeme': typeof ApiWebhooksSystemeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/bone-broth': typeof BoneBrothRoute
-  '/favourites': typeof FavouritesRoute
-  '/planner': typeof PlannerRoute
-  '/shopping': typeof ShoppingRoute
-  '/why-this-works': typeof WhyThisWorksRoute
-  '/build/glow-bowl': typeof BuildGlowBowlRoute
-  '/build/yoghurt-bowl': typeof BuildYoghurtBowlRoute
-  '/meal/$type': typeof MealTypeRoute
-  '/recipes/$slug': typeof RecipesSlugRoute
+  '/_authenticated/bone-broth': typeof AuthenticatedBoneBrothRoute
+  '/_authenticated/favourites': typeof AuthenticatedFavouritesRoute
+  '/_authenticated/planner': typeof AuthenticatedPlannerRoute
+  '/_authenticated/shopping': typeof AuthenticatedShoppingRoute
+  '/_authenticated/why-this-works': typeof AuthenticatedWhyThisWorksRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/admin/import': typeof AuthenticatedAdminImportRoute
+  '/_authenticated/build/glow-bowl': typeof AuthenticatedBuildGlowBowlRoute
+  '/_authenticated/build/yoghurt-bowl': typeof AuthenticatedBuildYoghurtBowlRoute
+  '/_authenticated/meal/$type': typeof AuthenticatedMealTypeRoute
+  '/_authenticated/recipes/$slug': typeof AuthenticatedRecipesSlugRoute
+  '/api/webhooks/systeme': typeof ApiWebhooksSystemeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -143,94 +156,53 @@ export interface FileRouteTypes {
     | '/planner'
     | '/shopping'
     | '/why-this-works'
+    | '/admin/import'
     | '/build/glow-bowl'
     | '/build/yoghurt-bowl'
     | '/meal/$type'
     | '/recipes/$slug'
-    | '/admin/import'
+    | '/api/webhooks/systeme'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/auth'
     | '/bone-broth'
     | '/favourites'
     | '/planner'
     | '/shopping'
     | '/why-this-works'
+    | '/'
+    | '/admin/import'
     | '/build/glow-bowl'
     | '/build/yoghurt-bowl'
     | '/meal/$type'
     | '/recipes/$slug'
-    | '/admin/import'
+    | '/api/webhooks/systeme'
   id:
     | '__root__'
-    | '/'
     | '/_authenticated'
     | '/auth'
-    | '/bone-broth'
-    | '/favourites'
-    | '/planner'
-    | '/shopping'
-    | '/why-this-works'
-    | '/build/glow-bowl'
-    | '/build/yoghurt-bowl'
-    | '/meal/$type'
-    | '/recipes/$slug'
+    | '/_authenticated/bone-broth'
+    | '/_authenticated/favourites'
+    | '/_authenticated/planner'
+    | '/_authenticated/shopping'
+    | '/_authenticated/why-this-works'
+    | '/_authenticated/'
     | '/_authenticated/admin/import'
+    | '/_authenticated/build/glow-bowl'
+    | '/_authenticated/build/yoghurt-bowl'
+    | '/_authenticated/meal/$type'
+    | '/_authenticated/recipes/$slug'
+    | '/api/webhooks/systeme'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  BoneBrothRoute: typeof BoneBrothRoute
-  FavouritesRoute: typeof FavouritesRoute
-  PlannerRoute: typeof PlannerRoute
-  ShoppingRoute: typeof ShoppingRoute
-  WhyThisWorksRoute: typeof WhyThisWorksRoute
-  BuildGlowBowlRoute: typeof BuildGlowBowlRoute
-  BuildYoghurtBowlRoute: typeof BuildYoghurtBowlRoute
-  MealTypeRoute: typeof MealTypeRoute
-  RecipesSlugRoute: typeof RecipesSlugRoute
+  ApiWebhooksSystemeRoute: typeof ApiWebhooksSystemeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/why-this-works': {
-      id: '/why-this-works'
-      path: '/why-this-works'
-      fullPath: '/why-this-works'
-      preLoaderRoute: typeof WhyThisWorksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/shopping': {
-      id: '/shopping'
-      path: '/shopping'
-      fullPath: '/shopping'
-      preLoaderRoute: typeof ShoppingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/planner': {
-      id: '/planner'
-      path: '/planner'
-      fullPath: '/planner'
-      preLoaderRoute: typeof PlannerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/favourites': {
-      id: '/favourites'
-      path: '/favourites'
-      fullPath: '/favourites'
-      preLoaderRoute: typeof FavouritesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/bone-broth': {
-      id: '/bone-broth'
-      path: '/bone-broth'
-      fullPath: '/bone-broth'
-      preLoaderRoute: typeof BoneBrothRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -245,40 +217,82 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/why-this-works': {
+      id: '/_authenticated/why-this-works'
+      path: '/why-this-works'
+      fullPath: '/why-this-works'
+      preLoaderRoute: typeof AuthenticatedWhyThisWorksRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/shopping': {
+      id: '/_authenticated/shopping'
+      path: '/shopping'
+      fullPath: '/shopping'
+      preLoaderRoute: typeof AuthenticatedShoppingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/planner': {
+      id: '/_authenticated/planner'
+      path: '/planner'
+      fullPath: '/planner'
+      preLoaderRoute: typeof AuthenticatedPlannerRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/favourites': {
+      id: '/_authenticated/favourites'
+      path: '/favourites'
+      fullPath: '/favourites'
+      preLoaderRoute: typeof AuthenticatedFavouritesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/bone-broth': {
+      id: '/_authenticated/bone-broth'
+      path: '/bone-broth'
+      fullPath: '/bone-broth'
+      preLoaderRoute: typeof AuthenticatedBoneBrothRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/webhooks/systeme': {
+      id: '/api/webhooks/systeme'
+      path: '/api/webhooks/systeme'
+      fullPath: '/api/webhooks/systeme'
+      preLoaderRoute: typeof ApiWebhooksSystemeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/recipes/$slug': {
-      id: '/recipes/$slug'
+    '/_authenticated/recipes/$slug': {
+      id: '/_authenticated/recipes/$slug'
       path: '/recipes/$slug'
       fullPath: '/recipes/$slug'
-      preLoaderRoute: typeof RecipesSlugRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedRecipesSlugRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/meal/$type': {
-      id: '/meal/$type'
+    '/_authenticated/meal/$type': {
+      id: '/_authenticated/meal/$type'
       path: '/meal/$type'
       fullPath: '/meal/$type'
-      preLoaderRoute: typeof MealTypeRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedMealTypeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/build/yoghurt-bowl': {
-      id: '/build/yoghurt-bowl'
+    '/_authenticated/build/yoghurt-bowl': {
+      id: '/_authenticated/build/yoghurt-bowl'
       path: '/build/yoghurt-bowl'
       fullPath: '/build/yoghurt-bowl'
-      preLoaderRoute: typeof BuildYoghurtBowlRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedBuildYoghurtBowlRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/build/glow-bowl': {
-      id: '/build/glow-bowl'
+    '/_authenticated/build/glow-bowl': {
+      id: '/_authenticated/build/glow-bowl'
       path: '/build/glow-bowl'
       fullPath: '/build/glow-bowl'
-      preLoaderRoute: typeof BuildGlowBowlRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedBuildGlowBowlRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/import': {
       id: '/_authenticated/admin/import'
@@ -291,29 +305,40 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBoneBrothRoute: typeof AuthenticatedBoneBrothRoute
+  AuthenticatedFavouritesRoute: typeof AuthenticatedFavouritesRoute
+  AuthenticatedPlannerRoute: typeof AuthenticatedPlannerRoute
+  AuthenticatedShoppingRoute: typeof AuthenticatedShoppingRoute
+  AuthenticatedWhyThisWorksRoute: typeof AuthenticatedWhyThisWorksRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedAdminImportRoute: typeof AuthenticatedAdminImportRoute
+  AuthenticatedBuildGlowBowlRoute: typeof AuthenticatedBuildGlowBowlRoute
+  AuthenticatedBuildYoghurtBowlRoute: typeof AuthenticatedBuildYoghurtBowlRoute
+  AuthenticatedMealTypeRoute: typeof AuthenticatedMealTypeRoute
+  AuthenticatedRecipesSlugRoute: typeof AuthenticatedRecipesSlugRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBoneBrothRoute: AuthenticatedBoneBrothRoute,
+  AuthenticatedFavouritesRoute: AuthenticatedFavouritesRoute,
+  AuthenticatedPlannerRoute: AuthenticatedPlannerRoute,
+  AuthenticatedShoppingRoute: AuthenticatedShoppingRoute,
+  AuthenticatedWhyThisWorksRoute: AuthenticatedWhyThisWorksRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedAdminImportRoute: AuthenticatedAdminImportRoute,
+  AuthenticatedBuildGlowBowlRoute: AuthenticatedBuildGlowBowlRoute,
+  AuthenticatedBuildYoghurtBowlRoute: AuthenticatedBuildYoghurtBowlRoute,
+  AuthenticatedMealTypeRoute: AuthenticatedMealTypeRoute,
+  AuthenticatedRecipesSlugRoute: AuthenticatedRecipesSlugRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  BoneBrothRoute: BoneBrothRoute,
-  FavouritesRoute: FavouritesRoute,
-  PlannerRoute: PlannerRoute,
-  ShoppingRoute: ShoppingRoute,
-  WhyThisWorksRoute: WhyThisWorksRoute,
-  BuildGlowBowlRoute: BuildGlowBowlRoute,
-  BuildYoghurtBowlRoute: BuildYoghurtBowlRoute,
-  MealTypeRoute: MealTypeRoute,
-  RecipesSlugRoute: RecipesSlugRoute,
+  ApiWebhooksSystemeRoute: ApiWebhooksSystemeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -20,7 +20,7 @@ const TAGLINES: Record<string, string> = {
   dessert: "Sweet treats that still work for your glow.",
 };
 
-export const Route = createFileRoute("/meal/$type")(({
+export const Route = createFileRoute("/_authenticated/meal/$type")(({
   head: ({ params }) => ({
     meta: [{ title: `${capitalize(params.type)} — The Collagen Kitchen` }],
   }),

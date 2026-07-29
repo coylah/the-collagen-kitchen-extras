@@ -158,7 +158,7 @@ const recipeQuery = (slug: string) =>
     queryFn: () => getRecipeBySlug({ data: { slug } }),
   });
 
-export const Route = createFileRoute("/recipes/$slug")({
+export const Route = createFileRoute("/_authenticated/recipes/$slug")({
   loader: async ({ params, context }) => {
     const r = await context.queryClient.ensureQueryData(recipeQuery(params.slug));
     if (!r) throw notFound();
