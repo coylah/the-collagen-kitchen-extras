@@ -14,7 +14,7 @@ const recipesQuery = queryOptions({
   queryFn: () => listRecipes(),
 });
 
-export const Route = createFileRoute("/planner")({
+export const Route = createFileRoute("/_authenticated/planner")({
   head: () => ({
     meta: [
       { title: "Weekly meal planner — The Collagen Kitchen" },

@@ -4,7 +4,7 @@ import { AppShell } from "@/components/app-shell";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/why-this-works")({
+export const Route = createFileRoute("/_authenticated/why-this-works")({
   head: () => ({
     meta: [
       { title: "Why This Works — The Collagen Kitchen" },
