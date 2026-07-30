@@ -9,53 +9,33 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
-import { Route as AuthenticatedBoneBrothRouteImport } from './routes/_authenticated/bone-broth'
-import { Route as AuthenticatedFavouritesRouteImport } from './routes/_authenticated/favourites'
-import { Route as AuthenticatedPlannerRouteImport } from './routes/_authenticated/planner'
-import { Route as AuthenticatedShoppingRouteImport } from './routes/_authenticated/shopping'
 import { Route as AuthenticatedWhyThisWorksRouteImport } from './routes/_authenticated/why-this-works'
-import { Route as AuthenticatedAdminImportRouteImport } from './routes/_authenticated/admin.import'
-import { Route as AuthenticatedBuildGlowBowlRouteImport } from './routes/_authenticated/build.glow-bowl'
-import { Route as AuthenticatedBuildYoghurtBowlRouteImport } from './routes/_authenticated/build.yoghurt-bowl'
-import { Route as AuthenticatedMealTypeRouteImport } from './routes/_authenticated/meal.$type'
-import { Route as AuthenticatedRecipesSlugRouteImport } from './routes/_authenticated/recipes.$slug'
+import { Route as AuthenticatedShoppingRouteImport } from './routes/_authenticated/shopping'
+import { Route as AuthenticatedPlannerRouteImport } from './routes/_authenticated/planner'
+import { Route as AuthenticatedFavouritesRouteImport } from './routes/_authenticated/favourites'
+import { Route as AuthenticatedBoneBrothRouteImport } from './routes/_authenticated/bone-broth'
 import { Route as ApiWebhooksSystemeRouteImport } from './routes/api/webhooks/systeme'
+import { Route as AuthenticatedRecipesSlugRouteImport } from './routes/_authenticated/recipes.$slug'
+import { Route as AuthenticatedMealTypeRouteImport } from './routes/_authenticated/meal.$type'
+import { Route as AuthenticatedBuildYoghurtBowlRouteImport } from './routes/_authenticated/build.yoghurt-bowl'
+import { Route as AuthenticatedBuildGlowBowlRouteImport } from './routes/_authenticated/build.glow-bowl'
+import { Route as AuthenticatedAdminImportRouteImport } from './routes/_authenticated/admin.import'
 
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedBoneBrothRoute = AuthenticatedBoneBrothRouteImport.update({
-  id: '/bone-broth',
-  path: '/bone-broth',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedFavouritesRoute = AuthenticatedFavouritesRouteImport.update({
-  id: '/favourites',
-  path: '/favourites',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedPlannerRoute = AuthenticatedPlannerRouteImport.update({
-  id: '/planner',
-  path: '/planner',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedShoppingRoute = AuthenticatedShoppingRouteImport.update({
-  id: '/shopping',
-  path: '/shopping',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedWhyThisWorksRoute =
@@ -64,10 +44,46 @@ const AuthenticatedWhyThisWorksRoute =
     path: '/why-this-works',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdminImportRoute =
-  AuthenticatedAdminImportRouteImport.update({
-    id: '/admin/import',
-    path: '/admin/import',
+const AuthenticatedShoppingRoute = AuthenticatedShoppingRouteImport.update({
+  id: '/shopping',
+  path: '/shopping',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlannerRoute = AuthenticatedPlannerRouteImport.update({
+  id: '/planner',
+  path: '/planner',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedFavouritesRoute = AuthenticatedFavouritesRouteImport.update({
+  id: '/favourites',
+  path: '/favourites',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBoneBrothRoute = AuthenticatedBoneBrothRouteImport.update({
+  id: '/bone-broth',
+  path: '/bone-broth',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiWebhooksSystemeRoute = ApiWebhooksSystemeRouteImport.update({
+  id: '/api/webhooks/systeme',
+  path: '/api/webhooks/systeme',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRecipesSlugRoute =
+  AuthenticatedRecipesSlugRouteImport.update({
+    id: '/recipes/$slug',
+    path: '/recipes/$slug',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedMealTypeRoute = AuthenticatedMealTypeRouteImport.update({
+  id: '/meal/$type',
+  path: '/meal/$type',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBuildYoghurtBowlRoute =
+  AuthenticatedBuildYoghurtBowlRouteImport.update({
+    id: '/build/yoghurt-bowl',
+    path: '/build/yoghurt-bowl',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedBuildGlowBowlRoute =
@@ -76,28 +92,12 @@ const AuthenticatedBuildGlowBowlRoute =
     path: '/build/glow-bowl',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedBuildYoghurtBowlRoute =
-  AuthenticatedBuildYoghurtBowlRouteImport.update({
-    id: '/build/yoghurt-bowl',
-    path: '/build/yoghurt-bowl',
+const AuthenticatedAdminImportRoute =
+  AuthenticatedAdminImportRouteImport.update({
+    id: '/admin/import',
+    path: '/admin/import',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedMealTypeRoute = AuthenticatedMealTypeRouteImport.update({
-  id: '/meal/$type',
-  path: '/meal/$type',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedRecipesSlugRoute =
-  AuthenticatedRecipesSlugRouteImport.update({
-    id: '/recipes/$slug',
-    path: '/recipes/$slug',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const ApiWebhooksSystemeRoute = ApiWebhooksSystemeRouteImport.update({
-  id: '/api/webhooks/systeme',
-  path: '/api/webhooks/systeme',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -203,18 +203,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/': {
@@ -224,25 +224,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/bone-broth': {
-      id: '/_authenticated/bone-broth'
-      path: '/bone-broth'
-      fullPath: '/bone-broth'
-      preLoaderRoute: typeof AuthenticatedBoneBrothRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/favourites': {
-      id: '/_authenticated/favourites'
-      path: '/favourites'
-      fullPath: '/favourites'
-      preLoaderRoute: typeof AuthenticatedFavouritesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/planner': {
-      id: '/_authenticated/planner'
-      path: '/planner'
-      fullPath: '/planner'
-      preLoaderRoute: typeof AuthenticatedPlannerRouteImport
+    '/_authenticated/why-this-works': {
+      id: '/_authenticated/why-this-works'
+      path: '/why-this-works'
+      fullPath: '/why-this-works'
+      preLoaderRoute: typeof AuthenticatedWhyThisWorksRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/shopping': {
@@ -252,32 +238,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedShoppingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/why-this-works': {
-      id: '/_authenticated/why-this-works'
-      path: '/why-this-works'
-      fullPath: '/why-this-works'
-      preLoaderRoute: typeof AuthenticatedWhyThisWorksRouteImport
+    '/_authenticated/planner': {
+      id: '/_authenticated/planner'
+      path: '/planner'
+      fullPath: '/planner'
+      preLoaderRoute: typeof AuthenticatedPlannerRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admin/import': {
-      id: '/_authenticated/admin/import'
-      path: '/admin/import'
-      fullPath: '/admin/import'
-      preLoaderRoute: typeof AuthenticatedAdminImportRouteImport
+    '/_authenticated/favourites': {
+      id: '/_authenticated/favourites'
+      path: '/favourites'
+      fullPath: '/favourites'
+      preLoaderRoute: typeof AuthenticatedFavouritesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/build/glow-bowl': {
-      id: '/_authenticated/build/glow-bowl'
-      path: '/build/glow-bowl'
-      fullPath: '/build/glow-bowl'
-      preLoaderRoute: typeof AuthenticatedBuildGlowBowlRouteImport
+    '/_authenticated/bone-broth': {
+      id: '/_authenticated/bone-broth'
+      path: '/bone-broth'
+      fullPath: '/bone-broth'
+      preLoaderRoute: typeof AuthenticatedBoneBrothRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/build/yoghurt-bowl': {
-      id: '/_authenticated/build/yoghurt-bowl'
-      path: '/build/yoghurt-bowl'
-      fullPath: '/build/yoghurt-bowl'
-      preLoaderRoute: typeof AuthenticatedBuildYoghurtBowlRouteImport
+    '/api/webhooks/systeme': {
+      id: '/api/webhooks/systeme'
+      path: '/api/webhooks/systeme'
+      fullPath: '/api/webhooks/systeme'
+      preLoaderRoute: typeof ApiWebhooksSystemeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/recipes/$slug': {
+      id: '/_authenticated/recipes/$slug'
+      path: '/recipes/$slug'
+      fullPath: '/recipes/$slug'
+      preLoaderRoute: typeof AuthenticatedRecipesSlugRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/meal/$type': {
@@ -287,19 +280,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMealTypeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/recipes/$slug': {
-      id: '/_authenticated/recipes/$slug'
-      path: '/recipes/$slug'
-      fullPath: '/recipes/$slug'
-      preLoaderRoute: typeof AuthenticatedRecipesSlugRouteImport
+    '/_authenticated/build/yoghurt-bowl': {
+      id: '/_authenticated/build/yoghurt-bowl'
+      path: '/build/yoghurt-bowl'
+      fullPath: '/build/yoghurt-bowl'
+      preLoaderRoute: typeof AuthenticatedBuildYoghurtBowlRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/api/webhooks/systeme': {
-      id: '/api/webhooks/systeme'
-      path: '/api/webhooks/systeme'
-      fullPath: '/api/webhooks/systeme'
-      preLoaderRoute: typeof ApiWebhooksSystemeRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authenticated/build/glow-bowl': {
+      id: '/_authenticated/build/glow-bowl'
+      path: '/build/glow-bowl'
+      fullPath: '/build/glow-bowl'
+      preLoaderRoute: typeof AuthenticatedBuildGlowBowlRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/import': {
+      id: '/_authenticated/admin/import'
+      path: '/admin/import'
+      fullPath: '/admin/import'
+      preLoaderRoute: typeof AuthenticatedAdminImportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
@@ -343,3 +343,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
