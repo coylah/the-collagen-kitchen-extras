@@ -14,7 +14,7 @@ const recipesQuery = queryOptions({
 
 export const Route = createFileRoute("/_authenticated/favourites")({
   head: () => ({
-    meta: [{ title: "Saved recipes — The Collagen Kitchen" }],
+    meta: [{ title: "Saved recipes — Collagen Kitchen" }],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(recipesQuery),
   component: FavouritesPage,

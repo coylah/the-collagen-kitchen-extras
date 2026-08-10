@@ -7,7 +7,7 @@ import { Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/_authenticated/why-this-works")({
   head: () => ({
     meta: [
-      { title: "Why This Works — The Collagen Kitchen" },
+      { title: "Why This Works — Collagen Kitchen" },
       {
         name: "description",
         content: "The science behind every recipe. Four phases, eleven cofactors, one cookbook.",
@@ -189,7 +189,7 @@ function WhyThisWorksPage() {
             The powders weren't the problem. The missing picture was the problem.
           </p>
           <p>
-            Four years of cross-referencing nutritional databases, research papers and recipe testing later, I built The Collagen Kitchen Matrix — a complete framework mapping every food against every cofactor involved in collagen synthesis and protection. Every single recipe in this cookbook has been built using it.
+            Four years of cross-referencing nutritional databases, research papers and recipe testing later, I built Collagen Kitchen Matrix — a complete framework mapping every food against every cofactor involved in collagen synthesis and protection. Every single recipe in this cookbook has been built using it.
           </p>
           <p>
             You don't need to understand all of it. Honestly — that's the whole point. I've done that bit so you don't have to.

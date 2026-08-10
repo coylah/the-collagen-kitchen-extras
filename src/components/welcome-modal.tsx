@@ -213,7 +213,7 @@ export default function WelcomeModal({ onClose }: { onClose: () => void }) {
                 </span>
               </div>
             </div>
-            <p className="text-[11px] font-medium text-gray-700 mb-2.5">The Collagen Kitchen</p>
+            <p className="text-[11px] font-medium text-gray-700 mb-2.5">Collagen Kitchen</p>
 
             <div className="text-left space-y-2">
               <div className="flex items-center gap-2.5">

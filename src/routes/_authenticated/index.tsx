@@ -15,7 +15,7 @@ const recipesQuery = queryOptions({
 export const Route = createFileRoute("/_authenticated/")(({
   head: () => ({
     meta: [
-      { title: "The Collagen Kitchen — Love Coylah" },
+      { title: "Collagen Kitchen — Love Coylah" },
       {
         name: "description",
         content: "Skin-food recipes to help you age slow and reclaim your glow.",
@@ -135,7 +135,7 @@ function Cookbook() {
 
         <div className="mx-auto max-w-6xl px-5 pt-1.5 pb-1.5 text-center shrink-0">
           <h1 className="font-serif text-2xl font-light leading-tight text-foreground mb-1">
-            The Collagen Kitchen
+            Collagen Kitchen
           </h1>
           <div className="w-7 h-px bg-secondary mx-auto mb-1.5" />
           <p className="text-xs text-muted-foreground leading-snug mb-2.5 font-light max-w-xs mx-auto">

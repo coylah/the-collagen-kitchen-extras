@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/_authenticated/build/glow-bowl")({
   head: () => ({
     meta: [
-      { title: "Build Your Glow Bowl — The Collagen Kitchen" },
+      { title: "Build Your Glow Bowl — Collagen Kitchen" },
       { name: "description", content: "Six steps to a collagen-supporting lunch bowl." },
     ],
   }),

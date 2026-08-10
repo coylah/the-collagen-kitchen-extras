@@ -22,7 +22,7 @@ const TAGLINES: Record<string, string> = {
 
 export const Route = createFileRoute("/_authenticated/meal/$type")(({
   head: ({ params }) => ({
-    meta: [{ title: `${capitalize(params.type)} — The Collagen Kitchen` }],
+    meta: [{ title: `${capitalize(params.type)} — Collagen Kitchen` }],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(recipesQuery),
   component: MealTypePage,

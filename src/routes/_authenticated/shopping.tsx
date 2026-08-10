@@ -17,7 +17,7 @@ const recipesQuery = queryOptions({
 export const Route = createFileRoute("/_authenticated/shopping")({
   head: () => ({
     meta: [
-      { title: "Shopping list — The Collagen Kitchen" },
+      { title: "Shopping list — Collagen Kitchen" },
       { name: "description", content: "Your ingredients, grouped and ready to shop." },
     ],
   }),

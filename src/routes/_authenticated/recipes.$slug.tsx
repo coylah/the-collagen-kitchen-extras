@@ -167,7 +167,7 @@ export const Route = createFileRoute("/_authenticated/recipes/$slug")({
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.name} — The Collagen Kitchen` },
+          { title: `${loaderData.name} — Collagen Kitchen` },
           {
             name: "description",
             content:
