@@ -77,21 +77,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "The Collagen Kitchen — Love Coylah" },
+      { title: "Collagen Kitchen — Love Coylah" },
       {
         name: "description",
         content:
           "Skin-food recipes to help you age slow and reclaim your glow.",
       },
-      { name: "author", content: "The Collagen Kitchen" },
-      { property: "og:title", content: "The Collagen Kitchen — Love Coylah" },
+      { name: "author", content: "Collagen Kitchen" },
+      { property: "og:title", content: "Collagen Kitchen — Love Coylah" },
       {
         property: "og:description",
         content: "Skin-food recipes to help you age slow and reclaim your glow.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "The Collagen Kitchen — Love Coylah" },
+      { name: "twitter:title", content: "Collagen Kitchen — Love Coylah" },
       { name: "description", content: "Skin-food recipes to help you age slow and reclaim your glow." },
       { property: "og:description", content: "Skin-food recipes to help you age slow and reclaim your glow." },
       { name: "twitter:description", content: "Skin-food recipes to help you age slow and reclaim your glow." },

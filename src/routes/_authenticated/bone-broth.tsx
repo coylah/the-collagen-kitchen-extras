@@ -12,8 +12,8 @@ const recipesQuery = queryOptions({
 export const Route = createFileRoute("/_authenticated/bone-broth")({
   head: () => ({
     meta: [
-      { title: "Bone Broth — The Collagen Kitchen" },
-      { name: "description", content: "The backbone of The Collagen Kitchen. Coylah's Collagen Bone Broth." },
+      { title: "Bone Broth — Collagen Kitchen" },
+      { name: "description", content: "The backbone of Collagen Kitchen. Coylah's Collagen Bone Broth." },
     ],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(recipesQuery),

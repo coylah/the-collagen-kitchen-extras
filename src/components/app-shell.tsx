@@ -48,7 +48,7 @@ function Header() {
         <Link to="/" className="flex flex-col leading-none">
           <span className="font-script text-base text-secondary -mb-1">Love Coylah</span>
           <span className="font-serif text-lg font-light tracking-tight text-foreground">
-            The Collagen Kitchen
+            Collagen Kitchen
           </span>
         </Link>
       </div>
@@ -87,7 +87,7 @@ function Footer() {
         </div>
       </div>
       <p className="mt-3 text-[11px] text-muted-foreground/60 max-w-md mx-auto">
-        The Collagen Kitchen · Skin-food recipes from the inside out.
+        Collagen Kitchen · Skin-food recipes from the inside out.
       </p>
       <p className="mt-1.5 text-[10px] text-muted-foreground/40 max-w-md mx-auto px-4">
         Coylah is not a doctor, dermatologist or registered nutritionist. Always speak to your GP before making changes to your diet or skincare.

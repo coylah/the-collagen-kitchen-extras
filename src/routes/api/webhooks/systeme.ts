@@ -1,4 +1,4 @@
-// api/webhooks/systeme.ts — The Collagen Kitchen
+// api/webhooks/systeme.ts — Collagen Kitchen
 //
 // Receives purchase and cancellation events from Systeme.io.
 // New sale → creates Supabase account + sends magic link email.

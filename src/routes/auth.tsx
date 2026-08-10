@@ -1,5 +1,5 @@
 // auth.tsx
-// Login page for The Collagen Kitchen.
+// Login page for Collagen Kitchen.
 // Uses magic link (no password) — user enters email, receives a one-click login link.
 // Only users created via the Systeme.io purchase webhook can log in.
 
@@ -51,7 +51,7 @@ function AuthPage() {
           We've sent a login link to <strong>{email}</strong>
         </p>
         <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
-          Click the link in that email and you'll be straight into The Collagen Kitchen. No password needed.
+          Click the link in that email and you'll be straight into Collagen Kitchen. No password needed.
         </p>
         <button
           onClick={() => { setSent(false); setEmail(""); }}
@@ -68,7 +68,7 @@ function AuthPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <p className="font-script text-3xl text-secondary mb-1">Love Coylah</p>
-          <h1 className="font-serif text-xl font-light text-foreground mb-2">The Collagen Kitchen</h1>
+          <h1 className="font-serif text-xl font-light text-foreground mb-2">Collagen Kitchen</h1>
           <p className="text-xs text-muted-foreground">Enter your email to access your recipes</p>
         </div>
 
